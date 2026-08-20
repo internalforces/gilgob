@@ -3,10 +3,10 @@ dist/
 .astro/
 .cache/
 .superpowers/
+.worktrees/
 .DS_Store
 *.log
 
 # Obsidian workspace state is local to each device.
 content/.obsidian/workspace.json
 content/.obsidian/workspace-mobile.json
-
