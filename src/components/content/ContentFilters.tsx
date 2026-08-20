@@ -16,7 +16,7 @@ interface Props {
   initialSearchParams: string;
 }
 
-interface Filters {
+export interface Filters {
   q: string;
   type: string;
   category: string;
@@ -37,25 +37,20 @@ const statusLabels: Record<string, string> = {
 };
 
 export default function ContentFilters({ entries, initialSearchParams }: Props) {
-  const [filters, setFilters] = useState(() => readFilters(new URLSearchParams(initialSearchParams)));
+  const [filters, setFilters] = useState(() => normalizeFilters(entries, new URLSearchParams(initialSearchParams)));
   const [hydrated, setHydrated] = useState(false);
   const searchId = useId();
   const categoryId = useId();
   const tagId = useId();
   const typeId = useId();
   const statusId = useId();
-  const options = useMemo(() => ({
-    types: unique(entries.map(({ kind }) => kind)),
-    categories: unique(entries.map(({ category }) => category)),
-    tags: unique(entries.flatMap(({ tags }) => tags)),
-    statuses: unique(entries.flatMap(({ status }) => status ? [status] : [])),
-  }), [entries]);
+  const options = useMemo(() => filterOptions(entries), [entries]);
   const visibleIds = useMemo(() => new Set(entries.filter((entry) => matches(entry, filters)).map(({ id }) => id)), [entries, filters]);
 
   useEffect(() => {
-    setFilters(readFilters(new URLSearchParams(window.location.search)));
+    setFilters(normalizeFilters(entries, new URLSearchParams(window.location.search)));
     setHydrated(true);
-  }, []);
+  }, [entries]);
 
   useEffect(() => {
     if (!hydrated) return;
@@ -64,10 +59,7 @@ export default function ContentFilters({ entries, initialSearchParams }: Props) 
       card.hidden = !visibleIds.has(card.dataset.entryId ?? '');
     });
 
-    const params = new URLSearchParams();
-    for (const [key, value] of Object.entries(filters)) {
-      if (value) params.set(key, value);
-    }
+    const params = filtersToSearchParams(filters);
     const query = params.toString();
     history.replaceState(null, '', `${window.location.pathname}${query ? `?${query}` : ''}${window.location.hash}`);
   }, [filters, hydrated, visibleIds]);
@@ -116,14 +108,23 @@ function FilterSelect({ id, name, label, value, options, labels, onChange }: Fil
   );
 }
 
-function readFilters(params: URLSearchParams): Filters {
+export function normalizeFilters(entries: FilterEntry[], params: URLSearchParams): Filters {
+  const options = filterOptions(entries);
   return {
     q: params.get('q') ?? '',
-    type: params.get('type') ?? '',
-    category: params.get('category') ?? '',
-    tag: params.get('tag') ?? '',
-    status: params.get('status') ?? '',
+    type: availableValue(params.get('type'), options.types),
+    category: availableValue(params.get('category'), options.categories),
+    tag: availableValue(params.get('tag'), options.tags),
+    status: availableValue(params.get('status'), options.statuses),
   };
+}
+
+export function filtersToSearchParams(filters: Filters): URLSearchParams {
+  const params = new URLSearchParams();
+  for (const [key, value] of Object.entries(filters)) {
+    if (value) params.set(key, value);
+  }
+  return params;
 }
 
 function matches(entry: FilterEntry, filters: Filters): boolean {
@@ -139,4 +140,17 @@ function matches(entry: FilterEntry, filters: Filters): boolean {
 
 function unique(values: string[]): string[] {
   return [...new Set(values)].sort((left, right) => left.localeCompare(right, 'ko'));
+}
+
+function filterOptions(entries: FilterEntry[]) {
+  return {
+    types: unique(entries.map(({ kind }) => kind)),
+    categories: unique(entries.map(({ category }) => category)),
+    tags: unique(entries.flatMap(({ tags }) => tags)),
+    statuses: unique(entries.flatMap(({ status }) => status ? [status] : [])),
+  };
+}
+
+function availableValue(value: string | null, options: string[]): string {
+  return value !== null && options.includes(value) ? value : '';
 }

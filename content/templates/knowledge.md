@@ -10,5 +10,3 @@ aliases: []
 featured: false
 status: seed
 ---
-
-# {{title}}

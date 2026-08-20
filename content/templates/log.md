@@ -9,5 +9,3 @@ draft: false
 aliases: []
 featured: false
 ---
-
-# {{title}}

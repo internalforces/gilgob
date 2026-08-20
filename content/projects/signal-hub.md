@@ -12,6 +12,4 @@ status: building
 repository: "https://github.com/internalforces/signal-hub"
 ---
 
-# Signal Hub
-
 Signal Hub는 탐구와 학습 로그를 한눈에 연결한다. 현재 [[LLM 워터마크는 신뢰할 수 있을까?]]에서 나온 질문을 프로젝트의 다음 실험으로 옮기고 있다.

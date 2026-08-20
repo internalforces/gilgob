@@ -10,6 +10,7 @@ export interface RemarkObsidianOptions {
   index?: ContentIndex;
   indexPath?: string;
   base: string;
+  publicOnly?: boolean;
 }
 
 const CALLOUTS = {
@@ -26,7 +27,7 @@ export const remarkObsidian: Plugin<[RemarkObsidianOptions], Root> = function re
   const readIndex = createIndexReader(options);
 
   return (tree, file) => {
-    const index = readIndex();
+    const index = publicResolutionIndex(readIndex(), options.publicOnly ?? false);
     const sourceId = sourceIdFromPath(file.path);
 
     visit(tree, 'blockquote', transformCallout);
@@ -40,6 +41,14 @@ export const remarkObsidian: Plugin<[RemarkObsidianOptions], Root> = function re
     });
   };
 };
+
+function publicResolutionIndex(index: ContentIndex, publicOnly: boolean): ContentIndex {
+  if (!publicOnly) return index;
+  return {
+    ...index,
+    documents: index.documents.filter((document) => !document.draft),
+  };
+}
 
 function createIndexReader(options: RemarkObsidianOptions): () => ContentIndex {
   if ((options.index === undefined) === (options.indexPath === undefined)) {

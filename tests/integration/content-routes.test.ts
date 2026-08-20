@@ -6,6 +6,7 @@ import { beforeAll, describe, expect, it } from 'vitest';
 const execFileAsync = promisify(execFile);
 const basePath = 'dist';
 const draftFixture = 'content/knowledge/__integration-draft.md';
+const publicLinkFixture = 'content/knowledge/__integration-public-link.md';
 
 describe('content routes', () => {
   beforeAll(async () => {
@@ -23,6 +24,20 @@ status: seed
 
 # 공개되지 않는 초안
 `, 'utf8');
+    await writeFile(publicLinkFixture, `---
+title: "초안을 참조하는 공개 문서"
+description: "공개 문서에서 초안 링크가 노출되지 않는지 검증한다."
+category: "Research"
+tags: ["Draft"]
+created: 2026-08-20
+draft: false
+aliases: []
+featured: false
+status: seed
+---
+
+[[공개되지 않는 초안|초안 링크]]
+`, 'utf8');
     try {
       await execFileAsync('npm', ['run', 'build'], {
         cwd: process.cwd(),
@@ -30,7 +45,10 @@ status: seed
         maxBuffer: 10 * 1024 * 1024,
       });
     } finally {
-      await rm(draftFixture, { force: true });
+      await Promise.all([
+        rm(draftFixture, { force: true }),
+        rm(publicLinkFixture, { force: true }),
+      ]);
     }
   }, 60_000);
 
@@ -53,6 +71,7 @@ status: seed
     expect(detailHtml).toContain('목차');
     expect(detailHtml).toContain('백링크');
     expect(detailHtml).toContain('관련 지식');
+    expect(detailHtml.match(/<h1(?:\s|>)/g)).toHaveLength(1);
   });
 
   it('renders complete static cards before the filter island enhances them', async () => {
@@ -71,5 +90,19 @@ status: seed
 
   it('does not emit a production route for a draft fixture', async () => {
     await expect(access(`${basePath}/knowledge/__integration-draft/index.html`)).rejects.toMatchObject({ code: 'ENOENT' });
+  });
+
+  it('does not render an href from a public document to a draft document', async () => {
+    const html = await readFile(`${basePath}/knowledge/__integration-public-link/index.html`, 'utf8');
+
+    expect(html).toContain('초안 링크');
+    expect(html).toContain('wiki-link--missing');
+    expect(html).not.toContain('href="/astro-astro-personal-knowledge-base-digital/knowledge/__integration-draft"');
+  });
+
+  it('places reading content before the mobile table of contents in the DOM', async () => {
+    const html = await readFile(`${basePath}/knowledge/database/b-tree-index/index.html`, 'utf8');
+
+    expect(html.indexOf('<div class="prose">')).toBeLessThan(html.indexOf('reading-toc--mobile'));
   });
 });

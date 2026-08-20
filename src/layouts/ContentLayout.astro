@@ -49,13 +49,13 @@ const updated = (entry.data.updated ?? entry.data.created).toLocaleDateString('k
       </aside>
 
       <div class="reading-column">
+        <div class="prose"><slot /></div>
         {toc.length > 0 && (
           <details class="reading-toc reading-toc--mobile">
             <summary>목차</summary>
             <ol>{toc.map((heading) => <li class={`toc-depth-${heading.depth}`}><a href={`#${heading.slug}`}>{heading.text}</a></li>)}</ol>
           </details>
         )}
-        <div class="prose"><slot /></div>
 
         {entry.data.nextQuestions?.length && (
           <section class="next-questions" aria-labelledby="next-questions-title">

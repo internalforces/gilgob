@@ -10,6 +10,4 @@ aliases: ["Oracle Hierarchical Query"]
 featured: false
 ---
 
-# Oracle 계층형 쿼리로 조직도 탐색하기
-
 `START WITH`와 `CONNECT BY PRIOR`를 사용하면 부모-자식 관계를 순회할 수 있다. 인덱스 설계의 배경은 [[B-Tree는 왜 DB Index에 사용될까?]]에서 다시 확인한다.

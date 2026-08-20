@@ -418,7 +418,7 @@
 
 .reading-toc--mobile {
   display: none;
-  margin-block-end: 2rem;
+  margin-block-start: 2rem;
   padding: 1rem;
   border: 1px solid var(--line);
   border-radius: var(--radius);

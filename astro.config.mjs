@@ -14,7 +14,11 @@ export default defineConfig({
   integrations: [contentIndexIntegration(), preact(), mdx(), sitemap()],
   markdown: {
     processor: unified({
-      remarkPlugins: [[remarkObsidian, { indexPath: '.cache/content-index.json', base: SITE_CONFIG.base }]],
+      remarkPlugins: [[remarkObsidian, {
+        indexPath: '.cache/content-index.json',
+        base: SITE_CONFIG.base,
+        publicOnly: process.env.NODE_ENV === 'production',
+      }]],
     }),
   },
 });
