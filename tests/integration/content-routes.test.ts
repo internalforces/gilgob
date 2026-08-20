@@ -97,7 +97,7 @@ status: seed
 
     expect(html).toContain('초안 링크');
     expect(html).toContain('wiki-link--missing');
-    expect(html).not.toContain('href="/astro-astro-personal-knowledge-base-digital/knowledge/__integration-draft"');
+    expect(html).not.toContain('href="/gilgob/knowledge/__integration-draft"');
   });
 
   it('places reading content before the mobile table of contents in the DOM', async () => {
@@ -140,7 +140,7 @@ status: seed
     const skillsHtml = await readFile(`${basePath}/skills/index.html`, 'utf8');
     const chunkPath = skillsHtml.match(/component-url="([^"]*\/SkillTree\.[^"]+\.js)"/)?.[1];
     expect(chunkPath).toBeDefined();
-    const chunk = await readFile(`${basePath}${chunkPath!.replace('/astro-astro-personal-knowledge-base-digital', '')}`, 'utf8');
+    const chunk = await readFile(`${basePath}${chunkPath!.replace('/gilgob', '')}`, 'utf8');
 
     expect(chunk).not.toMatch(/Zod(?:Error|Type|Check)|invalid_type|safeParse/);
     expect(Buffer.byteLength(chunk)).toBeLessThan(20_000);

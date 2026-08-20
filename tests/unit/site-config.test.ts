@@ -6,6 +6,6 @@ describe('site config', () => {
     expect(SITE_CONFIG.name).toBe('gilgob');
     expect(SITE_CONFIG.author).toBe('internalforces');
     expect(SITE_CONFIG.locale).toBe('ko-KR');
-    expect(withBase('/knowledge')).toBe('/astro-astro-personal-knowledge-base-digital/knowledge');
+    expect(withBase('/knowledge')).toBe('/gilgob/knowledge');
   });
 });

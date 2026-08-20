@@ -239,7 +239,7 @@ Pagefind가 정적 HTML에서 제목, 설명, 본문, 태그, 분야를 색인�
 
 각 공개 문서는 canonical URL, 제목, 설명, Open Graph 메타데이터를 가진다. RSS는 최신 공개 글을 유형과 관계없이 제공하고, 사이트맵에는 공개 문서만 포함한다.
 
-기본 GitHub Pages 주소는 현재 프로젝트 이름을 기준으로 `https://internalforces.github.io/astro-astro-personal-knowledge-base-digital/`로 설정한다. 실제 저장소 이름이나 사용자 도메인이 달라지면 GitHub Actions의 `SITE_URL`과 `BASE_PATH` 환경 값만 변경한다. 모든 내부 링크와 정적 자산 경로는 Astro의 base path를 따른다.
+기본 GitHub Pages 주소는 원격 저장소 이름을 기준으로 `https://internalforces.github.io/gilgob/`로 설정한다. 저장소 이름이나 사용자 도메인이 달라지면 GitHub Actions의 `SITE_URL`과 `BASE_PATH` 환경 값을 함께 변경한다. 모든 내부 링크와 정적 자산 경로는 Astro의 base path를 따른다.
 
 ## 14. 오류 처리
 
@@ -280,4 +280,3 @@ Pagefind가 정적 HTML에서 제목, 설명, 본문, 태그, 분야를 색인�
 - GitHub 기여 캘린더가 표시되고 API 실패 시 fallback이 동작한다.
 - GitHub Pages의 base path 아래에서 내부 링크와 자산이 깨지지 않는다.
 - 자동 테스트와 정적 빌드가 통과한다.
-

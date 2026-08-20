@@ -1,4 +1,4 @@
-const DEFAULT_BASE_PATH = '/astro-astro-personal-knowledge-base-digital';
+const DEFAULT_BASE_PATH = '/gilgob';
 
 function configuredBasePath(): string {
   const configured = process.env.BASE_PATH;

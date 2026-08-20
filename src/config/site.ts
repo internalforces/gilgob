@@ -1,4 +1,4 @@
-const base = (process.env.BASE_PATH ?? '/astro-astro-personal-knowledge-base-digital').replace(/\/$/, '');
+const base = (process.env.BASE_PATH ?? '/gilgob').replace(/\/$/, '');
 
 export const SITE_CONFIG = {
   name: 'gilgob',

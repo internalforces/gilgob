@@ -16,7 +16,7 @@
 - 사용자 인터페이스는 전체 한국어이며 기술 용어와 문서 제목은 원문 표기를 허용한다.
 - `content/` 자체가 Obsidian Vault이며 게시를 위해 파일을 다른 폴더로 복사하지 않는다.
 - 정적 GitHub Pages 배포를 유지하고 런타임 서버나 데이터베이스를 추가하지 않는다.
-- 기본 Pages URL은 `https://internalforces.github.io/astro-astro-personal-knowledge-base-digital/`이다.
+- 기본 Pages URL은 `https://internalforces.github.io/gilgob/`이다.
 - 밝은 테마만 제공하며 Quiet System 75%, Midnight Lab UI 25%의 시각 방향을 따른다.
 - 모든 상호작용은 키보드로 사용할 수 있고 `prefers-reduced-motion`을 존중한다.
 - 공개 빌드에서 `draft: true` 문서를 제외한다.
@@ -138,7 +138,7 @@ describe('site config', () => {
     expect(SITE_CONFIG.name).toBe('gilgob');
     expect(SITE_CONFIG.author).toBe('internalforces');
     expect(SITE_CONFIG.locale).toBe('ko-KR');
-    expect(withBase('/knowledge')).toBe('/astro-astro-personal-knowledge-base-digital/knowledge');
+    expect(withBase('/knowledge')).toBe('/gilgob/knowledge');
   });
 });
 ```
@@ -153,7 +153,7 @@ Expected: FAIL because `src/config/site.ts` does not exist.
 
 ```ts
 // src/config/site.ts
-const base = (process.env.BASE_PATH ?? '/astro-astro-personal-knowledge-base-digital').replace(/\/$/, '');
+const base = (process.env.BASE_PATH ?? '/gilgob').replace(/\/$/, '');
 
 export const SITE_CONFIG = {
   name: 'gilgob',
@@ -1047,7 +1047,7 @@ for (const path of ['/', '/knowledge/', '/skills/', '/graph/']) {
 }
 ```
 
-`tests/e2e/helpers.ts` exports `pagePath(path: string)` and prefixes `/astro-astro-personal-knowledge-base-digital` unless `BASE_PATH` is explicitly set. All E2E specifications use this helper rather than root-absolute paths.
+`tests/e2e/helpers.ts` exports `pagePath(path: string)` and prefixes `/gilgob` unless `BASE_PATH` is explicitly set. All E2E specifications use this helper rather than root-absolute paths.
 
 Navigation tests assert every Korean global link, skip-link focus, active location, and a custom 404. Mobile tests use a 390×844 viewport and assert menu focus restoration, collapsed table of contents, horizontal-overflow absence, and graph list fallback.
 
@@ -1063,7 +1063,7 @@ Expected: tests expose any missing SEO routes, mobile behavior, or accessibility
 
 - [ ] **Step 4: Add the GitHub Pages workflow**
 
-Workflow triggers on `push` to `main`, `workflow_dispatch`, and cron `17 18 * * *` (03:17 KST). Grant `contents: read`, `pages: write`, `id-token: write`. Use Node 22, `npm ci`, `npm run verify`, Playwright browser installation, E2E tests, `withastro/action@v6.1.2`, and `actions/deploy-pages@v4`. Pass `GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}`, `SITE_URL: https://internalforces.github.io`, and `BASE_PATH: /astro-astro-personal-knowledge-base-digital` only to build steps. Restore/save `.cache/github-stats.json` with `actions/cache` and a date-based key plus `github-stats-` restore prefix.
+Workflow triggers on `push` to `main`, `workflow_dispatch`, and cron `17 18 * * *` (03:17 KST). Grant `contents: read`, `pages: write`, `id-token: write`. Use Node 22, `npm ci`, `npm run verify`, Playwright browser installation, E2E tests, `withastro/action@v6.1.2`, and `actions/deploy-pages@v4`. Pass `GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}`, `SITE_URL: https://internalforces.github.io`, and `BASE_PATH: /gilgob` only to build steps. Restore/save `.cache/github-stats.json` with `actions/cache` and a date-based key plus `github-stats-` restore prefix.
 
 - [ ] **Step 5: Document the author workflow**
 

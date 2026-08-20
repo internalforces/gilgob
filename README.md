@@ -2,7 +2,7 @@
 
 `gilgob`은 `internalforces`가 지식, 탐구, 프로젝트, 학습 기록을 관계로 연결해 가꾸는 한국어 정적 Knowledge Garden입니다. 저장소의 `content/`가 그대로 Obsidian Vault이자 Astro Content Collections의 원본이며, 별도의 CMS나 콘텐츠 복사 단계가 없습니다.
 
-기본 공개 주소는 `https://internalforces.github.io/astro-astro-personal-knowledge-base-digital/`입니다. 기본 base path 계약도 `/astro-astro-personal-knowledge-base-digital`이며, 저장소 이름을 바꿀 때만 명시적으로 변경합니다.
+기본 공개 주소는 `https://internalforces.github.io/gilgob/`입니다. 기본 base path 계약은 저장소 이름과 같은 `/gilgob`입니다.
 
 ## 로컬 실행
 
@@ -96,16 +96,16 @@ Workflow는 Node.js 22와 `npm ci`를 사용하고 기본값으로 다음 환경
 
 ```text
 SITE_URL=https://internalforces.github.io
-BASE_PATH=/astro-astro-personal-knowledge-base-digital
+BASE_PATH=/gilgob
 ```
 
 GitHub가 자동 발급하는 `GITHUB_TOKEN`은 빌드 시 공개 기여 통계와 공개 이벤트를 읽는 데만 사용하며 브라우저 번들에 포함하지 않습니다. 이 토큰은 현재 저장소 범위의 기본 권한만 가지므로 다른 비공개 저장소의 활동이나 비공개 기여를 완전하게 집계한다고 가정하면 안 됩니다. Pull Request 이벤트에서는 배포 workflow가 실행되지 않아 fork의 secret을 가정하지 않습니다.
 
 통계 결과는 `.cache/github-stats.json`에 저장되고 날짜별 Actions cache로 복구됩니다. API 제한이나 일시적 오류가 있으면 마지막 캐시를 오래된 데이터로 표시하며, 캐시도 없으면 안전한 빈 상태로 빌드합니다. 캐시 파일은 공개 저장소에 커밋하지 않으며 공개 GitHub 데이터만 담습니다.
 
-## `/gilgob` 경로로 전환
+## `/gilgob` 경로 확인
 
-저장소 이름을 `gilgob`으로 바꾼 경우 workflow의 두 build 환경 블록에서 `BASE_PATH`만 다음처럼 바꿉니다.
+이 저장소의 기본 Pages 경로는 `/gilgob`입니다. 로컬에서 배포 환경과 같은 설정을 명시적으로 확인하려면 다음을 실행합니다.
 
 ```text
 SITE_URL=https://internalforces.github.io
@@ -119,7 +119,7 @@ SITE_URL=https://internalforces.github.io BASE_PATH=/gilgob npm run verify
 SITE_URL=https://internalforces.github.io BASE_PATH=/gilgob npm run test:e2e
 ```
 
-현재 저장소 이름을 유지하는 동안에는 기본 base path를 조용히 `/gilgob`으로 바꾸지 않습니다.
+저장소 이름을 바꾸면 `src/config/site.ts`, workflow와 테스트 helper의 기본 base path도 같은 이름으로 변경합니다.
 
 ## 커스텀 도메인 전환
 

@@ -53,7 +53,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SITE_URL: https://internalforces.github.io
-          BASE_PATH: /astro-astro-personal-knowledge-base-digital
+          BASE_PATH: /gilgob
 
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
@@ -61,7 +61,7 @@ jobs:
       - name: Run browser acceptance tests
         run: npm run test:e2e
         env:
-          BASE_PATH: /astro-astro-personal-knowledge-base-digital
+          BASE_PATH: /gilgob
 
       - name: Build and upload Pages artifact
         uses: withastro/action@v6.1.2
@@ -73,7 +73,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SITE_URL: https://internalforces.github.io
-          BASE_PATH: /astro-astro-personal-knowledge-base-digital
+          BASE_PATH: /gilgob
 
       - name: Check GitHub stats cache output
         if: always()

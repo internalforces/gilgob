@@ -53,12 +53,12 @@ it('does not load Pagefind for an empty or whitespace-only query', async () => {
 });
 
 it('keeps every Pagefind result inside the GitHub Pages base path', () => {
-  const base = '/astro-astro-personal-knowledge-base-digital';
+  const base = '/gilgob';
 
   expect(resolvePagefindUrl('/knowledge/database/b-tree-index/', base))
-    .toBe('/astro-astro-personal-knowledge-base-digital/knowledge/database/b-tree-index/');
-  expect(resolvePagefindUrl('/astro-astro-personal-knowledge-base-digital/projects/signal-hub/', base))
-    .toBe('/astro-astro-personal-knowledge-base-digital/projects/signal-hub/');
+    .toBe('/gilgob/knowledge/database/b-tree-index/');
+  expect(resolvePagefindUrl('/gilgob/projects/signal-hub/', base))
+    .toBe('/gilgob/projects/signal-hub/');
 });
 
 it('treats the build sentinel as an unavailable search instead of importing Pagefind', async () => {
