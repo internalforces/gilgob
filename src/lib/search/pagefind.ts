@@ -19,7 +19,26 @@ export interface SearchController {
   currentQuery(): string;
 }
 
+export interface SearchGeneration {
+  invalidate(): number;
+  isCurrent(generation: number): boolean;
+}
+
 export type SearchModuleLoader = () => Promise<SearchModule>;
+
+export function createSearchGeneration(): SearchGeneration {
+  let current = 0;
+
+  return {
+    invalidate() {
+      current += 1;
+      return current;
+    },
+    isCurrent(generation) {
+      return generation === current;
+    },
+  };
+}
 
 interface PagefindLoaderDependencies {
   fetchStatus(url: string): Promise<number>;
@@ -90,7 +109,13 @@ export function createSearchController(loader: SearchModuleLoader): SearchContro
       if (!query) return [];
 
       modulePromise ??= loader();
-      const pagefind = await modulePromise;
+      let pagefind: SearchModule;
+      try {
+        pagefind = await modulePromise;
+      } catch (error) {
+        if (!(error instanceof SearchUnavailableError)) modulePromise = undefined;
+        throw error;
+      }
       const response = await pagefind.search(query);
       const results = await Promise.all(response.results.map((entry) => entry.data()));
 

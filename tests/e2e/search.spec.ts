@@ -1,5 +1,41 @@
 import AxeBuilder from '@axe-core/playwright';
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
+
+async function mockSequencedPagefind(page: Page, delays: number[]) {
+  await page.route('**/pagefind/pagefind.js', (route) => route.fulfill({
+    status: 200,
+    contentType: 'text/javascript',
+    body: `
+      const delays = ${JSON.stringify(delays)};
+      window.__pagefindSearchCalls = [];
+      export async function search(query) {
+        const call = window.__pagefindSearchCalls.length;
+        window.__pagefindSearchCalls.push(query);
+        await new Promise((resolve) => setTimeout(resolve, delays[call] ?? 10));
+        const prefix = call === 0 ? '오래된' : '최신';
+        return {
+          results: [{
+            id: String(call),
+            async data() {
+              return {
+                url: '/knowledge/database/b-tree-index/',
+                excerpt: prefix + ' ' + query + ' 문맥',
+                plain_excerpt: prefix + ' ' + query + ' 문맥',
+                meta: { title: prefix + ' ' + query, type: '지식', category: 'Computer Science' }
+              };
+            }
+          }]
+        };
+      }
+    `,
+  }));
+}
+
+async function waitForSearchCalls(page: Page, count: number) {
+  await page.waitForFunction((expected) => (
+    (window as typeof window & { __pagefindSearchCalls?: string[] }).__pagefindSearchCalls?.length === expected
+  ), count);
+}
 
 test('opens Korean search with the command shortcut and restores focus on Escape', async ({ page }) => {
   await page.goto('./', { waitUntil: 'networkidle' });
@@ -55,7 +91,9 @@ test('waits until Korean composition ends before searching', async ({ page }) =>
   await page.keyboard.press('ControlOrMeta+k');
   const input = page.getByRole('searchbox', { name: '지식 전체 검색' });
 
-  await input.dispatchEvent('compositionstart');
+  await input.evaluate((element) => {
+    element.dispatchEvent(new CompositionEvent('compositionstart', { bubbles: true, data: '디' }));
+  });
   await input.evaluate((element) => {
     const inputElement = element as HTMLInputElement;
     inputElement.value = '디스크';
@@ -85,6 +123,95 @@ test('uses an accessible full-screen search surface on mobile', async ({ page })
 
   const results = await new AxeBuilder({ page }).include('[role="dialog"]').analyze();
   expect(results.violations).toEqual([]);
+});
+
+test('restores mobile search focus to the visible menu trigger', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('./', { waitUntil: 'networkidle' });
+  const menuTrigger = page.getByRole('button', { name: '모바일 메뉴 열기' });
+
+  await menuTrigger.click();
+  await page.getByRole('button', { name: '검색 열기', exact: true }).click();
+  await expect(page.getByRole('dialog', { name: '통합 검색' })).toBeVisible();
+  await expect(page.getByRole('searchbox', { name: '지식 전체 검색' })).toBeFocused();
+  await page.keyboard.press('Escape');
+
+  await expect(menuTrigger).toBeFocused();
+});
+
+test('invalidates an in-flight result immediately when the query is cleared', async ({ page }) => {
+  await mockSequencedPagefind(page, [220]);
+  await page.goto('./', { waitUntil: 'networkidle' });
+  await page.keyboard.press('ControlOrMeta+k');
+  const dialog = page.getByRole('dialog', { name: '통합 검색' });
+  const input = dialog.getByRole('searchbox');
+
+  await input.fill('A');
+  await waitForSearchCalls(page, 1);
+  await input.fill('');
+  await page.waitForTimeout(260);
+
+  await expect(dialog.getByRole('option')).toHaveCount(0);
+  await expect(dialog.getByRole('status')).toContainText('검색어를 입력');
+});
+
+test('keeps a stale result out while the next query waits for debounce', async ({ page }) => {
+  await mockSequencedPagefind(page, [80, 10]);
+  await page.goto('./', { waitUntil: 'networkidle' });
+  await page.keyboard.press('ControlOrMeta+k');
+  const dialog = page.getByRole('dialog', { name: '통합 검색' });
+  const input = dialog.getByRole('searchbox');
+
+  await input.fill('A');
+  await waitForSearchCalls(page, 1);
+  await input.fill('B');
+  await page.waitForTimeout(100);
+
+  await expect(dialog.getByRole('option')).toHaveCount(0);
+  await expect(dialog.getByRole('status')).toContainText('검색 중입니다');
+  await expect(dialog.getByRole('option', { name: /최신 B/ })).toBeVisible();
+});
+
+test('distinguishes repeated query text from an older request', async ({ page }) => {
+  await mockSequencedPagefind(page, [280, 10]);
+  await page.goto('./', { waitUntil: 'networkidle' });
+  await page.keyboard.press('ControlOrMeta+k');
+  const dialog = page.getByRole('dialog', { name: '통합 검색' });
+  const input = dialog.getByRole('searchbox');
+
+  await input.fill('A');
+  await waitForSearchCalls(page, 1);
+  await input.fill('B');
+  await input.fill('A');
+  await waitForSearchCalls(page, 2);
+  await expect(dialog.getByRole('option', { name: /최신 A/ })).toBeVisible();
+  await page.waitForTimeout(300);
+
+  await expect(dialog.getByRole('option', { name: /최신 A/ })).toBeVisible();
+  await expect(dialog.getByRole('status')).toHaveCount(0);
+});
+
+test('invalidates an in-flight result when Korean composition starts', async ({ page }) => {
+  await mockSequencedPagefind(page, [300, 10]);
+  await page.goto('./', { waitUntil: 'networkidle' });
+  await page.keyboard.press('ControlOrMeta+k');
+  const dialog = page.getByRole('dialog', { name: '통합 검색' });
+  const input = dialog.getByRole('searchbox');
+
+  await input.fill('A');
+  await waitForSearchCalls(page, 1);
+  await input.evaluate((element) => {
+    element.dispatchEvent(new CompositionEvent('compositionstart', { bubbles: true, data: '디' }));
+  });
+  await page.waitForTimeout(350);
+
+  await expect(dialog.getByRole('option')).toHaveCount(0);
+  await input.evaluate((element) => {
+    const inputElement = element as HTMLInputElement;
+    inputElement.value = '디스크';
+    inputElement.dispatchEvent(new CompositionEvent('compositionend', { bubbles: true, data: '디스크' }));
+  });
+  await expect(dialog.getByRole('option', { name: /최신 디스크/ })).toBeVisible();
 });
 
 test('shows the Korean unavailable state when the build sentinel is present', async ({ page }) => {

@@ -1,6 +1,7 @@
 import { expect, it, vi } from 'vitest';
 import {
   createPagefindLoader,
+  createSearchGeneration,
   createSearchController,
   resolvePagefindUrl,
   SearchUnavailableError,
@@ -80,4 +81,57 @@ it('imports Pagefind from the configured base path when no sentinel exists', asy
 
   await expect(load()).resolves.toBe(module);
   expect(importModule).toHaveBeenCalledWith('/garden/pagefind/pagefind.js');
+});
+
+it('retries the Pagefind loader after a transient rejection', async () => {
+  const search = vi.fn(async () => ({
+    results: [{ id: 'recovered', data: async () => result('recovered') }],
+  }));
+  const loader = vi.fn()
+    .mockRejectedValueOnce(new Error('일시적인 네트워크 오류'))
+    .mockResolvedValueOnce({ search });
+  const controller = createSearchController(loader);
+
+  await expect(controller.query('첫 시도')).rejects.toThrow('일시적인 네트워크 오류');
+  await expect(controller.query('다시 시도')).resolves.toEqual([result('recovered')]);
+
+  expect(loader).toHaveBeenCalledTimes(2);
+});
+
+it('invalidates a pending request when input is cleared', () => {
+  const generation = createSearchGeneration();
+  const pending = generation.invalidate();
+
+  generation.invalidate();
+
+  expect(generation.isCurrent(pending)).toBe(false);
+});
+
+it('invalidates a pending request as soon as the next value enters debounce', () => {
+  const generation = createSearchGeneration();
+  const pending = generation.invalidate();
+
+  const waiting = generation.invalidate();
+
+  expect(generation.isCurrent(pending)).toBe(false);
+  expect(generation.isCurrent(waiting)).toBe(true);
+});
+
+it('distinguishes repeated query text by generation rather than value', () => {
+  const generation = createSearchGeneration();
+  const firstA = generation.invalidate();
+  generation.invalidate();
+  const latestA = generation.invalidate();
+
+  expect(generation.isCurrent(firstA)).toBe(false);
+  expect(generation.isCurrent(latestA)).toBe(true);
+});
+
+it('invalidates a pending request when composition starts', () => {
+  const generation = createSearchGeneration();
+  const pending = generation.invalidate();
+
+  generation.invalidate();
+
+  expect(generation.isCurrent(pending)).toBe(false);
 });

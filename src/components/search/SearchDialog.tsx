@@ -2,6 +2,7 @@
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import {
   createPagefindLoader,
+  createSearchGeneration,
   createSearchController,
   resolvePagefindUrl,
   SearchUnavailableError,
@@ -35,8 +36,27 @@ function statusMessage(state: ViewState): string {
   }
 }
 
+function focusIfVisible(element: HTMLElement | null): boolean {
+  if (!element?.isConnected || element.matches(':disabled, [aria-disabled="true"]')) return false;
+  if (element.closest('[hidden], [inert], [aria-hidden="true"]')) return false;
+  const style = window.getComputedStyle(element);
+  const rect = element.getBoundingClientRect();
+  if (
+    style.display === 'none'
+    || style.visibility === 'hidden'
+    || style.visibility === 'collapse'
+    || Number(style.opacity) === 0
+    || rect.width === 0
+    || rect.height === 0
+  ) return false;
+
+  element.focus();
+  return document.activeElement === element;
+}
+
 export default function SearchDialog({ base }: Props) {
   const controller = useMemo(() => createSearchController(createPagefindLoader(base)), [base]);
+  const searchGeneration = useMemo(() => createSearchGeneration(), []);
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<PagefindResult[]>([]);
@@ -62,15 +82,18 @@ export default function SearchDialog({ base }: Props) {
 
   const closeSearch = () => {
     window.clearTimeout(timerRef.current);
+    searchGeneration.invalidate();
     openRef.current = false;
     setIsOpen(false);
     const restoreTarget = restoreFocusRef.current;
     window.requestAnimationFrame(() => {
-      if (restoreTarget?.isConnected) {
-        restoreTarget.focus();
-        return;
+      if (focusIfVisible(restoreTarget)) return;
+      const fallbackTargets = document.querySelectorAll<HTMLElement>(
+        '.mobile-menu__trigger, [data-search-trigger]',
+      );
+      for (const fallbackTarget of fallbackTargets) {
+        if (focusIfVisible(fallbackTarget)) return;
       }
-      document.querySelector<HTMLElement>('.mobile-menu__trigger, [data-search-trigger]')?.focus();
     });
   };
 
@@ -118,23 +141,26 @@ export default function SearchDialog({ base }: Props) {
     };
   }, [isOpen]);
 
-  const runSearch = async (value: string) => {
-    setViewState('loading');
-    setActiveIndex(-1);
+  const runSearch = async (value: string, generation: number) => {
+    if (!searchGeneration.isCurrent(generation)) return;
     try {
       const nextResults = await controller.query(value);
-      if (controller.currentQuery() !== value) return;
+      if (!searchGeneration.isCurrent(generation)) return;
       setResults(nextResults);
       setViewState(nextResults.length > 0 ? 'results' : 'empty');
     } catch (error) {
-      if (controller.currentQuery() !== value) return;
+      if (!searchGeneration.isCurrent(generation)) return;
       setResults([]);
       setViewState(error instanceof SearchUnavailableError ? 'unavailable' : 'error');
     }
   };
 
-  const scheduleSearch = (value: string) => {
+  const invalidatePendingSearch = () => {
     window.clearTimeout(timerRef.current);
+    return searchGeneration.invalidate();
+  };
+
+  const scheduleSearch = (value: string, generation = invalidatePendingSearch()) => {
     if (!value.trim()) {
       setResults([]);
       setActiveIndex(-1);
@@ -142,7 +168,8 @@ export default function SearchDialog({ base }: Props) {
       return;
     }
     setViewState('loading');
-    timerRef.current = window.setTimeout(() => void runSearch(value), 120);
+    setActiveIndex(-1);
+    timerRef.current = window.setTimeout(() => void runSearch(value, generation), 120);
   };
 
   useEffect(() => {
@@ -150,13 +177,14 @@ export default function SearchDialog({ base }: Props) {
     const input = inputRef.current;
     const handleCompositionStart = () => {
       composingRef.current = true;
-      window.clearTimeout(timerRef.current);
+      invalidatePendingSearch();
     };
     const handleCompositionEnd = () => {
       composingRef.current = false;
       const value = input.value;
+      const generation = invalidatePendingSearch();
       setQuery(value);
-      scheduleSearch(value);
+      scheduleSearch(value, generation);
     };
 
     input.addEventListener('compositionstart', handleCompositionStart);
@@ -240,8 +268,9 @@ export default function SearchDialog({ base }: Props) {
             placeholder="검색어를 입력하세요"
             onInput={(event) => {
               const value = event.currentTarget.value;
+              const generation = invalidatePendingSearch();
               setQuery(value);
-              if (!composingRef.current && !event.isComposing) scheduleSearch(value);
+              if (!composingRef.current && !event.isComposing) scheduleSearch(value, generation);
             }}
             onKeyDown={(event) => {
               if (event.key === 'ArrowDown') {
