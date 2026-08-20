@@ -42,6 +42,22 @@ describe('wiki links', () => {
     });
   });
 
+  it('prefers a source-relative path when a direct path also matches', () => {
+    const index = {
+      documents: [
+        { id: 'knowledge/topic', title: 'Direct topic', aliases: [], url: '/knowledge/topic', sourcePath: 'topic.md' },
+        { id: 'knowledge/notes/topic', title: 'Relative topic', aliases: [], url: '/knowledge/notes/topic', sourcePath: 'knowledge/notes/topic.md' },
+      ],
+      graph: { nodes: [], edges: [] },
+      generatedAt: '',
+    } as unknown as ContentIndex;
+
+    expect(resolveWikiLink(parseWikiLinks('[[topic]]')[0], 'knowledge/notes/source', index)).toMatchObject({
+      found: true,
+      documentId: 'knowledge/notes/topic',
+    });
+  });
+
   it('rejects ambiguous matches within a resolution stage', () => {
     const index = {
       documents: [

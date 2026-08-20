@@ -52,13 +52,11 @@ export function resolveWikiLink(token: WikiLinkToken, sourceId: string, index: C
 }
 
 function resolveDocument(target: string, sourceId: string, documents: ContentRecord[]): ContentRecord | undefined {
-  const targetPaths = new Set([normalizePath(target), relativePath(sourceId, target)]);
-  const bySourcePath = documents.filter((document) => {
-    if (!document.sourcePath) return false;
-    return targetPaths.has(normalizePath(document.sourcePath));
-  });
-  const fromSourcePath = oneMatch(target, bySourcePath);
-  if (fromSourcePath !== undefined) return fromSourcePath;
+  const fromRelativePath = oneMatch(target, documentsAtPath(documents, relativePath(sourceId, target)));
+  if (fromRelativePath !== undefined) return fromRelativePath;
+
+  const fromDirectPath = oneMatch(target, documentsAtPath(documents, normalizePath(target)));
+  if (fromDirectPath !== undefined) return fromDirectPath;
 
   const byTitle = documents.filter((document) => normalize(document.title) === target);
   const fromTitle = oneMatch(target, byTitle);
@@ -75,6 +73,10 @@ function resolveDocument(target: string, sourceId: string, documents: ContentRec
   );
 
   return oneMatch(target, byFoldedName);
+}
+
+function documentsAtPath(documents: ContentRecord[], path: string): ContentRecord[] {
+  return documents.filter((document) => document.sourcePath && normalizePath(document.sourcePath) === path);
 }
 
 function oneMatch(target: string, matches: ContentRecord[]): ContentRecord | undefined {
