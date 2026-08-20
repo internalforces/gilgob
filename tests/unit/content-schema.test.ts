@@ -1,5 +1,13 @@
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import matter from 'gray-matter';
 import { describe, expect, it } from 'vitest';
-import { knowledgeSchema, projectSchema } from '../../src/lib/content/schema';
+import {
+  explorationSchema,
+  knowledgeSchema,
+  logSchema,
+  projectSchema,
+} from '../../src/lib/content/schema';
 
 const common = {
   title: 'B-Tree는 왜 DB Index에 사용될까?',
@@ -23,5 +31,19 @@ describe('content schemas', () => {
 
   it('accepts the project lifecycle', () => {
     expect(projectSchema.parse({ ...common, status: 'maintained' }).status).toBe('maintained');
+  });
+
+  it('validates the frontmatter in every Obsidian template', () => {
+    const templates = [
+      ['knowledge', knowledgeSchema],
+      ['exploration', explorationSchema],
+      ['project', projectSchema],
+      ['log', logSchema],
+    ] as const;
+
+    for (const [name, schema] of templates) {
+      const path = fileURLToPath(new URL(`../../content/templates/${name}.md`, import.meta.url));
+      expect(() => schema.parse(matter(readFileSync(path, 'utf8')).data)).not.toThrow();
+    }
   });
 });
