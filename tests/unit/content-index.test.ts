@@ -1,0 +1,171 @@
+import { cp, mkdtemp, readFile, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { pathToFileURL } from 'node:url';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import type { AstroIntegration } from 'astro';
+import type { ViteDevServer } from 'vite';
+import { buildContentIndex } from '../../src/lib/content/build-index';
+import { readContentIndex, writeContentIndex } from '../../src/lib/content/index-store';
+import { contentIndexIntegration } from '../../src/integrations/content-index';
+
+type ConfigSetupOptions = Parameters<NonNullable<AstroIntegration['hooks']['astro:config:setup']>>[0];
+type ConfigUpdate = Parameters<ConfigSetupOptions['updateConfig']>[0];
+type CapturedVitePlugin = {
+  buildStart?: () => void | Promise<void>;
+  configureServer?: (server: ViteDevServer) => void;
+};
+
+afterEach(() => {
+  vi.restoreAllMocks();
+});
+
+describe('content index', () => {
+  it('builds backlinks and deduplicated relation edges', async () => {
+    const index = await buildContentIndex('tests/fixtures/content-index');
+    const source = index.documents.find((item) => item.title === '인덱스 탐구');
+    const target = index.documents.find((item) => item.title === 'B-Tree');
+
+    expect(source?.outgoing).toEqual([target?.id]);
+    expect(target?.backlinks).toEqual([source?.id]);
+    expect(source?.related).toEqual([target?.id, 'knowledge/avl-tree']);
+    expect(index.graph.edges.filter((edge) => edge.kind === 'wikilink')).toHaveLength(1);
+    expect(index.graph.nodes.filter((node) => node.kind === 'category')).toHaveLength(1);
+    expect(index.graph.edges.every((edge) => edge.id === `${edge.kind}:${edge.source}:${edge.target}`)).toBe(true);
+  });
+
+  it('normalizes dates and derives slugs, document ids, and urls', async () => {
+    const index = await buildContentIndex('tests/fixtures/content-index');
+    const target = index.documents.find((item) => item.title === 'B-Tree');
+
+    expect(target).toMatchObject({
+      id: 'knowledge/database/b-tree',
+      slug: 'database/b-tree',
+      url: '/knowledge/database/b-tree',
+      created: '2026-08-18',
+      updated: '2026-08-19',
+      draft: false,
+      featured: false,
+    });
+  });
+
+  it('resolves relative links from the source path when an explicit slug is present', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    const index = await buildContentIndex('tests/fixtures/content-index-relative');
+    const source = index.documents.find((item) => item.title === 'Relative Source');
+
+    expect(source?.outgoing).toEqual(['knowledge/database/target']);
+    expect(warn).not.toHaveBeenCalled();
+  });
+
+  it('fails on duplicate aliases', async () => {
+    await expect(buildContentIndex('tests/fixtures/duplicate-alias')).rejects.toThrow('중복 별칭');
+  });
+
+  it('fails on duplicate slugs and titles before deriving relations', async () => {
+    await expect(buildContentIndex('tests/fixtures/duplicate-slug')).rejects.toThrow('중복 슬러그');
+    await expect(buildContentIndex('tests/fixtures/duplicate-title')).rejects.toThrow('중복 제목');
+  });
+
+  it('warns for unresolved links and missing attachments without failing the build', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+
+    await expect(buildContentIndex('tests/fixtures/content-index-warnings')).resolves.toBeDefined();
+    expect(warn.mock.calls).toEqual([
+      ['[content] 해결되지 않은 링크: 아직 없는 문서'],
+      ['[content] 누락된 첨부: attachments/missing.png'],
+    ]);
+  });
+});
+
+describe('content index store', () => {
+  it('writes and reads an index through the cache file', async () => {
+    const directory = await mkdtemp(join(tmpdir(), 'gilgob-index-'));
+    const path = join(directory, '.cache/content-index.json');
+    const index = await buildContentIndex('tests/fixtures/content-index');
+
+    try {
+      await writeContentIndex(index, path);
+
+      expect(readContentIndex(path)).toEqual(index);
+      expect(await readFile(path, 'utf8')).toBe(`${JSON.stringify(index, null, 2)}\n`);
+    } finally {
+      await rm(directory, { recursive: true, force: true });
+    }
+  });
+
+  it('instructs the user to restart the build when the cache is absent', () => {
+    expect(() => readContentIndex('/definitely/missing/content-index.json')).toThrow('빌드를 다시 시작');
+  });
+});
+
+describe('content index integration', () => {
+  it('generates the cache in the Vite buildStart hook', async () => {
+    const directory = await mkdtemp(join(tmpdir(), 'gilgob-integration-'));
+    const contentRoot = join(directory, 'content');
+    let vitePlugin: CapturedVitePlugin | undefined;
+    const integration = contentIndexIntegration();
+    const setup = integration.hooks['astro:config:setup'];
+
+    try {
+      await cp('tests/fixtures/content-index', contentRoot, { recursive: true });
+      await setup?.({
+        config: { root: pathToFileURL(`${directory}/`) },
+        updateConfig: (config: ConfigUpdate) => {
+          vitePlugin = config.vite?.plugins?.[0] as unknown as CapturedVitePlugin;
+          return config as never;
+        },
+      } as unknown as ConfigSetupOptions);
+
+      await vitePlugin?.buildStart?.();
+
+      expect(readContentIndex(join(directory, '.cache/content-index.json')).documents).toHaveLength(3);
+    } finally {
+      await rm(directory, { recursive: true, force: true });
+    }
+  });
+
+  it('debounces content changes and invalidates the development module graph', async () => {
+    const directory = await mkdtemp(join(tmpdir(), 'gilgob-watch-'));
+    const contentRoot = join(directory, 'content');
+    const cachePath = join(directory, '.cache/content-index.json');
+    const listeners = new Map<string, (path: string) => void>();
+    let invalidations = 0;
+    let vitePlugin: CapturedVitePlugin | undefined;
+    const setup = contentIndexIntegration().hooks['astro:config:setup'];
+
+    try {
+      await cp('tests/fixtures/content-index', contentRoot, { recursive: true });
+      await setup?.({
+        config: { root: pathToFileURL(`${directory}/`) },
+        logger: { error: () => undefined },
+        updateConfig: (config: ConfigUpdate) => {
+          vitePlugin = config.vite?.plugins?.[0] as unknown as CapturedVitePlugin;
+          return config as never;
+        },
+      } as unknown as ConfigSetupOptions);
+      vitePlugin?.configureServer?.({
+        watcher: {
+          on(event: string, listener: (path: string) => void) {
+            listeners.set(event, listener);
+            return this;
+          },
+        },
+        moduleGraph: { invalidateAll: () => { invalidations += 1; } },
+      } as unknown as ViteDevServer);
+
+      const changedPath = join(contentRoot, 'knowledge/avl-tree.md');
+      listeners.get('add')?.(changedPath);
+      listeners.get('change')?.(changedPath);
+      listeners.get('unlink')?.(changedPath);
+
+      await vi.waitFor(async () => {
+        expect(await readFile(cachePath, 'utf8')).toContain('AVL Tree');
+      });
+      expect([...listeners.keys()]).toEqual(['add', 'change', 'unlink']);
+      expect(invalidations).toBe(1);
+    } finally {
+      await rm(directory, { recursive: true, force: true });
+    }
+  });
+});
