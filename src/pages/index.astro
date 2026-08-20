@@ -9,14 +9,17 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import { readContentIndex } from '../lib/content/index-store';
 import { getPublicEntries } from '../lib/content/queries';
 import { calculateContentStats, loadSkillSignal } from '../lib/content/stats';
+import type { ContentIndex } from '../lib/content/types';
 
 const entries = await getPublicEntries();
 const publicIds = new Set(entries.map((entry) => entry.id));
 let indexedEntries = new Map<string, { outgoing: string[] }>();
 let connectionsAvailable = true;
+let contentIndex: ContentIndex | null = null;
 
 try {
-  indexedEntries = new Map(readContentIndex().documents
+  contentIndex = readContentIndex();
+  indexedEntries = new Map(contentIndex.documents
     .filter((entry) => publicIds.has(entry.id))
     .map((entry) => [entry.id, {
       outgoing: entry.outgoing.filter((target) => publicIds.has(target)),
@@ -32,7 +35,7 @@ const statsEntries = entries.map((entry) => ({
   outgoing: indexedEntries.get(entry.id)?.outgoing ?? [],
 }));
 const stats = calculateContentStats(statsEntries);
-const skillSignal = await loadSkillSignal(statsEntries);
+const skillSignal = await loadSkillSignal(statsEntries, contentIndex);
 const activeExplorations = entries.filter((entry) => (
   entry.kind === 'explorations' && entry.data.status === 'active'
 ));

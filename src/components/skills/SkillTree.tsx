@@ -48,7 +48,6 @@ export default function SkillTree({ fields, progress, relatedDocuments }: SkillT
           <FieldItem
             key={field.id}
             field={field}
-            path={field.id}
             relatedDocuments={relatedDocuments}
             level={0}
           />
@@ -60,15 +59,14 @@ export default function SkillTree({ fields, progress, relatedDocuments }: SkillT
 
 interface FieldItemProps {
   field: SkillField;
-  path: string;
   relatedDocuments: Record<string, RelatedSkillDocument>;
   level: number;
 }
 
-function FieldItem({ field, path, relatedDocuments, level }: FieldItemProps) {
+function FieldItem({ field, relatedDocuments, level }: FieldItemProps) {
   const [expanded, setExpanded] = useState(true);
   const progress = calculateFieldProgress(field);
-  const childId = `skill-field-${sanitizeId(path)}`;
+  const childId = `skill-field-${field.id}`;
 
   return (
     <li class={`skill-field skill-field--level-${level}`}>
@@ -97,7 +95,6 @@ function FieldItem({ field, path, relatedDocuments, level }: FieldItemProps) {
             <FieldItem
               key={child.id}
               field={child}
-              path={`${path}-${child.id}`}
               relatedDocuments={relatedDocuments}
               level={level + 1}
             />
@@ -166,8 +163,4 @@ function ProgressMeter({
       </div>
     </div>
   );
-}
-
-function sanitizeId(value: string): string {
-  return value.replace(/[^a-zA-Z0-9_-]/g, '-');
 }

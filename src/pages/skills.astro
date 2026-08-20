@@ -3,10 +3,14 @@ import SkillTree from '../components/skills/SkillTree';
 import { withBase } from '../config/site';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { readContentIndex } from '../lib/content/index-store';
-import { loadSkills } from '../lib/skills/load-skills';
+import { loadSkillsFromCandidates } from '../lib/skills/load-skills';
 
 const index = readContentIndex();
-const skills = await loadSkills('content/data/skills.yaml', index);
+const selection = await loadSkillsFromCandidates(index);
+if (selection.data === null) {
+  throw selection.errors[0] ?? new Error('[skills] 사용할 수 있는 스킬 트리 데이터가 없습니다.');
+}
+const skills = selection.data;
 const relatedDocuments = Object.fromEntries(index.documents
   .filter((document) => document.kind === 'knowledge' && !document.draft)
   .map((document) => [document.id, {

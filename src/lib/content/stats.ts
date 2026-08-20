@@ -1,9 +1,12 @@
-import { readFile } from 'node:fs/promises';
-import { resolve } from 'node:path';
-import { load } from 'js-yaml';
-import { collectSkillNodes, parseSkillTreeDocument } from '../skills/schema';
-import type { SkillStatus } from '../skills/schema';
-import type { ContentKind } from './types';
+import {
+  DEFAULT_SKILL_PATHS,
+  loadSkillsFromCandidates,
+} from '../skills/load-skills';
+import { calculateSkillProgress } from '../skills/progress';
+import type { SkillProgress, SkillStatus } from '../skills/schema';
+import type { ContentIndex, ContentKind } from './types';
+
+export { DEFAULT_SKILL_PATHS } from '../skills/load-skills';
 
 export interface ContentStatsEntry {
   kind: ContentKind;
@@ -19,18 +22,9 @@ export interface ContentStats {
   activeExplorations: number;
 }
 
-export interface SkillSignal {
-  mastered: number;
-  learning: number;
-  planned: number;
-  percent: number;
+export interface SkillSignal extends SkillProgress {
   source: 'skills' | 'knowledge';
 }
-
-export const DEFAULT_SKILL_PATHS = [
-  resolve('content/skills.yaml'),
-  resolve('content/data/skills.yaml'),
-];
 
 export function calculateContentStats(entries: ContentStatsEntry[]): ContentStats {
   return {
@@ -45,18 +39,13 @@ export function calculateContentStats(entries: ContentStatsEntry[]): ContentStat
 
 export async function loadSkillSignal(
   entries: ContentStatsEntry[],
+  index: ContentIndex | null,
   paths: string[] = DEFAULT_SKILL_PATHS,
 ): Promise<SkillSignal> {
-  for (const path of paths) {
-    try {
-      const parsed = load(await readFile(path, 'utf8'));
-      const tree = parseSkillTreeDocument(parsed);
-      if (tree === null) continue;
-      const statuses = collectSkillNodes(tree.fields).map((node) => node.status);
-      return summarizeStatuses(statuses, 'skills');
-    } catch (error) {
-      if (isMissingFile(error)) continue;
-      continue;
+  if (index !== null) {
+    const selection = await loadSkillsFromCandidates(index, paths);
+    if (selection.data !== null) {
+      return { ...selection.data.progress, source: 'skills' };
     }
   }
 
@@ -74,23 +63,8 @@ function fallbackSkillSignal(entries: ContentStatsEntry[]): SkillSignal {
     .map((entry) => entry.status === undefined ? undefined : statusMap[entry.status])
     .filter((status): status is SkillStatus => status !== undefined);
 
-  return summarizeStatuses(statuses, 'knowledge');
-}
-
-function summarizeStatuses(
-  statuses: SkillStatus[],
-  source: SkillSignal['source'],
-): SkillSignal {
-  const counts = { mastered: 0, learning: 0, planned: 0 };
-  for (const status of statuses) counts[status] += 1;
-  const total = statuses.length;
-  const percent = total === 0
-    ? 0
-    : Math.round(((counts.mastered + counts.learning * 0.5) / total) * 100);
-
-  return { ...counts, percent, source };
-}
-
-function isMissingFile(error: unknown): error is NodeJS.ErrnoException {
-  return error instanceof Error && 'code' in error && error.code === 'ENOENT';
+  return {
+    ...calculateSkillProgress(statuses.map((status, index) => ({ id: `knowledge-${index}`, status }))),
+    source: 'knowledge',
+  };
 }

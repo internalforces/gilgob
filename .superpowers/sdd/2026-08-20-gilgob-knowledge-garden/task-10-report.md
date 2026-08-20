@@ -68,3 +68,66 @@ Playwright Chromium full-page 캡처를 생성하고 직접 검토했다.
 
 - 기존 `src/lib/content/schema.ts`의 Zod `url()` deprecation hint 1건은 이번 범위 밖이라 변경하지 않았다.
 - Pagefind 1.5.2의 한국어 stemming 미지원 안내는 기존과 동일하며 스킬 페이지 빌드나 관련 링크에는 영향을 주지 않는다.
+
+---
+
+## Fix round 1
+
+### 리뷰 수정
+
+- root `skillTreeDocumentSchema.superRefine`가 전체 recursive tree를 한 namespace로 순회한다.
+  - field↔field, leaf↔leaf, field↔leaf ID 충돌을 모두 거부한다.
+  - custom issue에 충돌 ID와 최초·현재 경로를 모두 기록한다.
+  - ID를 영문자·숫자·하이픈·밑줄로 제한해 DOM identifier 계약을 명시한다.
+- field disclosure의 DOM ID는 경로 문자열 조합이 아니라 전역 유일 field ID에서 직접 만든다. 서로 다른 경로가 같은 문자열로 합쳐져도 `aria-controls`가 충돌하지 않는다.
+- related reference는 exact ID → exact slug → exact alias 순서로 해석한다.
+  - 해석된 record가 draft 또는 Knowledge가 아니면 거부한다.
+  - 성공한 reference는 canonical ContentRecord ID로 정규화하고 같은 문서를 여러 형식으로 참조하면 중복 제거한다.
+  - 모든 실패 메시지는 field ID, skill ID, 원본 reference를 유지한다.
+- canonical candidate selection을 `loadSkillsFromCandidates`로 통합했다.
+  - `content/data/skills.yaml`이 `content/skills.yaml`보다 항상 먼저 평가된다.
+  - canonical 후보가 strict schema나 public link 검증에 실패하면 오류를 보존하고 legacy 후보를 계속 시도한다.
+  - `/skills/`와 홈은 같은 selection과 정규화된 `SkillTreeData.progress`를 소비한다.
+- `stats.ts`의 별도 fs/YAML parser, 별도 strict schema 순회, 별도 가중치 공식을 제거했다. ContentIndex를 읽을 수 없는 경우와 모든 후보가 invalid인 경우의 Knowledge fallback은 유지한다.
+
+### TDD 증거
+
+1. schema/link/candidate RED: focused 22개 중 14개가 실패했다.
+   - 중복 field, 중복 leaf, field↔leaf 충돌 3종이 모두 승인됐다.
+   - DOM에 부적합한 ID가 승인됐다.
+   - alias/slug로 찾은 draft·non-Knowledge가 missing으로 잘못 분류됐다.
+   - slug/alias reference가 canonical ID로 정규화되지 않았다.
+   - 공용 candidate loader와 새 홈 계약이 없었다.
+2. 단계별 GREEN:
+   - 전역 schema/DOM 계약 4/4
+   - canonical related resolution/public 경계 5/5
+   - candidate precedence/invalid continuation 2/2
+   - 전체 focused loader/home 22/22
+3. DOM collision RED: 전역 ID가 모두 다른 `a-b → c`, `a → b-c` tree를 SSR했을 때 controls 4개 중 unique target이 3개뿐이었다.
+4. DOM collision GREEN: direct field ID target으로 변경 후 controls 4개가 모두 unique하고 존재하는 ID를 가리켰다.
+5. 최종 focused: skill tree SSR, schema/loader, home signal 3 files, 23 tests passed.
+
+### 최종 검증
+
+- `npm test`: 14 files, 94 tests passed.
+- `npm run check`: 0 errors, 0 warnings, 기존 deprecation hint 1.
+- `npm run build`: exit 0, 11 static pages built, Pagefind 공개 콘텐츠 4페이지 색인.
+- `npx playwright test`: Chromium E2E 19 passed.
+  - nested list, related anchor, disclosure keyboard/focus 유지
+  - 홈 YAML skill-source integration
+  - desktop 1440×1000 및 mobile 390×844 axe 위반 0
+- 생성 HTML 검사:
+  - 홈과 `/skills/` 모두 explicit skill progress 50%
+  - disclosure controls 7개, unique 7개, 누락 target 0개
+- `git diff --check`: passed.
+
+### 시각 증거
+
+| Viewport | 캡처 | 결과 |
+| --- | --- | --- |
+| 1440 × 1000 | `/tmp/gilgob-skills-fix1-desktop.png` (1440 × 3737) | 기존 계층, radar, 전체·분야 진척, CTA 레이아웃 유지 |
+| 390 × 844 | `/tmp/gilgob-skills-fix1-mobile.png` (390 × 3722) | 3줄 hero, nested card, 링크, 세로 요약과 무가로넘침 유지 |
+
+### 남은 우려 사항
+
+- 기존 Zod `url()` deprecation hint와 Pagefind 한국어 stemming 안내만 남아 있으며 fix round 변경과 무관하다.
