@@ -1,5 +1,5 @@
 /** @jsxImportSource preact */
-import { useEffect, useId, useRef, useState } from 'preact/hooks';
+import { useId, useLayoutEffect, useRef, useState } from 'preact/hooks';
 
 interface NavigationItem {
   label: string;
@@ -22,7 +22,7 @@ export default function MobileMenu({ items, githubHref }: Props) {
     window.requestAnimationFrame(() => triggerRef.current?.focus());
   };
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!isOpen) return;
 
     const handleKeyDown = (event: KeyboardEvent) => {

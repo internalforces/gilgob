@@ -5,7 +5,10 @@ import { pagePath } from './helpers';
 const homeUrl = pagePath('/');
 const expectedState = process.env.GITHUB_EXPECT_STATE ?? 'ready';
 
-test.skip(!process.env.GITHUB_EXPECT_STATE, 'GitHub 캐시 fixture 상태를 명시한 검증에서만 실행합니다.');
+test.skip(
+  !process.env.GITHUB_EXPECT_STATE || expectedState === 'empty',
+  'ready 또는 stale GitHub 캐시 fixture 상태를 명시한 검증에서만 실행합니다.',
+);
 
 test('fixture GitHub activity remains safe and accessible on desktop and mobile', async ({ page }) => {
   for (const [name, viewport] of Object.entries({

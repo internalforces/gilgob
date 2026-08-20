@@ -49,16 +49,50 @@ test('home exposes YAML skill progress and Korean project metadata', async ({ pa
   await expect(metadata).not.toContainText('Projects');
 });
 
-test('home keeps an accessible GitHub empty state when build credentials are absent', async ({ page }) => {
+test('home keeps every generated GitHub state safe, Korean, and accessible', async ({ page }) => {
   await page.goto(homeUrl, { waitUntil: 'networkidle' });
 
   const section = page.locator('[data-github-activity]');
   await expect(section.getByRole('heading', { name: 'GitHub 활동' })).toBeVisible();
-  await expect(section.getByRole('status')).toHaveText('GitHub 통계를 불러오지 못했습니다.');
-  await expect(section.getByRole('link', { name: /GitHub 프로필 보기/ })).toHaveAttribute(
+  await expect(section).toHaveAttribute('data-state', /^(ready|stale|empty)$/);
+  const state = await section.getAttribute('data-state');
+  const profileLink = section.getByRole('link', { name: /GitHub 프로필 보기/ });
+  await expect(profileLink).toHaveAttribute(
     'href',
     'https://github.com/internalforces',
   );
+  await expect(profileLink).toHaveAttribute('target', '_blank');
+  await expect(profileLink).toHaveAttribute('rel', /\bnoreferrer\b/);
+
+  if (state === 'empty') {
+    await expect(section.getByRole('status')).toHaveText('GitHub 통계를 불러오지 못했습니다.');
+    await expect(section.locator('.github-activity__grid')).toHaveCount(0);
+  } else {
+    await expect(section.getByRole('group', { name: /지난 1년 GitHub 기여 합계 \d+회/ })).toBeAttached();
+    await expect(section.getByRole('table', { name: '날짜별 GitHub 기여 횟수', includeHidden: true })).toBeAttached();
+    await expect(section.getByRole('heading', { name: '최근 공개 활동' })).toBeVisible();
+    if (state === 'stale') {
+      await expect(section.getByRole('status')).toContainText('마지막으로 확인된 활동 · ');
+    } else {
+      await expect(section.getByRole('status')).toHaveCount(0);
+    }
+  }
+
+  const links = await section.locator('a[href]').evaluateAll((anchors) => anchors.map((anchor) => {
+    const link = anchor as HTMLAnchorElement;
+    return { href: link.href, rel: link.rel, target: link.target };
+  }));
+  expect(links.length).toBeGreaterThan(0);
+  expect(links.every(({ href, rel, target }) => {
+    const url = new URL(href);
+    return url.protocol === 'https:'
+      && url.hostname === 'github.com'
+      && url.port === ''
+      && url.username === ''
+      && url.password === ''
+      && target === '_blank'
+      && rel.split(/\s+/).includes('noreferrer');
+  })).toBe(true);
 
   for (const viewport of [{ width: 1280, height: 900 }, { width: 390, height: 844 }]) {
     await page.setViewportSize(viewport);
