@@ -67,6 +67,38 @@ describe('filterGraph', () => {
       'tag:sql',
     ]);
   });
+
+  it('indexes a synthetic graph without repeated linear node scans', () => {
+    const nodeCount = 400;
+    const synthetic: GraphData = {
+      nodes: [
+        ...Array.from({ length: nodeCount }, (_, index) => ({
+          id: `document:${index}`,
+          label: `문서 ${index}`,
+          kind: 'document' as const,
+          group: index % 2 === 0 ? 'knowledge' : 'logs',
+        })),
+        { id: 'category:shared', label: 'Computer Science', kind: 'category', group: 'category' },
+        { id: 'tag:shared', label: 'Shared', kind: 'tag', group: 'tag' },
+      ],
+      edges: Array.from({ length: nodeCount }, (_, index) => ([
+        { id: `category:${index}`, source: `document:${index}`, target: 'category:shared', kind: 'category' as const },
+        { id: `tag:${index}`, source: `document:${index}`, target: 'tag:shared', kind: 'tag' as const },
+      ])).flat(),
+    };
+    Object.defineProperty(synthetic.nodes, 'find', {
+      value: () => { throw new Error('graph filtering must use a node index, not nodes.find()'); },
+    });
+
+    const filtered = filterGraph(synthetic, {
+      categories: ['Computer Science'],
+      kinds: ['knowledge'],
+      tags: ['Shared'],
+    });
+
+    expect(filtered.nodes.filter((node) => node.kind === 'document')).toHaveLength(nodeCount / 2);
+    expect(filtered.edges).toHaveLength(nodeCount);
+  });
 });
 
 describe('graphForDocuments', () => {

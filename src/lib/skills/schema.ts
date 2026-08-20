@@ -1,35 +1,8 @@
 import { z } from 'astro/zod';
+import type { SkillField, SkillNode, SkillTreeDocument } from './tree';
 
 export const skillStatusSchema = z.enum(['mastered', 'learning', 'planned']);
-export type SkillStatus = z.infer<typeof skillStatusSchema>;
-
-export interface SkillProgress {
-  mastered: number;
-  learning: number;
-  planned: number;
-  percent: number;
-}
-
-export interface SkillNode {
-  id: string;
-  label: string;
-  status: SkillStatus;
-  related: string[];
-}
-
-export interface SkillField {
-  id: string;
-  label: string;
-  children: Array<SkillField | SkillNode>;
-}
-
-export interface SkillTreeDocument {
-  fields: SkillField[];
-}
-
-export interface SkillTreeData extends SkillTreeDocument {
-  progress: SkillProgress;
-}
+export type { SkillField, SkillNode, SkillProgress, SkillStatus, SkillTreeData, SkillTreeDocument } from './tree';
 
 const skillIdSchema = z.string()
   .trim()
@@ -87,12 +60,6 @@ export const skillTreeDocumentSchema: z.ZodType<SkillTreeDocument> = z.object({
 export function parseSkillTreeDocument(value: unknown): SkillTreeDocument | null {
   const result = skillTreeDocumentSchema.safeParse(value);
   return result.success ? result.data : null;
-}
-
-export function collectSkillNodes(fields: SkillField[]): SkillNode[] {
-  return fields.flatMap((field) => field.children.flatMap((child) => (
-    'children' in child ? collectSkillNodes([child]) : [child]
-  )));
 }
 
 function formatSkillPath(path: Array<string | number>): string {

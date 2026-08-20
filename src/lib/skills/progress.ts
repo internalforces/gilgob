@@ -1,10 +1,10 @@
-import { collectSkillNodes } from './schema';
+import { collectSkillNodes } from './tree';
 import type {
   SkillField,
   SkillNode,
   SkillProgress,
   SkillStatus,
-} from './schema';
+} from './tree';
 
 type ProgressNode = Pick<SkillNode, 'id' | 'status'>;
 

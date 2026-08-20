@@ -4,6 +4,7 @@ import Backlinks from '../components/content/Backlinks.astro';
 import { withBase } from '../config/site';
 import type { NormalizedEntry } from '../lib/content/queries';
 import type { ContentRecord } from '../lib/content/types';
+import { categoryLabel } from '../lib/content/taxonomy';
 import BaseLayout from './BaseLayout.astro';
 
 interface Props {
@@ -31,7 +32,7 @@ const updated = (entry.data.updated ?? entry.data.created).toLocaleDateString('k
       <p class="reading-hero__eyebrow" data-pagefind-ignore>
         <span data-pagefind-meta="type">{typeLabels[entry.kind]}</span>
         {' / '}
-        <span data-pagefind-meta="category">{entry.data.category}</span>
+        <span data-pagefind-meta={`category:${entry.data.category}`}>{categoryLabel(entry.data.category)}</span>
       </p>
       <h1 data-pagefind-meta="title">{entry.data.title}</h1>
       <p class="reading-hero__description" data-pagefind-meta="description">{entry.data.description}</p>
@@ -48,7 +49,7 @@ const updated = (entry.data.updated ?? entry.data.created).toLocaleDateString('k
     <div class="reading-grid site-container">
       <aside class="reading-context" aria-label="문서 맥락" data-pagefind-ignore>
         <p class="reading-context__label">분야 신호</p>
-        <strong>{entry.data.category}</strong>
+        <strong>{categoryLabel(entry.data.category)}</strong>
         <span>{typeLabels[entry.kind]} 컬렉션</span>
       </aside>
 

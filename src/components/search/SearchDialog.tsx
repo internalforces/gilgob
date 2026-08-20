@@ -9,22 +9,13 @@ import {
   type PagefindResult,
 } from '../../lib/search/pagefind';
 import './search-dialog.css';
+import { categoryLabel } from '../../lib/content/taxonomy';
 
 interface Props {
   base: string;
 }
 
 type ViewState = 'idle' | 'loading' | 'results' | 'empty' | 'error' | 'unavailable';
-
-const categoryLabels: Record<string, string> = {
-  'Computer Science': '컴퓨터 과학',
-  'Data & Mathematics': '데이터와 수학',
-  AI: '인공지능',
-  Finance: '금융',
-  Research: '리서치',
-  Projects: '프로젝트',
-  Learning: '학습',
-};
 
 function statusMessage(state: ViewState): string {
   switch (state) {
@@ -317,7 +308,7 @@ export default function SearchDialog({ base }: Props) {
             {viewState === 'results' && results.map((result, index) => {
               const title = result.meta.title || '제목 없는 문서';
               const type = result.meta.type || '문서';
-              const category = categoryLabels[result.meta.category] || result.meta.category || '분야 미지정';
+              const category = categoryLabel(result.meta.category);
               return (
                 <li key={`${result.url}-${index}`} role="presentation">
                   <a

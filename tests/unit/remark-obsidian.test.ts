@@ -99,6 +99,29 @@ it('does not accept traversal or non-attachment embeds as images', async () => {
   expect(JSON.stringify(transformed)).not.toContain('content-assets');
 });
 
+it('does not transform wiki syntax inside Markdown link labels or reference link labels', async () => {
+  const transformed = await transform('[기존 [[B-Tree]] 링크](https://example.com) [참조 [[B-Tree]]][ref]\n\n[ref]: https://example.com/ref');
+
+  expect(transformed.children[0]).toMatchObject({
+    type: 'paragraph',
+    children: [
+      { type: 'link', url: 'https://example.com', children: [{ type: 'text', value: '기존 [[B-Tree]] 링크' }] },
+      { type: 'text', value: ' ' },
+      { type: 'linkReference', children: [{ type: 'text', value: '참조 [[B-Tree]]' }] },
+    ],
+  });
+});
+
+it('preserves wiki syntax inside inline and fenced code', async () => {
+  const transformed = await transform('`[[B-Tree]]`\n\n```md\n[[B-Tree]]\n```');
+
+  expect(transformed.children).toMatchObject([
+    { type: 'paragraph', children: [{ type: 'inlineCode', value: '[[B-Tree]]' }] },
+    { type: 'code', value: '[[B-Tree]]' },
+  ]);
+  expect(JSON.stringify(transformed)).not.toContain('/repo/knowledge/b-tree');
+});
+
 describe('Obsidian callouts', () => {
   const cases = [
     ['NOTE', 'note', '노트'],

@@ -13,6 +13,8 @@ status: mastered
 
 B-Tree는 한 노드에 많은 키를 저장해 디스크 접근 횟수를 줄인다. 그래서 데이터베이스 인덱스의 균형 잡힌 탐색 구조로 적합하다.
 
+![[attachments/b-tree-diagram.svg|B-Tree 구조 예시]]
+
 ## 다음 연결
 
 Oracle의 계층형 쿼리를 학습하며 [[Oracle 계층형 쿼리로 조직도 탐색하기]]도 함께 살펴본다.

@@ -33,6 +33,33 @@ describe('content schemas', () => {
     expect(projectSchema.parse({ ...common, status: 'maintained' }).status).toBe('maintained');
   });
 
+  it.each([
+    '../escape',
+    'nested/../escape',
+    './dot',
+    'nested//empty',
+    '/absolute',
+    'windows\\path',
+    'query?draft=true',
+    'fragment#heading',
+  ])('rejects unsafe explicit slug %s', (slug) => {
+    expect(() => knowledgeSchema.parse({ ...common, status: 'growing', slug })).toThrow();
+  });
+
+  it('accepts only HTTPS project repository URLs', () => {
+    expect(projectSchema.parse({
+      ...common,
+      status: 'maintained',
+      repository: 'https://github.com/internalforces/gilgob',
+    }).repository).toBe('https://github.com/internalforces/gilgob');
+
+    expect(() => projectSchema.parse({
+      ...common,
+      status: 'maintained',
+      repository: 'http://github.com/internalforces/gilgob',
+    })).toThrow();
+  });
+
   it('accepts optional next exploration questions', () => {
     const value = knowledgeSchema.parse({
       ...common,

@@ -2,6 +2,7 @@
 import type { Core, ElementDefinition, Layouts, StylesheetStyle } from 'cytoscape';
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import type { ContentKind, GraphData, GraphNode } from '../../lib/content/types';
+import { categoryLabel } from '../../lib/content/taxonomy';
 import { filterGraph, toEgoGraph, type GraphFilter } from '../../lib/graph/filter';
 
 export interface GraphDocument {
@@ -72,6 +73,7 @@ export default function KnowledgeGraph({ graph, documents }: Props) {
         <Facet
           label="분야"
           values={options.categories}
+          labelFor={categoryLabel}
           selected={filter.categories}
           countFor={(value) => documents.filter((document) => document.category === value).length}
           onToggle={(value) => setFilter((current) => ({
@@ -138,6 +140,7 @@ function Facet<T extends string>({
   label,
   values,
   labels,
+  labelFor,
   selected,
   countFor,
   onToggle,
@@ -145,6 +148,7 @@ function Facet<T extends string>({
   label: string;
   values: T[];
   labels?: Partial<Record<T, string>>;
+  labelFor?: (value: T) => string;
   selected: T[];
   countFor: (value: T) => number;
   onToggle: (value: T) => void;
@@ -160,7 +164,7 @@ function Facet<T extends string>({
               checked={selected.includes(value)}
               onChange={() => onToggle(value)}
             />
-            <span>{labels?.[value] ?? value}</span>
+            <span>{labelFor?.(value) ?? labels?.[value] ?? value}</span>
             <small>{countFor(value)}</small>
           </label>
         ))}
@@ -310,7 +314,7 @@ function NodeExplorer({
                       onClick={() => onSelect(node.id)}
                     >
                       <i class={`graph-key graph-key--${node.kind}`} aria-hidden="true"></i>
-                      <span>{node.label}</span>
+                      <span>{node.kind === 'category' ? categoryLabel(node.label) : node.label}</span>
                     </button>
                   </li>
                 ))}
@@ -328,7 +332,7 @@ function NodeExplorer({
         ) : (
           <>
             <p class="graph-details__eyebrow">{selectedNode.kind === 'category' ? '분야' : '태그'}</p>
-            <h3>{selectedNode.label}</h3>
+            <h3>{selectedNode.kind === 'category' ? categoryLabel(selectedNode.label) : selectedNode.label}</h3>
             <p>이 분류에 직접 연결된 공개 문서입니다.</p>
             <DocumentLinks documents={connectedDocuments} />
           </>
@@ -349,7 +353,7 @@ function DocumentDetails({
 
   return (
     <>
-      <p class="graph-details__eyebrow">{KIND_LABELS[document.kind]} · {document.category}</p>
+      <p class="graph-details__eyebrow">{KIND_LABELS[document.kind]} · {categoryLabel(document.category)}</p>
       <h3>{document.title}</h3>
       <p>{document.description}</p>
       <ul class="graph-details__tags" aria-label="문서 태그">
@@ -410,7 +414,7 @@ function useMediaQuery(query: string): { matches: boolean; ready: boolean } {
 function cytoscapeElements(graph: GraphData): ElementDefinition[] {
   return [
     ...graph.nodes.map((node) => ({
-      data: { id: node.id, label: node.label, kind: node.kind },
+      data: { id: node.id, label: node.kind === 'category' ? categoryLabel(node.label) : node.label, kind: node.kind },
       classes: node.kind,
       selectable: true,
     })),
@@ -430,6 +434,9 @@ function graphLayout() {
     randomize: false,
     fit: true,
     padding: 32,
+    idealEdgeLength: 92,
+    nodeRepulsion: 5200,
+    nodeOverlap: 18,
   } as const;
 }
 

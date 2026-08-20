@@ -112,8 +112,35 @@ status: seed
     expect(html).toContain('data-pagefind-meta="title"');
     expect(html).toContain('data-pagefind-meta="description"');
     expect(html).toContain('data-pagefind-meta="type"');
-    expect(html).toContain('data-pagefind-meta="category"');
+    expect(html).toContain('data-pagefind-meta="category:Computer Science"');
     expect(html).toContain('data-pagefind-meta="tags:B-Tree, Index, Oracle"');
     expect(html.match(/data-pagefind-ignore/g)?.length).toBeGreaterThanOrEqual(6);
+  });
+
+  it('renders Korean category copy while retaining canonical Pagefind metadata', async () => {
+    const [indexHtml, detailHtml, graphHtml] = await Promise.all([
+      readFile(`${basePath}/knowledge/index.html`, 'utf8'),
+      readFile(`${basePath}/knowledge/database/b-tree-index/index.html`, 'utf8'),
+      readFile(`${basePath}/graph/index.html`, 'utf8'),
+    ]);
+
+    expect(indexHtml).toContain('컴퓨터 과학');
+    expect(detailHtml).toContain('data-pagefind-meta="category:Computer Science"');
+    expect(detailHtml).toContain('컴퓨터 과학');
+    expect(graphHtml).toContain('컴퓨터 과학');
+    expect(indexHtml).not.toMatch(/>Computer Science</);
+    expect(detailHtml).not.toMatch(/>Computer Science</);
+    expect(graphHtml).not.toMatch(/>Computer Science</);
+    expect(graphHtml).not.toMatch(/>Projects</);
+  });
+
+  it('keeps the skill island free of server-only Zod code', async () => {
+    const skillsHtml = await readFile(`${basePath}/skills/index.html`, 'utf8');
+    const chunkPath = skillsHtml.match(/component-url="([^"]*\/SkillTree\.[^"]+\.js)"/)?.[1];
+    expect(chunkPath).toBeDefined();
+    const chunk = await readFile(`${basePath}${chunkPath!.replace('/astro-astro-personal-knowledge-base-digital', '')}`, 'utf8');
+
+    expect(chunk).not.toMatch(/Zod(?:Error|Type|Check)|invalid_type|safeParse/);
+    expect(Buffer.byteLength(chunk)).toBeLessThan(20_000);
   });
 });

@@ -2,15 +2,13 @@ import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { load } from 'js-yaml';
 import type { ContentIndex, ContentRecord } from '../content/types';
-import {
-  collectSkillNodes,
-  skillTreeDocumentSchema,
-} from './schema';
+import { skillTreeDocumentSchema } from './schema';
+import { collectSkillNodes } from './tree';
 import type {
   SkillField,
   SkillNode,
   SkillTreeData,
-} from './schema';
+} from './tree';
 import { calculateSkillProgress } from './progress';
 
 export { calculateFieldProgress, calculateSkillProgress } from './progress';

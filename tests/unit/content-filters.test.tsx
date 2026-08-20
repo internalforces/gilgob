@@ -42,4 +42,21 @@ describe('content filter hydration', () => {
     expect(html).toContain('전체 1개 중 1개');
     expect(html).toMatch(/<option selected value(?:="")?>전체<\/option>/);
   });
+
+  it('shows Korean category labels while preserving canonical option values', () => {
+    const html = render(h(ContentFilters, { entries, initialSearchParams: '' }));
+
+    expect(html).toContain('<option value="Computer Science">컴퓨터 과학</option>');
+    expect(html).not.toContain('>Computer Science</option>');
+  });
+
+  it('uses a safe Korean fallback for an unrecognized canonical category', () => {
+    const html = render(h(ContentFilters, {
+      entries: [{ ...entries[0], category: 'New Domain' }],
+      initialSearchParams: '',
+    }));
+
+    expect(html).toContain('<option value="New Domain">기타 분야</option>');
+    expect(html).not.toContain('>New Domain</option>');
+  });
 });

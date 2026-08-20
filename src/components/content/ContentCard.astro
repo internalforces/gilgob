@@ -1,6 +1,7 @@
 ---
 import { withBase } from '../../config/site';
 import type { NormalizedEntry } from '../../lib/content/queries';
+import { categoryLabel } from '../../lib/content/taxonomy';
 
 interface Props {
   entry: NormalizedEntry;
@@ -38,7 +39,7 @@ const updated = entry.data.updated ?? entry.data.created;
   <div class="content-card__signal" aria-hidden="true"></div>
   <div class="content-card__meta">
     <span>{typeLabels[entry.kind]}</span>
-    <span>{entry.data.category}</span>
+    <span>{categoryLabel(entry.data.category)}</span>
     {entry.data.status && <span>{statusLabels[entry.data.status] ?? entry.data.status}</span>}
   </div>
   <h2 class="content-card__title">

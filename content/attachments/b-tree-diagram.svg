@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 240" role="img" aria-labelledby="title description">
+  <title id="title">B-Tree diagram attachment</title>
+  <desc id="description">하나의 루트가 세 개의 리프 노드로 이어지는 B-Tree 구조 예시</desc>
+  <rect width="640" height="240" rx="24" fill="#f7f9fc"/>
+  <g fill="none" stroke="#52627a" stroke-width="4">
+    <path d="M320 84 128 160M320 84v76M320 84l192 76"/>
+  </g>
+  <g fill="#fff" stroke="#1d63ff" stroke-width="4">
+    <rect x="248" y="36" width="144" height="56" rx="12"/>
+    <rect x="64" y="152" width="128" height="52" rx="12"/>
+    <rect x="256" y="152" width="128" height="52" rx="12"/>
+    <rect x="448" y="152" width="128" height="52" rx="12"/>
+  </g>
+  <g fill="#0d1b36" font-family="sans-serif" font-size="20" text-anchor="middle">
+    <text x="320" y="71">20 · 40</text>
+    <text x="128" y="185">5 · 10</text>
+    <text x="320" y="185">25 · 30</text>
+    <text x="512" y="185">45 · 60</text>
+  </g>
+</svg>

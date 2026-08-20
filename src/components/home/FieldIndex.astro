@@ -1,6 +1,7 @@
 ---
 import { withBase } from '../../config/site';
 import type { NormalizedEntry } from '../../lib/content/queries';
+import { categoryLabel } from '../../lib/content/taxonomy';
 
 interface Props {
   entries: NormalizedEntry[];
@@ -8,13 +9,13 @@ interface Props {
 
 const { entries } = Astro.props;
 const fields = [
-  { label: '컴퓨터 과학', category: 'Computer Science', href: '/knowledge/?category=Computer%20Science' },
-  { label: '데이터와 수학', category: 'Data & Mathematics', href: '/knowledge/?category=Data%20%26%20Mathematics' },
-  { label: '인공지능', category: 'AI', href: '/explorations/?category=AI' },
-  { label: '금융', category: 'Finance', href: '/knowledge/?category=Finance' },
-  { label: '리서치', category: 'Research', href: '/explorations/?category=Research' },
-  { label: '프로젝트', category: 'Projects', href: '/projects/?category=Projects' },
-  { label: '학습', category: 'Learning', href: '/logs/?category=Learning' },
+  { label: categoryLabel('Computer Science'), category: 'Computer Science', href: '/knowledge/?category=Computer%20Science' },
+  { label: categoryLabel('Data & Mathematics'), category: 'Data & Mathematics', href: '/knowledge/?category=Data%20%26%20Mathematics' },
+  { label: categoryLabel('AI'), category: 'AI', href: '/explorations/?category=AI' },
+  { label: categoryLabel('Finance'), category: 'Finance', href: '/knowledge/?category=Finance' },
+  { label: categoryLabel('Research'), category: 'Research', href: '/explorations/?category=Research' },
+  { label: categoryLabel('Projects'), category: 'Projects', href: '/projects/?category=Projects' },
+  { label: categoryLabel('Learning'), category: 'Learning', href: '/logs/?category=Learning' },
   { label: '모든 지식', kind: 'knowledge', href: '/knowledge/' },
 ].map((field) => ({
   ...field,

@@ -1,16 +1,16 @@
 import { copyFile, mkdir, readdir, realpath, stat } from 'node:fs/promises';
-import { dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
+import { dirname, isAbsolute, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type { AstroIntegration } from 'astro';
 import type { Plugin, ViteDevServer } from 'vite';
 import { buildContentIndex } from '../lib/content/build-index';
+import { isContainedPath, isMissingFile } from '../lib/content/attachment-path';
 import { DEFAULT_CONTENT_INDEX_PATH, writeContentIndex } from '../lib/content/index-store';
 
 const REBUILD_DELAY_MS = 80;
 
 export function contentIndexIntegration(): AstroIntegration {
   let contentRoot: string | undefined;
-  let base = '/';
 
   return {
     name: 'gilgob-content-index',
@@ -19,7 +19,6 @@ export function contentIndexIntegration(): AstroIntegration {
         const projectRoot = fileURLToPath(config.root);
         const configuredContentRoot = join(projectRoot, 'content');
         contentRoot = configuredContentRoot;
-        base = config.base;
         const indexPath = join(projectRoot, DEFAULT_CONTENT_INDEX_PATH);
         let rebuildTimer: ReturnType<typeof setTimeout> | undefined;
         let rebuildRunning = false;
@@ -75,13 +74,13 @@ export function contentIndexIntegration(): AstroIntegration {
       },
       'astro:build:done': async ({ dir }) => {
         if (contentRoot === undefined) return;
-        await copyAttachments(contentRoot, fileURLToPath(dir), base);
+        await copyAttachments(contentRoot, fileURLToPath(dir));
       },
     },
   };
 }
 
-async function copyAttachments(contentRoot: string, outputRoot: string, base: string): Promise<void> {
+async function copyAttachments(contentRoot: string, outputRoot: string): Promise<void> {
   const attachmentRoot = join(contentRoot, 'attachments');
   let canonicalContentRoot: string;
   let canonicalAttachmentRoot: string;
@@ -96,7 +95,7 @@ async function copyAttachments(contentRoot: string, outputRoot: string, base: st
   }
 
   if (!isContainedPath(canonicalAttachmentRoot, canonicalContentRoot)) return;
-  const outputAttachmentRoot = join(outputRoot, ...baseSegments(base), 'content-assets');
+  const outputAttachmentRoot = join(outputRoot, 'content-assets');
   await copyContainedFiles(attachmentRoot, attachmentRoot, canonicalAttachmentRoot, outputAttachmentRoot);
 }
 
@@ -131,20 +130,6 @@ async function copyContainedFiles(
     await mkdir(dirname(destination), { recursive: true });
     await copyFile(canonicalSource, destination);
   }
-}
-
-function baseSegments(base: string): string[] {
-  return base.split('/').filter((segment) => segment !== '' && segment !== '.');
-}
-
-function isContainedPath(path: string, root: string): boolean {
-  const pathFromRoot = relative(root, path);
-  return pathFromRoot === ''
-    || (pathFromRoot !== '..' && !pathFromRoot.startsWith(`..${sep}`) && !isAbsolute(pathFromRoot));
-}
-
-function isMissingFile(error: unknown): error is NodeJS.ErrnoException {
-  return error instanceof Error && 'code' in error && error.code === 'ENOENT';
 }
 
 async function regenerateForDevelopment(

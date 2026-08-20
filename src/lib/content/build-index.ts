@@ -1,8 +1,9 @@
-import { access, readFile } from 'node:fs/promises';
+import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import fg from 'fast-glob';
 import matter from 'gray-matter';
 import { explorationSchema, knowledgeSchema, logSchema, projectSchema } from './schema';
+import { resolveContainedAttachment } from './attachment-path';
 import type { ContentFrontmatter } from './schema';
 import type { ContentIndex, ContentKind, ContentRecord, GraphEdge, GraphNode } from './types';
 import { parseWikiLinks, resolveWikiLink } from './wiki-links';
@@ -154,9 +155,7 @@ async function deriveOutgoingLinks(
 }
 
 async function warnIfAttachmentMissing(contentRoot: string, target: string): Promise<void> {
-  try {
-    await access(resolve(contentRoot, target));
-  } catch {
+  if (await resolveContainedAttachment(contentRoot, target) === null) {
     console.warn(`[content] 누락된 첨부: ${target}`);
   }
 }
@@ -175,9 +174,20 @@ function deriveBacklinks(documents: ContentRecord[]): void {
 }
 
 function deriveRelatedEntries(documents: ContentRecord[]): void {
+  const documentById = new Map(documents.map((document) => [document.id, document]));
+  const documentsByCategory = groupDocuments(documents, (document) => [document.category]);
+  const documentsByTag = groupDocuments(documents, (document) => [...new Set(document.tags)]);
+
   for (const document of documents) {
-    const scores = documents
-      .filter((candidate) => candidate.id !== document.id)
+    const candidateIds = new Set([
+      ...document.outgoing,
+      ...(documentsByCategory.get(document.category) ?? []),
+      ...document.tags.flatMap((tag) => documentsByTag.get(tag) ?? []),
+    ]);
+    candidateIds.delete(document.id);
+    const scores = [...candidateIds]
+      .map((id) => documentById.get(id))
+      .filter((candidate): candidate is ContentRecord => candidate !== undefined)
       .map((candidate) => ({
         document: candidate,
         score: 4 * Number(document.outgoing.includes(candidate.id))
@@ -189,6 +199,21 @@ function deriveRelatedEntries(documents: ContentRecord[]): void {
 
     document.related = scores.slice(0, 5).map(({ document: candidate }) => candidate.id);
   }
+}
+
+function groupDocuments(
+  documents: ContentRecord[],
+  keysFor: (document: ContentRecord) => string[],
+): Map<string, string[]> {
+  const groups = new Map<string, string[]>();
+  for (const document of documents) {
+    for (const key of keysFor(document)) {
+      const ids = groups.get(key) ?? [];
+      ids.push(document.id);
+      groups.set(key, ids);
+    }
+  }
+  return groups;
 }
 
 function sharedTagCount(left: ContentRecord, right: ContentRecord): number {

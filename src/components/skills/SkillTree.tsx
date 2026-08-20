@@ -5,7 +5,7 @@ import type {
   SkillNode,
   SkillProgress,
   SkillStatus,
-} from '../../lib/skills/schema';
+} from '../../lib/skills/tree';
 import { calculateFieldProgress } from '../../lib/skills/progress';
 
 export interface RelatedSkillDocument {

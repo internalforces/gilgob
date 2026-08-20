@@ -153,11 +153,21 @@ const graphDocuments = publicDocuments.map((document) => ({
   .graph-fallback__documents h3 { margin: 0; font-size: clamp(1.05rem, 2vw, 1.35rem); }
   .graph-fallback__documents h3 a { text-decoration-thickness: 1px; text-underline-offset: .22em; }
   .graph-fallback__documents header > span { display: block; margin-block-start: .65rem; color: var(--muted); font-size: .82rem; }
+  .graph-fallback__documents header a { color: var(--primary); text-underline-offset: .18em; }
+  .graph-fallback__tags { display: flex; flex-wrap: wrap; gap: .4rem .7rem; margin: .8rem 0 0; padding: 0; list-style: none; }
+  .graph-fallback__tags a { font-size: .72rem; }
   .graph-fallback__relations { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.5rem; }
   .graph-fallback__relations h4 { margin: 0 0 .5rem; color: var(--muted); font-size: .72rem; }
   .graph-fallback__relations ul { display: grid; gap: .35rem; margin: 0; padding-inline-start: 1rem; }
   .graph-fallback__relations a { color: var(--primary); font-size: .78rem; text-underline-offset: .18em; }
   .graph-fallback__relations p { margin: 0; color: var(--muted); font-size: .75rem; }
+  .graph-fallback__taxonomy { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1px; margin-block-start: 1px; background: var(--line); }
+  .graph-fallback__taxonomy > section { padding: clamp(1.4rem, 3vw, 2rem); background: var(--surface); }
+  .graph-fallback__taxonomy h2 { margin: 0 0 1.25rem; font-size: 1rem; }
+  .graph-fallback__taxonomy h3 { margin: 0 0 .45rem; color: var(--primary); font-size: .78rem; scroll-margin-block-start: 6rem; }
+  .graph-fallback__taxonomy ul { display: grid; gap: 1rem; margin: 0; padding: 0; list-style: none; }
+  .graph-fallback__taxonomy ul ul { gap: .3rem; padding-inline-start: 1rem; list-style: disc; }
+  .graph-fallback__taxonomy a { font-size: .78rem; text-underline-offset: .18em; }
 
   @media (max-width: 60rem) {
     .graph-workspace { grid-template-columns: minmax(0, 7fr) minmax(17rem, 5fr); }
@@ -176,6 +186,7 @@ const graphDocuments = publicDocuments.map((document) => ({
     .graph-explorer { border-block-start: 1px solid var(--line); border-inline-start: 0; }
     .graph-node-controls { max-height: 24rem; }
     .graph-fallback__relations { grid-template-columns: 1fr; }
+    .graph-fallback__taxonomy { grid-template-columns: 1fr; }
   }
   @media (prefers-reduced-motion: reduce) {
     .graph-node-controls button,

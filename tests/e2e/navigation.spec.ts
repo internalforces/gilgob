@@ -64,3 +64,14 @@ test('publishes absolute canonical and default Open Graph metadata', async ({ pa
   );
   await expect(page.locator('link[rel="icon"]')).toHaveAttribute('href', pagePath('/favicon.svg'));
 });
+
+test('serves rendered attachment URLs from the configured base', async ({ page, request }) => {
+  await page.goto(pagePath('/knowledge/database/b-tree-index/'));
+  const attachment = page.getByRole('img', { name: 'B-Tree 구조 예시' });
+  await expect(attachment).toHaveAttribute('src', pagePath('/content-assets/b-tree-diagram.svg'));
+
+  const response = await request.get(pagePath('/content-assets/b-tree-diagram.svg'));
+  expect(response.status()).toBe(200);
+  expect(response.headers()['content-type']).toContain('image/svg+xml');
+  expect(await response.text()).toContain('B-Tree diagram attachment');
+});

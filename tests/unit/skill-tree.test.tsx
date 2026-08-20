@@ -2,7 +2,7 @@ import { h } from 'preact';
 import render from 'preact-render-to-string';
 import { expect, it } from 'vitest';
 import SkillTree from '../../src/components/skills/SkillTree';
-import type { SkillField } from '../../src/lib/skills/schema';
+import type { SkillField } from '../../src/lib/skills/tree';
 
 it('renders one unique aria-controls target for every globally unique field ID', () => {
   const fields: SkillField[] = [

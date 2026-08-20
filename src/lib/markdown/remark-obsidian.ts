@@ -1,10 +1,10 @@
-import { posix } from 'node:path';
 import type { Blockquote, Paragraph, Root, RootContent, Text } from 'mdast';
 import type { Plugin } from 'unified';
 import { visit } from 'unist-util-visit';
 import { readContentIndex } from '../content/index-store';
 import type { ContentIndex, WikiLinkToken } from '../content/types';
 import { parseWikiLinks, resolveWikiLink } from '../content/wiki-links';
+import { attachmentRelativePath } from '../content/attachment-path';
 
 export interface RemarkObsidianOptions {
   index?: ContentIndex;
@@ -34,6 +34,7 @@ export const remarkObsidian: Plugin<[RemarkObsidianOptions], Root> = function re
 
     visit(tree, 'text', (node, position, parent) => {
       if (position === undefined || parent === undefined) return;
+      if (parent.type === 'link' || parent.type === 'linkReference') return;
       const replacement = replaceWikiLinks(node, sourceId, index, options.base);
       if (replacement.length === 1 && replacement[0] === node) return;
       parent.children.splice(position, 1, ...replacement);
@@ -82,7 +83,7 @@ function replaceWikiLinks(node: Text, sourceId: string, index: ContentIndex, bas
 }
 
 function attachmentNode(token: WikiLinkToken, base: string): RootContent {
-  const relativePath = token.target.slice('attachments/'.length);
+  const relativePath = attachmentRelativePath(token.target)!;
   return {
     type: 'image',
     url: joinBase(base, `/content-assets/${encodePath(relativePath)}`),
@@ -91,12 +92,7 @@ function attachmentNode(token: WikiLinkToken, base: string): RootContent {
 }
 
 function isSafeAttachmentTarget(target: string): boolean {
-  if (!target.startsWith('attachments/') || target.includes('\\')) return false;
-  const segments = target.split('/');
-  if (segments.length < 2 || segments.some((segment) => segment === '' || segment === '.' || segment === '..')) {
-    return false;
-  }
-  return posix.normalize(target) === target;
+  return attachmentRelativePath(target) !== null;
 }
 
 function encodePath(path: string): string {

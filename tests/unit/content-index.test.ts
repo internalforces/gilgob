@@ -1,4 +1,4 @@
-import { cp, mkdir, mkdtemp, readFile, rm, symlink, writeFile } from 'node:fs/promises';
+import { access, cp, mkdir, mkdtemp, readFile, rm, symlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
@@ -35,6 +35,45 @@ describe('content index', () => {
     expect(index.graph.edges.filter((edge) => edge.kind === 'wikilink')).toHaveLength(1);
     expect(index.graph.nodes.filter((node) => node.kind === 'category')).toHaveLength(1);
     expect(index.graph.edges.every((edge) => edge.id === `${edge.kind}:${edge.source}:${edge.target}`)).toBe(true);
+  });
+
+  it('preserves related scoring, title ties, positive-only candidates, and the five-item cap', async () => {
+    const directory = await mkdtemp(join(tmpdir(), 'gilgob-related-ranking-'));
+    const contentRoot = join(directory, 'content');
+    const documents = [
+      ['source', 'Source', 'Alpha', ['one', 'two'], '[[Linked]]'],
+      ['linked', 'Linked', 'Other', [], ''],
+      ['category-plus-tag', 'Category plus tag', 'Alpha', ['one'], ''],
+      ['category-only', 'Category only', 'Alpha', [], ''],
+      ['two-tags', 'Two tags', 'Other', ['one', 'two'], ''],
+      ['a-tag', 'A tag', 'Other', ['one'], ''],
+      ['b-tag', 'B tag', 'Other', ['two'], ''],
+      ['unrelated', 'Unrelated', 'Elsewhere', ['none'], ''],
+    ] as const;
+
+    try {
+      await mkdir(join(contentRoot, 'knowledge'), { recursive: true });
+      await Promise.all(documents.map(([slug, title, category, tags, body]) => writeFile(
+        join(contentRoot, `knowledge/${slug}.md`),
+        `---\ntitle: "${title}"\ndescription: "${title}"\ncategory: "${category}"\ntags: ${JSON.stringify(tags)}\ncreated: 2026-08-20\ndraft: false\naliases: []\nfeatured: false\nstatus: seed\n---\n\n${body}\n`,
+        'utf8',
+      )));
+
+      const index = await buildContentIndex(contentRoot);
+      const source = index.documents.find((document) => document.title === 'Source');
+
+      expect(source?.related).toEqual([
+        'knowledge/linked',
+        'knowledge/category-plus-tag',
+        'knowledge/category-only',
+        'knowledge/two-tags',
+        'knowledge/a-tag',
+      ]);
+      expect(source?.related).not.toContain('knowledge/unrelated');
+      expect(source?.related).toHaveLength(5);
+    } finally {
+      await rm(directory, { recursive: true, force: true });
+    }
   });
 
   it('normalizes dates and derives slugs, document ids, and urls', async () => {
@@ -97,6 +136,47 @@ describe('content index', () => {
       ['[content] 누락된 첨부: attachments/missing.png'],
     ]);
   });
+
+  it('treats traversal, symlink escapes, and directories as missing attachments', async () => {
+    const directory = await mkdtemp(join(tmpdir(), 'gilgob-attachment-validation-'));
+    const contentRoot = join(directory, 'content');
+    const attachmentRoot = join(contentRoot, 'attachments');
+    const outside = join(directory, 'secret.txt');
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+
+    try {
+      await mkdir(join(contentRoot, 'knowledge'), { recursive: true });
+      await mkdir(join(attachmentRoot, 'directory'), { recursive: true });
+      await writeFile(outside, 'secret');
+      await symlink(outside, join(attachmentRoot, 'escape.txt'));
+      await writeFile(join(contentRoot, 'knowledge/attachments.md'), `---
+title: "Attachment validation"
+description: "attachment validation"
+category: "Research"
+tags: []
+created: 2026-08-20
+draft: false
+aliases: []
+featured: false
+status: seed
+---
+
+![[attachments/../secret.txt]]
+![[attachments/escape.txt]]
+![[attachments/directory]]
+`, 'utf8');
+
+      await buildContentIndex(contentRoot);
+
+      expect(warn.mock.calls).toEqual([
+        ['[content] 누락된 첨부: attachments/../secret.txt'],
+        ['[content] 누락된 첨부: attachments/escape.txt'],
+        ['[content] 누락된 첨부: attachments/directory'],
+      ]);
+    } finally {
+      await rm(directory, { recursive: true, force: true });
+    }
+  });
 });
 
 describe('content index store', () => {
@@ -121,7 +201,7 @@ describe('content index store', () => {
 });
 
 describe('content index integration', () => {
-  it('copies only contained regular attachments into the base-aware build directory', async () => {
+  it('copies contained regular attachments at the output root while URLs remain base-aware', async () => {
     const directory = await mkdtemp(join(tmpdir(), 'gilgob-attachments-'));
     const attachmentRoot = join(directory, 'content/attachments');
     const outputRoot = join(directory, 'dist');
@@ -143,9 +223,10 @@ describe('content index integration', () => {
         dir: pathToFileURL(`${outputRoot}/`),
       } as unknown as BuildDoneOptions);
 
-      await expect(readFile(join(outputRoot, 'repo/content-assets/diagrams/tree.txt'), 'utf8')).resolves.toBe('tree');
-      await expect(readFile(join(outputRoot, 'repo/content-assets/..assets/safe.txt'), 'utf8')).resolves.toBe('safe');
-      await expect(readFile(join(outputRoot, 'repo/content-assets/escape.txt'), 'utf8')).rejects.toMatchObject({ code: 'ENOENT' });
+      await expect(readFile(join(outputRoot, 'content-assets/diagrams/tree.txt'), 'utf8')).resolves.toBe('tree');
+      await expect(readFile(join(outputRoot, 'content-assets/..assets/safe.txt'), 'utf8')).resolves.toBe('safe');
+      await expect(readFile(join(outputRoot, 'content-assets/escape.txt'), 'utf8')).rejects.toMatchObject({ code: 'ENOENT' });
+      await expect(access(join(outputRoot, 'repo/content-assets/diagrams/tree.txt'))).rejects.toMatchObject({ code: 'ENOENT' });
     } finally {
       await rm(directory, { recursive: true, force: true });
     }
