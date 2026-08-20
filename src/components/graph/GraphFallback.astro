@@ -1,0 +1,59 @@
+---
+import { withBase } from '../../config/site';
+import type { ContentRecord } from '../../lib/content/types';
+
+interface Props {
+  documents: ContentRecord[];
+}
+
+const { documents } = Astro.props;
+const sortedDocuments = [...documents].sort((left, right) => left.title.localeCompare(right.title, 'ko'));
+const documentById = new Map(sortedDocuments.map((document) => [document.id, document]));
+const connections = (ids: string[]) => ids
+  .map((id) => documentById.get(id))
+  .filter((document): document is ContentRecord => document !== undefined)
+  .sort((left, right) => left.title.localeCompare(right.title, 'ko'));
+---
+
+<details class="graph-fallback" aria-label="그래프 대신 목록 보기" open>
+  <summary>그래프 대신 목록 보기</summary>
+  <div class="graph-fallback__intro">
+    <h2>모든 공개 문서와 연결</h2>
+    <p>시각 그래프와 같은 문서를 일반 링크로 탐색할 수 있습니다.</p>
+  </div>
+  <ol class="graph-fallback__documents">
+    {sortedDocuments.map((document) => (
+      <li>
+        <article>
+          <header>
+            <p>{document.category}</p>
+            <h3><a href={withBase(document.url)}>{document.title}</a></h3>
+            <span>{document.description}</span>
+          </header>
+          <div class="graph-fallback__relations">
+            <div>
+              <h4 id={`outgoing-${document.id}`}>나가는 연결</h4>
+              {connections(document.outgoing).length > 0 ? (
+                <ul>
+                  {connections(document.outgoing).map((target) => (
+                    <li><a href={withBase(target.url)}>{target.title}</a></li>
+                  ))}
+                </ul>
+              ) : <p>연결 없음</p>}
+            </div>
+            <div>
+              <h4 id={`incoming-${document.id}`}>들어오는 연결</h4>
+              {connections(document.backlinks).length > 0 ? (
+                <ul>
+                  {connections(document.backlinks).map((source) => (
+                    <li><a href={withBase(source.url)}>{source.title}</a></li>
+                  ))}
+                </ul>
+              ) : <p>연결 없음</p>}
+            </div>
+          </div>
+        </article>
+      </li>
+    ))}
+  </ol>
+</details>
