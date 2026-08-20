@@ -259,12 +259,13 @@ function normalizeEvent(value: unknown): GitHubActivity | null {
       if ((payload.ref_type !== 'branch' && payload.ref_type !== 'tag' && payload.ref_type !== 'repository')
         || !nonEmptyString(payload.full_ref, 512)
         || !nonEmptyString(payload.master_branch, 256)
-        || typeof payload.description !== 'string'
+        || (payload.description !== null && typeof payload.description !== 'string')
         || (payload.pusher_type !== 'user' && payload.pusher_type !== 'deploy_key')) return null;
       const ref = nonEmptyString(payload.ref, 256) ? payload.ref : null;
-      if (payload.ref_type === 'repository' ? payload.ref !== null : !ref) return null;
+      if (payload.ref_type === 'repository' ? payload.ref !== null && !ref : !ref) return null;
       if (payload.ref_type === 'branch' && payload.full_ref !== `refs/heads/${ref}`) return null;
       if (payload.ref_type === 'tag' && payload.full_ref !== `refs/tags/${ref}`) return null;
+      if (payload.ref_type === 'repository' && ref && payload.full_ref !== `refs/heads/${ref}`) return null;
       if (payload.ref_type === 'branch') {
         label = '브랜치를 만들었습니다';
         url = constructedGitHubUrl(repository, ref ? `/tree/${encodeURIComponent(ref)}` : '/branches');

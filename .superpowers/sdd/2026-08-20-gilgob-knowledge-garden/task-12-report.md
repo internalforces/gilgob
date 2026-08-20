@@ -37,7 +37,7 @@
 - 기여 캘린더는 합계, 월 레이블, 0–4 강도 범례, 날짜 셀별 `2026년 8월 20일, 기여 3회` accessible name을 제공한다.
 - 동일 데이터를 caption, 날짜 row header, 기여 횟수 column으로 구성한 screen-reader table로 함께 제공한다.
 - 모바일 캘린더는 문서 전체의 가로 overflow 없이 자체 키보드 스크롤 영역을 제공하며 최신 주차 쪽에서 시작한다.
-- 최근 활동은 저장소, 한국어 행동, explicit `fetchedAt` 기준의 결정적 상대 날짜와 KST absolute title을 표시한다. 전체 활동량을 주장하지 않고 REST가 제공하는 최근 30일 범위임을 밝힌다.
+- 최근 활동은 저장소, 한국어 행동, 한 번 고정한 build time 기준의 결정적 상대 날짜와 KST absolute title을 표시한다. stale 확인 문구만 cache `fetchedAt`을 사용한다. 전체 활동량을 주장하지 않고 REST가 제공하는 최근 30일 범위임을 밝힌다.
 - stale 상태는 `마지막으로 확인된 활동`과 KST 확인 시각을, null 상태는 `GitHub 통계를 불러오지 못했습니다.`를 표시한다.
 - seed 80의 Geist, light-only Quiet System 75% / Midnight Lab 25%, 한국어 UI, reduced-motion 전역 계약을 유지했다.
 
@@ -107,3 +107,11 @@ Fresh final no-token run:
 - cache 파일을 제거한 no-token full Playwright: 26 passed, fixture-only 1 skipped; null state desktop/mobile 계약 유지.
 - `.cache/github-stats.json`은 no-token build 전후 존재하지 않았고, `dist/` token/header 문자열 scan은 일치 항목이 없었다.
 - 기존 Zod deprecation hint 1개와 Pagefind 한국어 stemming 안내만 남으며 이번 범위와 무관하다.
+
+## Fix Round 2 — Official Repository CreateEvent
+
+- GitHub 공식 Event type 표의 repository `ref: null` 형태와 Events endpoint 공식 응답 예시의 `ref: "master"`, `full_ref: "refs/heads/master"`, `description: null` 형태를 모두 양성 계약으로 반영했다.
+- repository ref가 문자열이면 `refs/heads/<ref>`와 일치해야 하며, null도 허용한다. branch/tag의 non-empty ref와 `full_ref` 일치, `master_branch`, `pusher_type`, common event shape, repository/URL 안전 검증은 유지한다.
+- 실제 공식 응답 구조를 미러링한 `create-repository.json` fixture와 두 ref 형태의 한국어 label·안전한 repository URL 회귀 테스트를 추가했다. 수정 전 supported `CreateEvent` source failure RED, 수정 후 focused GREEN을 확인했다.
+- Accessible UI 설명의 오래된 `fetchedAt` 상대 날짜 문구를 수정했다. 활동 상대 날짜는 build time, stale `마지막으로 확인된 활동` 문구는 cache `fetchedAt` 기준이다.
+- focused GitHub unit 29 tests와 `GITHUB_TOKEN= npm run verify`의 16 files / 127 tests, 12-page no-token build가 통과했다. cache 파일은 빌드 전후 없었고 정적 산출물 token/header scan도 일치 항목이 없었다. null-state full Playwright는 26 passed / fixture-only 1 skipped로 기존 홈 접근성 상태를 유지했다.

@@ -16,7 +16,7 @@ import {
 } from '../../src/lib/github/cache';
 import type { GitHubStats } from '../../src/lib/github/types';
 
-const fixture = async (name: 'graphql' | 'events') => JSON.parse(
+const fixture = async (name: 'graphql' | 'events' | 'create-repository') => JSON.parse(
   await readFile(new URL(`../fixtures/github/${name}.json`, import.meta.url), 'utf8'),
 ) as unknown;
 
@@ -121,6 +121,35 @@ describe('GitHub payload normalization', () => {
       { id: '1', type: 'PushEvent', public: false, created_at: '2026-08-20T00:00:00Z', repo: { name: 'internalforces/private' }, payload: {} },
       { id: '2', type: 'WatchEvent', public: true, created_at: '2026-08-20T00:00:00Z', repo: { name: 'internalforces/watch' }, payload: {} },
     ])).toEqual([]);
+  });
+
+  it('accepts official repository CreateEvent ref shapes with a null description', async () => {
+    const officialExample = await fixture('create-repository') as Record<string, unknown>;
+    const nullRefExample = {
+      ...officialExample,
+      id: 'repository-create-null-ref',
+      payload: {
+        ...(officialExample.payload as Record<string, unknown>),
+        ref: null,
+      },
+    };
+
+    expect(normalizeEvents([officialExample, nullRefExample])).toEqual([
+      {
+        id: 'repository-create-1',
+        repository: 'internalforces/new-garden',
+        label: '저장소를 만들었습니다',
+        url: 'https://github.com/internalforces/new-garden',
+        createdAt: '2026-08-20T05:00:00.000Z',
+      },
+      {
+        id: 'repository-create-null-ref',
+        repository: 'internalforces/new-garden',
+        label: '저장소를 만들었습니다',
+        url: 'https://github.com/internalforces/new-garden',
+        createdAt: '2026-08-20T05:00:00.000Z',
+      },
+    ]);
   });
 
   it('rejects malformed supported events instead of caching a false empty state', () => {
