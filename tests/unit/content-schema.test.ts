@@ -42,8 +42,22 @@ describe('content schemas', () => {
     'windows\\path',
     'query?draft=true',
     'fragment#heading',
+    '%2e%2e/%2e%2e/graph',
+    '%2E%2e/escape',
+    'nested%2fescape',
+    'nested%5Cescape',
+    'control%00byte',
+    'malformed%',
   ])('rejects unsafe explicit slug %s', (slug) => {
     expect(() => knowledgeSchema.parse({ ...common, status: 'growing', slug })).toThrow();
+  });
+
+  it('accepts safe Unicode POSIX slug segments', () => {
+    expect(knowledgeSchema.parse({
+      ...common,
+      status: 'growing',
+      slug: '보안/위협-모델',
+    }).slug).toBe('보안/위협-모델');
   });
 
   it('accepts only HTTPS project repository URLs', () => {

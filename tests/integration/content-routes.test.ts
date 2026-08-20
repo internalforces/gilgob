@@ -27,7 +27,7 @@ status: seed
     await writeFile(publicLinkFixture, `---
 title: "초안을 참조하는 공개 문서"
 description: "공개 문서에서 초안 링크가 노출되지 않는지 검증한다."
-category: "Research"
+category: "보안"
 tags: ["Draft"]
 created: 2026-08-20
 draft: false
@@ -128,6 +128,8 @@ status: seed
     expect(detailHtml).toContain('data-pagefind-meta="category:Computer Science"');
     expect(detailHtml).toContain('컴퓨터 과학');
     expect(graphHtml).toContain('컴퓨터 과학');
+    expect(indexHtml).toContain('보안');
+    expect(graphHtml).toContain('분야: 보안');
     expect(indexHtml).not.toMatch(/>Computer Science</);
     expect(detailHtml).not.toMatch(/>Computer Science</);
     expect(graphHtml).not.toMatch(/>Computer Science</);

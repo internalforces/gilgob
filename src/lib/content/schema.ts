@@ -1,7 +1,13 @@
 import { z } from 'astro/zod';
 
 const safeSlugSchema = z.string().min(1).refine((slug) => {
-  if (slug.startsWith('/') || slug.includes('\\') || slug.includes('?') || slug.includes('#')) return false;
+  if (
+    slug.startsWith('/')
+    || slug.includes('\\')
+    || slug.includes('?')
+    || slug.includes('#')
+    || slug.includes('%')
+  ) return false;
   const segments = slug.split('/');
   return segments.every((segment) => segment !== '' && segment !== '.' && segment !== '..');
 }, 'slug는 안전한 POSIX 상대 경로여야 합니다.');

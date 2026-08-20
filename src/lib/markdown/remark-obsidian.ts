@@ -31,10 +31,11 @@ export const remarkObsidian: Plugin<[RemarkObsidianOptions], Root> = function re
     const sourceId = sourceIdFromPath(file.path);
 
     visit(tree, 'blockquote', transformCallout);
+    const markdownLinkText = collectMarkdownLinkText(tree);
 
     visit(tree, 'text', (node, position, parent) => {
       if (position === undefined || parent === undefined) return;
-      if (parent.type === 'link' || parent.type === 'linkReference') return;
+      if (markdownLinkText.has(node)) return;
       const replacement = replaceWikiLinks(node, sourceId, index, options.base);
       if (replacement.length === 1 && replacement[0] === node) return;
       parent.children.splice(position, 1, ...replacement);
@@ -42,6 +43,17 @@ export const remarkObsidian: Plugin<[RemarkObsidianOptions], Root> = function re
     });
   };
 };
+
+function collectMarkdownLinkText(tree: Root): WeakSet<Text> {
+  const linkedText = new WeakSet<Text>();
+  visit(tree, (node) => {
+    if (node.type !== 'link' && node.type !== 'linkReference') return;
+    visit(node, 'text', (text) => {
+      linkedText.add(text);
+    });
+  });
+  return linkedText;
+}
 
 function publicResolutionIndex(index: ContentIndex, publicOnly: boolean): ContentIndex {
   if (!publicOnly) return index;

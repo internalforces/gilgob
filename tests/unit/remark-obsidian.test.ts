@@ -112,6 +112,51 @@ it('does not transform wiki syntax inside Markdown link labels or reference link
   });
 });
 
+it('does not transform wiki syntax nested under formatting inside Markdown links', async () => {
+  const transformed = await transform('[**중첩 [[B-Tree]]**](https://example.com) [*참조 [[B-Tree]]*][ref]\n\n[ref]: https://example.com/ref');
+
+  expect(transformed.children[0]).toMatchObject({
+    type: 'paragraph',
+    children: [
+      {
+        type: 'link',
+        children: [{ type: 'strong', children: [{ type: 'text', value: '중첩 [[B-Tree]]' }] }],
+      },
+      { type: 'text', value: ' ' },
+      {
+        type: 'linkReference',
+        children: [{ type: 'emphasis', children: [{ type: 'text', value: '참조 [[B-Tree]]' }] }],
+      },
+    ],
+  });
+  expect(JSON.stringify(transformed.children[0])).not.toContain('/repo/knowledge/b-tree');
+});
+
+it('still transforms standalone wiki syntax nested under formatting', async () => {
+  const transformed = await transform('**중첩 [[B-Tree]]** *강조 [[B-Tree]]*');
+
+  expect(transformed.children[0]).toMatchObject({
+    type: 'paragraph',
+    children: [
+      {
+        type: 'strong',
+        children: [
+          { type: 'text', value: '중첩 ' },
+          { type: 'link', url: '/repo/knowledge/b-tree' },
+        ],
+      },
+      { type: 'text', value: ' ' },
+      {
+        type: 'emphasis',
+        children: [
+          { type: 'text', value: '강조 ' },
+          { type: 'link', url: '/repo/knowledge/b-tree' },
+        ],
+      },
+    ],
+  });
+});
+
 it('preserves wiki syntax inside inline and fenced code', async () => {
   const transformed = await transform('`[[B-Tree]]`\n\n```md\n[[B-Tree]]\n```');
 

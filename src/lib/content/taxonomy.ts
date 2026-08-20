@@ -9,6 +9,7 @@ export const CATEGORY_LABELS: Readonly<Record<string, string>> = {
 };
 
 export function categoryLabel(category: string | null | undefined): string {
-  if (category === null || category === undefined || category === '') return '기타 분야';
-  return CATEGORY_LABELS[category] ?? '기타 분야';
+  const normalizedCategory = category?.trim() ?? '';
+  if (normalizedCategory === '') return '기타 분야';
+  return CATEGORY_LABELS[normalizedCategory] ?? normalizedCategory;
 }

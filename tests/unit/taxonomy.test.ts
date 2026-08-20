@@ -14,8 +14,15 @@ describe('categoryLabel', () => {
     expect(categoryLabel(category)).toBe(expected);
   });
 
-  it('uses generic Korean copy for unknown or absent categories', () => {
-    expect(categoryLabel('New Domain')).toBe('기타 분야');
+  it.each([
+    ['New Domain', 'New Domain'],
+    ['  보안  ', '보안'],
+  ])('preserves extensible author category %s as trimmed UI copy', (category, expected) => {
+    expect(categoryLabel(category)).toBe(expected);
+  });
+
+  it('uses generic Korean copy only for absent or blank categories', () => {
     expect(categoryLabel(undefined)).toBe('기타 분야');
+    expect(categoryLabel('   ')).toBe('기타 분야');
   });
 });

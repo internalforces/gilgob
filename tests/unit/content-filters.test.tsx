@@ -50,13 +50,12 @@ describe('content filter hydration', () => {
     expect(html).not.toContain('>Computer Science</option>');
   });
 
-  it('uses a safe Korean fallback for an unrecognized canonical category', () => {
+  it('preserves an extensible category label while keeping its internal value', () => {
     const html = render(h(ContentFilters, {
       entries: [{ ...entries[0], category: 'New Domain' }],
       initialSearchParams: '',
     }));
 
-    expect(html).toContain('<option value="New Domain">기타 분야</option>');
-    expect(html).not.toContain('>New Domain</option>');
+    expect(html).toContain('<option value="New Domain">New Domain</option>');
   });
 });
