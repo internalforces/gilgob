@@ -33,6 +33,16 @@ describe('content schemas', () => {
     expect(projectSchema.parse({ ...common, status: 'maintained' }).status).toBe('maintained');
   });
 
+  it('accepts optional next exploration questions', () => {
+    const value = knowledgeSchema.parse({
+      ...common,
+      status: 'growing',
+      nextQuestions: ['분기 계수는 읽기 비용에 어떤 영향을 줄까?'],
+    });
+
+    expect(value.nextQuestions).toEqual(['분기 계수는 읽기 비용에 어떤 영향을 줄까?']);
+  });
+
   it('validates the frontmatter in every Obsidian template', () => {
     const templates = [
       ['knowledge', knowledgeSchema],

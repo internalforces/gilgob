@@ -1,0 +1,27 @@
+---
+import { withBase } from '../../config/site';
+import type { ContentRecord } from '../../lib/content/types';
+
+interface Props {
+  entries: ContentRecord[];
+}
+
+const { entries } = Astro.props;
+---
+
+<section class="reading-links" aria-labelledby="backlinks-title">
+  <div class="reading-links__heading">
+    <p class="reading-links__eyebrow">연결 / 들어오는 링크</p>
+    <h2 id="backlinks-title">백링크</h2>
+  </div>
+  {entries.length > 0 ? (
+    <ul>
+      {entries.map((entry) => (
+        <li>
+          <a href={withBase(entry.url)}>{entry.title}</a>
+          <span>{entry.description}</span>
+        </li>
+      ))}
+    </ul>
+  ) : <p class="reading-links__empty">아직 이 글을 참조하는 공개 문서가 없습니다.</p>}
+</section>

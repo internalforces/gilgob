@@ -11,6 +11,7 @@ export const commonSchema = z.object({
   aliases: z.array(z.string().min(1)).default([]),
   featured: z.boolean().default(false),
   slug: z.string().min(1).optional(),
+  nextQuestions: z.array(z.string().min(1)).optional(),
 });
 
 export const knowledgeSchema = commonSchema.extend({

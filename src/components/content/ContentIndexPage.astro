@@ -1,0 +1,46 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getPublicEntries } from '../../lib/content/queries';
+import type { ContentKind } from '../../lib/content/types';
+import ContentCard from './ContentCard.astro';
+import ContentFilters from './ContentFilters';
+
+interface Props {
+  kind: ContentKind;
+  title: string;
+  description: string;
+  eyebrow: string;
+}
+
+const { kind, title, description, eyebrow } = Astro.props;
+const entries = await getPublicEntries(kind);
+const filterEntries = entries.map((entry) => ({
+  id: entry.id,
+  kind: entry.kind,
+  title: entry.data.title,
+  description: entry.data.description,
+  category: entry.data.category,
+  tags: entry.data.tags,
+  ...(entry.data.status ? { status: entry.data.status } : {}),
+}));
+---
+
+<BaseLayout title={title} description={description}>
+  <section class="content-index site-container">
+    <header class="content-index__header">
+      <p>{eyebrow}</p>
+      <h1>{title}</h1>
+      <div class="content-index__intro">
+        <p>{description}</p>
+        <span><strong>{entries.length}</strong> 공개 문서</span>
+      </div>
+    </header>
+
+    <div class="content-index__browser">
+      <div class="content-list" data-content-list>
+        {entries.map((entry) => <ContentCard entry={entry} />)}
+      </div>
+      <ContentFilters entries={filterEntries} initialSearchParams={Astro.url.search} client:load />
+    </div>
+  </section>
+</BaseLayout>
