@@ -1,0 +1,142 @@
+---
+import { SITE_CONFIG, withBase } from '../../config/site';
+
+const footerLinks = [
+  { label: '지식', href: withBase('/knowledge/') },
+  { label: '탐구', href: withBase('/explorations/') },
+  { label: '프로젝트', href: withBase('/projects/') },
+  { label: '학습 기록', href: withBase('/logs/') },
+  { label: '지식 그래프', href: withBase('/graph/') },
+];
+---
+
+<footer class="site-footer">
+  <div class="site-container">
+    <section class="site-footer__action" aria-labelledby="footer-action-title">
+      <div>
+        <h2 id="footer-action-title">생각이 연결되는 경로를 살펴보세요.</h2>
+        <p>정리된 지식과 진행 중인 프로젝트를 한곳에서 탐색할 수 있습니다.</p>
+      </div>
+      <div class="site-footer__buttons">
+        <a class="button-link button-link--primary" href={withBase('/knowledge/')}>모든 지식 보기</a>
+        <a class="button-link" href={withBase('/projects/')}>프로젝트 보기</a>
+      </div>
+    </section>
+
+    <div class="site-footer__bottom">
+      <a class="site-footer__identity" href={withBase('/')}>{SITE_CONFIG.name}</a>
+      <nav aria-label="하단 메뉴">
+        <ul>
+          {footerLinks.map((item) => <li><a href={item.href}>{item.label}</a></li>)}
+        </ul>
+      </nav>
+      <a href={SITE_CONFIG.github} target="_blank" rel="noreferrer">GitHub</a>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    margin-block-start: clamp(6rem, 12vw, 10rem);
+    padding-block: 1.5rem 2rem;
+    border-block-start: 1px solid var(--line);
+  }
+
+  .site-footer__action {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) auto;
+    align-items: end;
+    gap: 2rem;
+    padding: clamp(2rem, 5vw, 4.5rem);
+    border-radius: var(--radius);
+    background:
+      radial-gradient(circle at 90% 10%, color-mix(in srgb, var(--primary) 36%, transparent), transparent 18rem),
+      var(--ink);
+    color: var(--surface);
+  }
+
+  .site-footer__action h2 {
+    max-width: 18ch;
+    margin: 0;
+    font-size: clamp(2rem, 4vw, 3.75rem);
+    font-weight: 620;
+    letter-spacing: -0.045em;
+    line-height: 1.08;
+    text-wrap: balance;
+  }
+
+  .site-footer__action p {
+    max-width: 35rem;
+    margin: 1rem 0 0;
+    color: color-mix(in srgb, var(--surface) 70%, transparent);
+  }
+
+  .site-footer__buttons {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 0.75rem;
+  }
+
+  .site-footer__buttons .button-link:not(.button-link--primary) {
+    border-color: color-mix(in srgb, var(--surface) 35%, transparent);
+    background: transparent;
+    color: var(--surface);
+  }
+
+  .site-footer__buttons .button-link:not(.button-link--primary):hover {
+    border-color: var(--surface);
+    color: var(--surface);
+  }
+
+  .site-footer__bottom {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 2rem;
+    padding-block-start: 2rem;
+    color: var(--muted);
+    font-size: 0.875rem;
+  }
+
+  .site-footer__bottom a {
+    text-decoration: none;
+  }
+
+  .site-footer__bottom a:hover {
+    color: var(--ink);
+  }
+
+  .site-footer__identity {
+    color: var(--ink);
+    font-size: 1rem;
+    font-weight: 700;
+  }
+
+  .site-footer__bottom ul {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.75rem 1.25rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  @media (max-width: 45rem) {
+    .site-footer__action,
+    .site-footer__bottom {
+      grid-template-columns: minmax(0, 1fr);
+      align-items: start;
+    }
+
+    .site-footer__buttons,
+    .site-footer__bottom ul {
+      justify-content: flex-start;
+    }
+
+    .site-footer__bottom {
+      gap: 1.25rem;
+    }
+  }
+</style>

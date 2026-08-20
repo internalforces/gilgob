@@ -1,0 +1,110 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { withBase } from '../config/site';
+---
+
+<BaseLayout title="페이지를 찾을 수 없습니다" description="요청한 페이지를 찾을 수 없습니다." noindex>
+  <section class="not-found site-container">
+    <div class="not-found__signal" aria-hidden="true">
+      <span></span><span></span><span></span>
+    </div>
+    <div class="not-found__copy">
+      <p>경로가 이어지지 않았습니다.</p>
+      <h1>페이지를 찾을 수 없습니다.</h1>
+      <p>주소가 바뀌었거나 삭제된 페이지일 수 있습니다. 홈에서 다시 탐색해 주세요.</p>
+      <div class="not-found__actions">
+        <a class="button-link button-link--primary" href={withBase('/')}>홈으로 돌아가기</a>
+        <a class="button-link" href={withBase('/knowledge/')}>지식 둘러보기</a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .not-found {
+    display: grid;
+    min-height: 65vh;
+    grid-template-columns: minmax(15rem, 0.8fr) minmax(0, 1.2fr);
+    align-items: center;
+    gap: clamp(3rem, 8vw, 8rem);
+    padding-block: clamp(5rem, 12vw, 10rem);
+  }
+
+  .not-found__signal {
+    position: relative;
+    aspect-ratio: 1;
+    border: 1px solid var(--line);
+    border-radius: 50%;
+    background:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px),
+      var(--surface);
+    background-size: 12.5% 12.5%;
+    overflow: hidden;
+  }
+
+  .not-found__signal::before,
+  .not-found__signal::after {
+    position: absolute;
+    border: 1px solid color-mix(in srgb, var(--primary) 24%, transparent);
+    border-radius: 50%;
+    content: '';
+  }
+
+  .not-found__signal::before { inset: 18%; }
+  .not-found__signal::after { inset: 36%; }
+
+  .not-found__signal span {
+    position: absolute;
+    width: 0.65rem;
+    height: 0.65rem;
+    border-radius: 50%;
+    background: var(--signal);
+    box-shadow: 0 0 0 0.35rem color-mix(in srgb, var(--signal) 15%, transparent);
+  }
+
+  .not-found__signal span:nth-child(1) { inset: 22% auto auto 58%; }
+  .not-found__signal span:nth-child(2) { inset: 56% auto auto 28%; }
+  .not-found__signal span:nth-child(3) { inset: 68% auto auto 70%; }
+
+  .not-found__copy > p:first-child {
+    margin: 0 0 1rem;
+    color: var(--primary);
+    font-weight: 650;
+  }
+
+  .not-found h1 {
+    max-width: 12ch;
+    margin: 0;
+    font-size: clamp(2.75rem, 6vw, 5.5rem);
+    font-weight: 640;
+    letter-spacing: -0.055em;
+    line-height: 1;
+    text-wrap: balance;
+  }
+
+  .not-found__copy > p:not(:first-child) {
+    max-width: 32rem;
+    margin: 1.5rem 0 0;
+    color: var(--muted);
+  }
+
+  .not-found__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-block-start: 2rem;
+  }
+
+  @media (max-width: 45rem) {
+    .not-found {
+      min-height: auto;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 3rem;
+    }
+
+    .not-found__signal {
+      width: min(72vw, 20rem);
+    }
+  }
+</style>

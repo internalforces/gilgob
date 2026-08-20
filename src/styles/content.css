@@ -1,41 +1,59 @@
 .prose {
-  color: var(--color-ink, #22201d);
+  color: var(--ink);
   line-height: 1.75;
 }
 
 .prose a,
 .prose .wiki-link {
-  color: var(--color-link, #315f70);
+  color: var(--primary);
   text-decoration-color: color-mix(in srgb, currentColor 45%, transparent);
   text-underline-offset: 0.2em;
 }
 
 .prose .wiki-link--missing {
-  color: var(--color-muted, #77716a);
+  color: var(--muted);
   cursor: help;
   text-decoration: underline dotted;
 }
 
 .prose .callout {
-  --callout-accent: #4f7180;
   margin-block: 1.5rem;
   padding: 0.9rem 1rem;
-  border: 1px solid color-mix(in srgb, var(--callout-accent) 38%, transparent);
-  border-inline-start: 0.25rem solid var(--callout-accent);
-  border-radius: 0.5rem;
-  background: color-mix(in srgb, var(--callout-accent) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--primary) 38%, transparent);
+  border-inline-start: 0.25rem solid var(--primary);
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--primary) 8%, transparent);
 }
 
-.prose .callout--tip { --callout-accent: #39745a; }
+.prose .callout--tip {
+  border-color: color-mix(in srgb, var(--signal) 45%, transparent);
+  border-inline-start-color: var(--signal);
+  background: color-mix(in srgb, var(--signal) 9%, transparent);
+}
+
 .prose .callout--warning,
-.prose .callout--caution { --callout-accent: #a35d25; }
-.prose .callout--important { --callout-accent: #7b4c91; }
+.prose .callout--caution {
+  border-color: color-mix(in srgb, var(--danger) 42%, transparent);
+  border-inline-start-color: var(--danger);
+  background: color-mix(in srgb, var(--danger) 8%, transparent);
+}
+
+.prose .callout--important {
+  border-color: color-mix(in srgb, var(--ink) 34%, transparent);
+  border-inline-start-color: var(--ink);
+  background: color-mix(in srgb, var(--ink) 6%, transparent);
+}
 
 .prose .callout__label {
   display: block;
   margin-block-end: 0.35rem;
-  color: var(--callout-accent);
+  color: var(--primary);
 }
+
+.prose .callout--tip .callout__label { color: color-mix(in srgb, var(--signal) 72%, var(--ink)); }
+.prose .callout--warning .callout__label,
+.prose .callout--caution .callout__label { color: var(--danger); }
+.prose .callout--important .callout__label { color: var(--ink); }
 
 .prose table {
   display: block;
@@ -47,14 +65,14 @@
 .prose th,
 .prose td {
   padding: 0.55rem 0.75rem;
-  border: 1px solid var(--color-border, #d8d2c9);
+  border: 1px solid var(--line);
   text-align: start;
 }
 
 .prose :not(pre) > code {
   padding: 0.1em 0.35em;
   border-radius: 0.25rem;
-  background: var(--color-code-surface, #f0ece5);
+  background: color-mix(in srgb, var(--line) 65%, var(--surface));
   font-size: 0.9em;
 }
 
@@ -78,7 +96,7 @@
 
 .prose figcaption {
   margin-block-start: 0.5rem;
-  color: var(--color-muted, #77716a);
+  color: var(--muted);
   font-size: 0.875rem;
   text-align: center;
 }
