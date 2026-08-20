@@ -23,9 +23,10 @@ const CALLOUTS = {
 type CalloutKind = keyof typeof CALLOUTS;
 
 export const remarkObsidian: Plugin<[RemarkObsidianOptions], Root> = function remarkObsidian(options) {
-  const index = getIndex(options);
+  const readIndex = createIndexReader(options);
 
   return (tree, file) => {
+    const index = readIndex();
     const sourceId = sourceIdFromPath(file.path);
 
     visit(tree, 'blockquote', transformCallout);
@@ -40,11 +41,17 @@ export const remarkObsidian: Plugin<[RemarkObsidianOptions], Root> = function re
   };
 };
 
-function getIndex(options: RemarkObsidianOptions): ContentIndex {
+function createIndexReader(options: RemarkObsidianOptions): () => ContentIndex {
   if ((options.index === undefined) === (options.indexPath === undefined)) {
     throw new Error('remarkObsidian requires exactly one of index or indexPath');
   }
-  return options.index ?? readContentIndex(options.indexPath!);
+  if (options.index !== undefined) {
+    const index = options.index;
+    return () => index;
+  }
+
+  const indexPath = options.indexPath!;
+  return () => readContentIndex(indexPath);
 }
 
 function replaceWikiLinks(node: Text, sourceId: string, index: ContentIndex, base: string): RootContent[] {

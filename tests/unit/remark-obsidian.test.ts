@@ -1,3 +1,6 @@
+import { mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { unified } from 'unified';
 import remarkParse from 'remark-parse';
@@ -34,6 +37,27 @@ it('turns resolved and unresolved wiki links into semantic nodes', async () => {
 
   expect(JSON.stringify(transformed)).toContain('/repo/knowledge/b-tree');
   expect(JSON.stringify(transformed)).toContain('wiki-link--missing');
+});
+
+it('reloads a file-backed index for every transformation on the same processor', async () => {
+  const directory = await mkdtemp(join(tmpdir(), 'gilgob-remark-index-'));
+  const indexPath = join(directory, 'content-index.json');
+  const processor = unified().use(remarkParse).use(remarkObsidian, { indexPath, base: '/repo' });
+
+  try {
+    await writeFile(indexPath, JSON.stringify({ ...index, documents: [] }));
+    const before = await processor.run(processor.parse('[[B-Tree]]'));
+    expect(JSON.stringify(before)).toContain('wiki-link--missing');
+
+    await writeFile(indexPath, JSON.stringify(index));
+    const after = await processor.run(processor.parse('[[B-Tree]]'));
+    expect(after.children[0]).toMatchObject({
+      type: 'paragraph',
+      children: [{ type: 'link', url: '/repo/knowledge/b-tree' }],
+    });
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
 });
 
 it('resolves relative wiki links when the source file path begins with content/', async () => {
