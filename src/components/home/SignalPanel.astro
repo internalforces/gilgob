@@ -1,0 +1,298 @@
+---
+import { withBase } from '../../config/site';
+import type { NormalizedEntry } from '../../lib/content/queries';
+import type { ContentStats, SkillSignal } from '../../lib/content/stats';
+
+interface Props {
+  activeExplorations: NormalizedEntry[];
+  stats: ContentStats;
+  skillSignal: SkillSignal;
+  connectionsAvailable?: boolean;
+}
+
+const { activeExplorations, stats, skillSignal, connectionsAvailable = true } = Astro.props;
+const skillTotal = skillSignal.mastered + skillSignal.learning + skillSignal.planned;
+---
+
+<section class="signals home-section" aria-labelledby="signals-title">
+  <header class="signals__heading">
+    <h2 id="signals-title">지금의 학습 신호</h2>
+    <p>진행 중인 질문, 명시된 숙련 상태, 축적된 연결을 한눈에 봅니다.</p>
+  </header>
+
+  <div class="signals__grid">
+    <article class="signal-card" data-home-card>
+      <header class="signal-card__header">
+        <h3>현재 탐구 중</h3>
+        <span class="signal-card__dot" aria-hidden="true"></span>
+      </header>
+      {activeExplorations.length > 0 ? (
+        <ul class="signal-card__explorations">
+          {activeExplorations.slice(0, 3).map((entry) => (
+            <li>
+              <a href={withBase(entry.url)}>{entry.data.title}</a>
+              <p>{entry.data.description}</p>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p class="signal-card__empty">현재 공개된 활성 탐구가 없습니다.</p>
+      )}
+      <a class="signal-card__link" href={withBase('/explorations/')}>
+        모든 탐구 보기 <span aria-hidden="true">→</span>
+      </a>
+    </article>
+
+    <article class="signal-card signal-card--skill" data-home-card>
+      <header class="signal-card__header">
+        <h3>스킬 신호</h3>
+        <span>{skillSignal.source === 'skills' ? '스킬 트리 기준' : '지식 문서 상태 기준'}</span>
+      </header>
+      {skillTotal > 0 ? (
+        <>
+          <strong class="signal-card__metric">{skillSignal.percent}<small>%</small></strong>
+          <div
+            class="signal-card__progress"
+            role="progressbar"
+            aria-label="전체 스킬 진척도"
+            aria-valuemin="0"
+            aria-valuemax="100"
+            aria-valuenow={skillSignal.percent}
+            data-progress-bar
+          >
+            <span style={`--progress: ${skillSignal.percent}%`}></span>
+          </div>
+          <dl class="signal-card__status-list">
+            <div><dt>습득</dt><dd>{skillSignal.mastered}</dd></div>
+            <div><dt>학습 중</dt><dd>{skillSignal.learning}</dd></div>
+            <div><dt>예정</dt><dd>{skillSignal.planned}</dd></div>
+          </dl>
+        </>
+      ) : (
+        <p class="signal-card__empty">아직 스킬 신호로 계산할 공개 지식 문서가 없습니다.</p>
+      )}
+      {skillSignal.source === 'knowledge' && skillTotal > 0 && (
+        <p class="signal-card__note">스킬 트리가 준비되기 전까지 공개 지식 문서의 상태를 반영합니다.</p>
+      )}
+    </article>
+
+    <article class="signal-card signal-card--growth" data-home-card>
+      <header class="signal-card__header">
+        <h3>지식 성장</h3>
+        <span>현재 공개 기록</span>
+      </header>
+      <div class="signal-card__growth-layout">
+        <dl class="signal-card__counts">
+          <div><dt>문서</dt><dd>{stats.documents.toLocaleString('ko-KR')}</dd></div>
+          <div>
+            <dt>연결</dt>
+            {connectionsAvailable
+              ? <dd>{stats.connections.toLocaleString('ko-KR')}</dd>
+              : <dd class="signal-card__unavailable">확인 불가</dd>}
+          </div>
+          <div><dt>분야</dt><dd>{stats.categories.toLocaleString('ko-KR')}</dd></div>
+        </dl>
+        <div class="radar-field" aria-hidden="true" data-home-visual>
+          <span class="radar-field__ring radar-field__ring--one"></span>
+          <span class="radar-field__ring radar-field__ring--two"></span>
+          <span class="radar-field__ring radar-field__ring--three"></span>
+          <span class="radar-field__sweep"></span>
+          <span class="radar-field__point"></span>
+        </div>
+      </div>
+      <p class="signal-card__note">월별 이력이 쌓이면 기간별 성장 흐름을 보여줍니다.</p>
+    </article>
+  </div>
+</section>
+
+<style>
+  .home-section { padding-block-start: clamp(7rem, 13vw, 11rem); }
+
+  .signals__heading {
+    margin-block-end: clamp(2rem, 4vw, 3.5rem);
+  }
+
+  .signals__heading h2 {
+    margin: 0;
+    font-size: clamp(2rem, 4vw, 3.5rem);
+    font-weight: 620;
+    letter-spacing: -0.045em;
+    line-height: 1.08;
+  }
+
+  .signals__heading p {
+    max-width: 42rem;
+    margin: 0.8rem 0 0;
+    color: var(--muted);
+  }
+
+  .signals__grid {
+    display: grid;
+    grid-auto-flow: dense;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+  }
+
+  .signal-card {
+    display: flex;
+    min-height: 28rem;
+    flex-direction: column;
+    padding: clamp(1.5rem, 3vw, 2.25rem);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface);
+  }
+
+  .signal-card--growth {
+    overflow: hidden;
+    background:
+      radial-gradient(circle at 100% 0, color-mix(in srgb, var(--primary) 10%, transparent), transparent 15rem),
+      var(--surface);
+  }
+
+  .signal-card__header {
+    display: flex;
+    min-height: 2rem;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-block-end: 2rem;
+  }
+
+  .signal-card__header h3 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 660;
+  }
+
+  .signal-card__header > span:not(.signal-card__dot) {
+    color: var(--muted);
+    font-size: 0.72rem;
+  }
+
+  .signal-card__dot {
+    width: 0.55rem;
+    height: 0.55rem;
+    border-radius: 50%;
+    background: var(--signal);
+    box-shadow: 0 0 0 0.32rem color-mix(in srgb, var(--signal) 15%, transparent);
+  }
+
+  .signal-card__explorations {
+    display: grid;
+    gap: 1.35rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .signal-card__explorations li + li { padding-block-start: 1.35rem; border-block-start: 1px solid var(--line); }
+  .signal-card__explorations a { font-size: 1.18rem; font-weight: 620; letter-spacing: -0.025em; text-decoration: none; }
+  .signal-card__explorations a:hover { color: var(--primary); }
+  .signal-card__explorations p { margin: 0.55rem 0 0; color: var(--muted); font-size: 0.88rem; line-height: 1.65; }
+
+  .signal-card__link {
+    margin-block-start: auto;
+    padding-block-start: 2rem;
+    color: var(--primary);
+    font-size: 0.86rem;
+    font-weight: 650;
+    text-decoration: none;
+  }
+
+  .signal-card__metric {
+    margin-block: 0.3rem 1.4rem;
+    font-family: ui-monospace, 'SFMono-Regular', Consolas, monospace;
+    font-size: clamp(3.75rem, 7vw, 5.75rem);
+    font-weight: 560;
+    letter-spacing: -0.09em;
+    line-height: 1;
+  }
+
+  .signal-card__metric small { margin-inline-start: 0.18em; color: var(--muted); font-size: 0.3em; letter-spacing: 0; }
+
+  .signal-card__progress {
+    height: 0.45rem;
+    overflow: hidden;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--line) 80%, transparent);
+  }
+
+  .signal-card__progress span {
+    display: block;
+    width: var(--progress);
+    height: 100%;
+    border-radius: inherit;
+    background: var(--signal);
+    transform-origin: left;
+  }
+
+  .signal-card__status-list,
+  .signal-card__counts {
+    margin: 1.5rem 0 0;
+  }
+
+  .signal-card__status-list {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+  }
+
+  .signal-card__status-list div { display: grid; gap: 0.2rem; }
+  .signal-card__status-list dt,
+  .signal-card__counts dt { color: var(--muted); font-size: 0.75rem; }
+  .signal-card__status-list dd,
+  .signal-card__counts dd { margin: 0; font-family: ui-monospace, 'SFMono-Regular', Consolas, monospace; font-weight: 650; }
+
+  .signal-card__growth-layout {
+    display: grid;
+    grid-template-columns: minmax(6rem, 0.75fr) minmax(10rem, 1.25fr);
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .signal-card__counts { display: grid; gap: 1rem; }
+  .signal-card__counts div { display: grid; gap: 0.15rem; }
+  .signal-card__counts dd { font-size: 1.75rem; }
+  .signal-card__counts .signal-card__unavailable { font-family: inherit; font-size: 0.78rem; font-weight: 560; }
+
+  .radar-field {
+    position: relative;
+    aspect-ratio: 1;
+    border: 1px solid var(--line);
+    border-radius: 50%;
+    background:
+      linear-gradient(90deg, transparent calc(50% - 0.5px), var(--line) 50%, transparent calc(50% + 0.5px)),
+      linear-gradient(transparent calc(50% - 0.5px), var(--line) 50%, transparent calc(50% + 0.5px));
+  }
+
+  .radar-field__ring,
+  .radar-field__sweep,
+  .radar-field__point { position: absolute; }
+  .radar-field__ring { inset: 16%; border: 1px solid var(--line); border-radius: 50%; }
+  .radar-field__ring--two { inset: 32%; }
+  .radar-field__ring--three { inset: 46%; }
+  .radar-field__sweep { width: 42%; height: 1px; inset-block-start: 50%; inset-inline-start: 50%; background: var(--primary); transform: rotate(-36deg); transform-origin: left; }
+  .radar-field__point { width: 0.5rem; height: 0.5rem; inset-block-start: 25%; inset-inline-start: 66%; border-radius: 50%; background: var(--signal); box-shadow: 0 0 0 0.28rem color-mix(in srgb, var(--signal) 16%, transparent); }
+
+  .signal-card__note,
+  .signal-card__empty {
+    color: var(--muted);
+    font-size: 0.78rem;
+    line-height: 1.6;
+  }
+
+  .signal-card__note { margin: auto 0 0; padding-block-start: 1.5rem; }
+  .signal-card__empty { margin: 0; }
+
+  @media (max-width: 64rem) {
+    .signals__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .signal-card--growth { grid-column: 1 / -1; min-height: 22rem; }
+  }
+
+  @media (max-width: 42rem) {
+    .signals__grid { grid-template-columns: minmax(0, 1fr); }
+    .signal-card--growth { grid-column: auto; }
+    .signal-card { min-height: 24rem; }
+  }
+</style>

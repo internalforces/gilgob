@@ -1,0 +1,239 @@
+---
+import { withBase } from '../../config/site';
+---
+
+<section class="home-hero" aria-labelledby="home-title">
+  <div class="home-hero__copy" data-home-reveal>
+    <p class="home-hero__eyebrow">internalforces의 지식 정원</p>
+    <h1 id="home-title">
+      <span>지식을 연결하고,</span>
+      <span>배움을 축적합니다.</span>
+    </h1>
+    <p class="home-hero__description">
+      개념, 탐구, 프로젝트, 학습 기록을 관계로 엮어 오래 다시 쓸 수 있는 지식으로 가꿉니다.
+    </p>
+  </div>
+
+  <div class="home-hero__field" aria-hidden="true" data-home-visual>
+    <span class="home-hero__orbit home-hero__orbit--outer"></span>
+    <span class="home-hero__orbit home-hero__orbit--middle"></span>
+    <span class="home-hero__orbit home-hero__orbit--inner"></span>
+    <span class="home-hero__beam"></span>
+    <span class="home-hero__node home-hero__node--one"></span>
+    <span class="home-hero__node home-hero__node--two"></span>
+    <span class="home-hero__node home-hero__node--three"></span>
+  </div>
+
+  <a class="home-search" href={withBase('/search/')} data-search-reveal aria-label="통합 검색 열기">
+    <span class="home-search__icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8">
+        <circle cx="11" cy="11" r="6.5"></circle>
+        <path d="m16 16 4 4"></path>
+      </svg>
+    </span>
+    <span class="home-search__copy">
+      <strong>지식 전체에서 검색</strong>
+      <small>제목, 본문, 태그와 분야를 찾아보세요.</small>
+    </span>
+    <kbd><span aria-hidden="true">⌘</span><span class="sr-only">Command</span> K</kbd>
+  </a>
+</section>
+
+<style>
+  .home-hero {
+    position: relative;
+    display: grid;
+    min-height: clamp(37rem, 72vh, 48rem);
+    grid-template-columns: minmax(0, 8fr) minmax(16rem, 4fr);
+    align-items: center;
+    gap: clamp(2rem, 5vw, 6rem);
+    padding-block: clamp(5.5rem, 11vw, 9rem) clamp(4rem, 8vw, 7rem);
+  }
+
+  .home-hero__copy {
+    position: relative;
+    z-index: 2;
+    width: min(100%, 1200px);
+  }
+
+  .home-hero__eyebrow {
+    margin: 0 0 1.4rem;
+    color: var(--primary);
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .home-hero h1 {
+    max-width: 1200px;
+    margin: 0;
+    font-size: clamp(3rem, 6vw, 5.5rem);
+    font-weight: 650;
+    letter-spacing: -0.06em;
+    line-height: 0.98;
+  }
+
+  .home-hero h1 span {
+    display: block;
+    white-space: nowrap;
+  }
+
+  .home-hero__description {
+    max-width: 39rem;
+    margin: clamp(1.5rem, 3vw, 2.25rem) 0 0;
+    color: var(--muted);
+    font-size: clamp(1.05rem, 1.4vw, 1.25rem);
+    line-height: 1.75;
+    text-wrap: pretty;
+  }
+
+  .home-hero__field {
+    position: relative;
+    width: min(100%, 24rem);
+    aspect-ratio: 1;
+    justify-self: end;
+    border: 1px solid color-mix(in srgb, var(--primary) 12%, var(--line));
+    border-radius: 50%;
+    background:
+      linear-gradient(90deg, transparent calc(50% - 0.5px), color-mix(in srgb, var(--line) 72%, transparent) 50%, transparent calc(50% + 0.5px)),
+      linear-gradient(transparent calc(50% - 0.5px), color-mix(in srgb, var(--line) 72%, transparent) 50%, transparent calc(50% + 0.5px)),
+      radial-gradient(circle, color-mix(in srgb, var(--primary) 8%, transparent), transparent 68%);
+    opacity: 0.9;
+  }
+
+  .home-hero__orbit,
+  .home-hero__node,
+  .home-hero__beam {
+    position: absolute;
+  }
+
+  .home-hero__orbit {
+    inset: 11%;
+    border: 1px solid color-mix(in srgb, var(--primary) 20%, var(--line));
+    border-radius: 50%;
+  }
+
+  .home-hero__orbit--middle { inset: 27%; }
+  .home-hero__orbit--inner { inset: 42%; }
+
+  .home-hero__beam {
+    width: 38%;
+    height: 1px;
+    inset-block-start: 50%;
+    inset-inline-start: 50%;
+    background: linear-gradient(90deg, var(--primary), transparent);
+    transform: rotate(-32deg);
+    transform-origin: left;
+  }
+
+  .home-hero__node {
+    width: 0.55rem;
+    height: 0.55rem;
+    border: 2px solid var(--surface);
+    border-radius: 50%;
+    background: var(--primary);
+    box-shadow: 0 0 0 0.3rem color-mix(in srgb, var(--primary) 13%, transparent);
+  }
+
+  .home-hero__node--one { inset-block-start: 25%; inset-inline-start: 64%; }
+  .home-hero__node--two { inset-block-start: 61%; inset-inline-start: 22%; background: var(--signal); }
+  .home-hero__node--three { inset-block-start: 70%; inset-inline-start: 72%; }
+
+  .home-search {
+    position: absolute;
+    z-index: 3;
+    inset-block-end: 0;
+    inset-inline: 0;
+    display: grid;
+    min-height: 6.25rem;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.2rem clamp(1.25rem, 3vw, 2rem);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: color-mix(in srgb, var(--surface) 94%, transparent);
+    box-shadow: 0 1.25rem 3.5rem color-mix(in srgb, var(--ink) 8%, transparent);
+    color: var(--ink);
+    text-decoration: none;
+    backdrop-filter: blur(18px);
+    transition: border-color 180ms ease, transform 180ms ease;
+  }
+
+  .home-search:hover {
+    border-color: color-mix(in srgb, var(--primary) 45%, var(--line));
+    transform: translateY(-2px);
+  }
+
+  .home-search__icon {
+    display: grid;
+    width: 3rem;
+    height: 3rem;
+    place-items: center;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--primary) 9%, var(--surface));
+    color: var(--primary);
+  }
+
+  .home-search__copy {
+    display: grid;
+    gap: 0.1rem;
+  }
+
+  .home-search__copy strong { font-size: 1rem; }
+  .home-search__copy small { color: var(--muted); font-size: 0.875rem; }
+
+  .home-search kbd {
+    padding: 0.35rem 0.55rem;
+    border: 1px solid var(--line);
+    border-block-end-width: 2px;
+    border-radius: 0.4rem;
+    background: var(--canvas);
+    color: var(--muted);
+    font-family: inherit;
+    font-size: 0.78rem;
+    font-weight: 650;
+  }
+
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  @media (max-width: 52rem) {
+    .home-hero {
+      min-height: 41rem;
+      grid-template-columns: minmax(0, 1fr);
+      align-content: center;
+      padding-block-start: 4.5rem;
+    }
+
+    .home-hero__field {
+      position: absolute;
+      z-index: 0;
+      width: min(62vw, 19rem);
+      inset-block-start: 4rem;
+      inset-inline-end: -4rem;
+      opacity: 0.45;
+    }
+
+    .home-hero h1 {
+      font-size: clamp(2.55rem, 10.8vw, 4.75rem);
+      line-height: 1.03;
+    }
+  }
+
+  @media (max-width: 31rem) {
+    .home-hero h1 span { white-space: normal; }
+    .home-search__copy small { display: none; }
+    .home-search kbd { display: none; }
+  }
+</style>
