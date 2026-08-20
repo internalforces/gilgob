@@ -88,3 +88,57 @@ it('falls back to actual Knowledge statuses when the skills file is missing or i
     source: 'knowledge',
   });
 });
+
+it('rejects a skills tree whose leaves omit required Task 10 fields', async () => {
+  const directory = await mkdtemp(join(tmpdir(), 'gilgob-skills-'));
+  const path = join(directory, 'skills.yaml');
+  await writeFile(path, [
+    'fields:',
+    '  - id: database',
+    '    label: 데이터베이스',
+    '    children:',
+    '      - id: b-tree',
+    '        status: mastered',
+  ].join('\n'), 'utf8');
+  const entries = [
+    { kind: 'knowledge', category: 'Database', status: 'growing' },
+  ] satisfies ContentStatsEntry[];
+
+  await expect(loadSkillSignal(entries, [path])).resolves.toEqual({
+    mastered: 0,
+    learning: 1,
+    planned: 0,
+    percent: 50,
+    source: 'knowledge',
+  });
+});
+
+it('continues past an invalid candidate and activates the next valid skills tree', async () => {
+  const directory = await mkdtemp(join(tmpdir(), 'gilgob-skills-'));
+  const invalidPath = join(directory, 'skills.yaml');
+  const validPath = join(directory, 'data-skills.yaml');
+  await Promise.all([
+    writeFile(invalidPath, 'fields: invalid\n', 'utf8'),
+    writeFile(validPath, [
+      'fields:',
+      '  - id: database',
+      '    label: 데이터베이스',
+      '    children:',
+      '      - id: b-tree',
+      '        label: B-Tree',
+      '        status: mastered',
+      '        related: [knowledge/database/b-tree-index]',
+    ].join('\n'), 'utf8'),
+  ]);
+  const entries = [
+    { kind: 'knowledge', category: 'Database', status: 'seed' },
+  ] satisfies ContentStatsEntry[];
+
+  await expect(loadSkillSignal(entries, [invalidPath, validPath])).resolves.toEqual({
+    mastered: 1,
+    learning: 0,
+    planned: 0,
+    percent: 100,
+    source: 'skills',
+  });
+});

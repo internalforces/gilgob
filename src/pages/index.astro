@@ -87,6 +87,7 @@ const featuredProjects = entries.filter((entry) => (
 
 <style>
   .home-dashboard { width: min(calc(100% - 3rem), var(--content-max)); }
+  .home-dashboard :global([data-home-card][data-home-focus-final]) { transition: none !important; }
 
   .github-slot {
     display: grid;

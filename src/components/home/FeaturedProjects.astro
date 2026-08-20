@@ -13,6 +13,15 @@ const statusLabels: Record<string, string> = {
   maintained: '유지 중',
   archived: '보관',
 };
+const categoryLabels: Record<string, string> = {
+  'Computer Science': '컴퓨터 과학',
+  'Data & Mathematics': '데이터와 수학',
+  AI: '인공지능',
+  Finance: '금융',
+  Research: '리서치',
+  Projects: '프로젝트',
+  Learning: '학습',
+};
 ---
 
 <section class="featured-projects home-section" aria-labelledby="featured-projects-title">
@@ -33,8 +42,8 @@ const statusLabels: Record<string, string> = {
           </div>
           <div class="project-card__content">
             <div class="project-card__meta">
-              <span>{entry.data.status ? statusLabels[entry.data.status] ?? entry.data.status : '프로젝트'}</span>
-              <span>{entry.data.category}</span>
+              <span>{entry.data.status ? statusLabels[entry.data.status] ?? '상태 미정' : '상태 미정'}</span>
+              <span>{categoryLabels[entry.data.category] ?? '기타 분야'}</span>
             </div>
             <h3><a href={withBase(entry.url)}>{entry.data.title}</a></h3>
             <p>{entry.data.description}</p>

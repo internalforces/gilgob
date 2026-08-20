@@ -1,6 +1,8 @@
 import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { load } from 'js-yaml';
+import { collectSkillNodes, parseSkillTreeDocument } from '../skills/schema';
+import type { SkillStatus } from '../skills/schema';
 import type { ContentKind } from './types';
 
 export interface ContentStatsEntry {
@@ -25,8 +27,6 @@ export interface SkillSignal {
   source: 'skills' | 'knowledge';
 }
 
-type SkillStatus = 'mastered' | 'learning' | 'planned';
-
 export const DEFAULT_SKILL_PATHS = [
   resolve('content/skills.yaml'),
   resolve('content/data/skills.yaml'),
@@ -50,12 +50,13 @@ export async function loadSkillSignal(
   for (const path of paths) {
     try {
       const parsed = load(await readFile(path, 'utf8'));
-      const statuses = collectSkillStatuses(parsed);
-      if (statuses !== null) return summarizeStatuses(statuses, 'skills');
-      return fallbackSkillSignal(entries);
+      const tree = parseSkillTreeDocument(parsed);
+      if (tree === null) continue;
+      const statuses = collectSkillNodes(tree.fields).map((node) => node.status);
+      return summarizeStatuses(statuses, 'skills');
     } catch (error) {
       if (isMissingFile(error)) continue;
-      return fallbackSkillSignal(entries);
+      continue;
     }
   }
 
@@ -76,25 +77,6 @@ function fallbackSkillSignal(entries: ContentStatsEntry[]): SkillSignal {
   return summarizeStatuses(statuses, 'knowledge');
 }
 
-function collectSkillStatuses(value: unknown): SkillStatus[] | null {
-  if (!isRecord(value) || !Array.isArray(value.fields)) return null;
-
-  const statuses: SkillStatus[] = [];
-  const visit = (node: unknown): boolean => {
-    if (!isRecord(node)) return false;
-    if (node.children !== undefined) {
-      if (node.status !== undefined || !Array.isArray(node.children) || node.children.length === 0) return false;
-      return node.children.every(visit);
-    }
-    if (typeof node.status !== 'string' || !isSkillStatus(node.status)) return false;
-    statuses.push(node.status);
-    return true;
-  };
-
-  if (!value.fields.every(visit) || statuses.length === 0) return null;
-  return statuses;
-}
-
 function summarizeStatuses(
   statuses: SkillStatus[],
   source: SkillSignal['source'],
@@ -107,14 +89,6 @@ function summarizeStatuses(
     : Math.round(((counts.mastered + counts.learning * 0.5) / total) * 100);
 
   return { ...counts, percent, source };
-}
-
-function isSkillStatus(value: string): value is SkillStatus {
-  return value === 'mastered' || value === 'learning' || value === 'planned';
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null;
 }
 
 function isMissingFile(error: unknown): error is NodeJS.ErrnoException {

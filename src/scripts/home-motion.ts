@@ -4,19 +4,31 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 gsap.registerPlugin(ScrollTrigger);
 
 let homeContext: gsap.Context | undefined;
+let homeEvents: AbortController | undefined;
 
 function setupHomeMotion(): void {
   homeContext?.revert();
   homeContext = undefined;
+  homeEvents?.abort();
+  homeEvents = undefined;
 
   const root = document.querySelector<HTMLElement>('[data-home-dashboard]');
   if (root === null || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  homeEvents = new AbortController();
+  const { signal } = homeEvents;
 
   homeContext = gsap.context(() => {
     const intro = gsap.timeline({ defaults: { duration: 0.72, ease: 'power3.out' } });
     intro
-      .from('[data-home-reveal]', { autoAlpha: 0, y: 18 }, 0)
-      .from('[data-search-reveal]', { autoAlpha: 0, y: 12 }, 0.16);
+      .from('[data-home-reveal]', { opacity: 0.55, y: 18 }, 0)
+      .from('[data-search-reveal]', { opacity: 0.68, y: 12 }, 0.16);
+
+    root.querySelector<HTMLElement>('[data-search-reveal]')?.addEventListener('focusin', (event) => {
+      const target = event.currentTarget;
+      if (!(target instanceof HTMLElement)) return;
+      gsap.killTweensOf(target);
+      gsap.set(target, { opacity: 1, y: 0 });
+    }, { signal });
 
     gsap.utils.toArray<HTMLElement>('[data-progress-bar]').forEach((progress) => {
       const fill = progress.firstElementChild;
@@ -36,10 +48,14 @@ function setupHomeMotion(): void {
     });
 
     gsap.utils.toArray<HTMLElement>('[data-home-card]').forEach((card) => {
-      gsap.from(card, {
-        autoAlpha: 0,
+      const animation = gsap.fromTo(card, {
+        opacity: 0.62,
         y: 16,
         scale: 0.99,
+      }, {
+        opacity: 1,
+        y: 0,
+        scale: 1,
         duration: 0.65,
         ease: 'power2.out',
         scrollTrigger: {
@@ -48,6 +64,19 @@ function setupHomeMotion(): void {
           once: true,
         },
       });
+
+      card.addEventListener('focusin', () => {
+        card.setAttribute('data-home-focus-final', '');
+        animation.progress(1);
+        animation.scrollTrigger?.kill();
+        animation.kill();
+        gsap.set(card, { clearProps: 'opacity,transform' });
+      }, { signal });
+      card.addEventListener('focusout', (event) => {
+        const nextTarget = event.relatedTarget;
+        if (nextTarget instanceof Node && card.contains(nextTarget)) return;
+        card.removeAttribute('data-home-focus-final');
+      }, { signal });
     });
 
     gsap.utils.toArray<HTMLElement>('[data-home-visual]').forEach((visual) => {
@@ -69,6 +98,11 @@ function setupHomeMotion(): void {
 function cleanupHomeMotion(): void {
   homeContext?.revert();
   homeContext = undefined;
+  homeEvents?.abort();
+  homeEvents = undefined;
+  document.querySelectorAll('[data-home-focus-final]').forEach((card) => {
+    card.removeAttribute('data-home-focus-final');
+  });
   ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
 }
 

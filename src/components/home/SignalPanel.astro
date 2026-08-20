@@ -12,6 +12,9 @@ interface Props {
 
 const { activeExplorations, stats, skillSignal, connectionsAvailable = true } = Astro.props;
 const skillTotal = skillSignal.mastered + skillSignal.learning + skillSignal.planned;
+const skillProgressLabel = skillSignal.source === 'skills'
+  ? '스킬 트리 기준 전체 스킬 진척도'
+  : '공개 지식 문서 상태 기반 스킬 신호';
 ---
 
 <section class="signals home-section" aria-labelledby="signals-title">
@@ -54,7 +57,7 @@ const skillTotal = skillSignal.mastered + skillSignal.learning + skillSignal.pla
           <div
             class="signal-card__progress"
             role="progressbar"
-            aria-label="전체 스킬 진척도"
+            aria-label={skillProgressLabel}
             aria-valuemin="0"
             aria-valuemax="100"
             aria-valuenow={skillSignal.percent}
