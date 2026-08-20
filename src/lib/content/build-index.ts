@@ -100,6 +100,7 @@ function validateUniqueNames(documents: ContentRecord[]): void {
   const owners = new Map<string, { documentId: string; kind: 'title' | 'alias' }>();
 
   for (const document of documents) {
+    assertUnique(document.aliases, (alias) => normalizeName(alias), '중복 별칭');
     const names = [
       { value: document.title, kind: 'title' as const },
       ...document.aliases.map((value) => ({ value, kind: 'alias' as const })),
@@ -112,7 +113,10 @@ function validateUniqueNames(documents: ContentRecord[]): void {
         owners.set(key, { documentId: document.id, kind: name.kind });
         continue;
       }
-      if (owner.documentId === document.id) continue;
+      if (owner.documentId === document.id) {
+        // Per-document alias uniqueness is checked above; this is a title matching its own alias.
+        continue;
+      }
 
       const label = owner.kind === name.kind
         ? name.kind === 'title' ? '중복 제목' : '중복 별칭'

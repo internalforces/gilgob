@@ -64,6 +64,16 @@ describe('content index', () => {
     await expect(buildContentIndex('tests/fixtures/duplicate-alias')).rejects.toThrow('중복 별칭');
   });
 
+  it('fails on NFC, trim, and case-equivalent aliases within one document', async () => {
+    await expect(buildContentIndex('tests/fixtures/duplicate-alias-single-document')).rejects.toThrow('중복 별칭');
+  });
+
+  it('allows a title to match its own alias because the owner is unchanged', async () => {
+    await expect(buildContentIndex('tests/fixtures/self-title-alias')).resolves.toMatchObject({
+      documents: [{ title: 'Own Name', aliases: [' own name '] }],
+    });
+  });
+
   it('fails on duplicate slugs and titles before deriving relations', async () => {
     await expect(buildContentIndex('tests/fixtures/duplicate-slug')).rejects.toThrow('중복 슬러그');
     await expect(buildContentIndex('tests/fixtures/duplicate-title')).rejects.toThrow('중복 제목');
