@@ -1,4 +1,5 @@
 import mdx from '@astrojs/mdx';
+import { unified } from '@astrojs/markdown-remark';
 import preact from '@astrojs/preact';
 import sitemap from '@astrojs/sitemap';
 import { defineConfig } from 'astro/config';
@@ -10,6 +11,6 @@ export default defineConfig({
   output: 'static',
   integrations: [preact(), mdx(), sitemap()],
   markdown: {
-    remarkPlugins: [],
+    processor: unified({ remarkPlugins: [] }),
   },
 });
