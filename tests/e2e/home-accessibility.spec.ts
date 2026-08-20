@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import AxeBuilder from '@axe-core/playwright';
 
 const homeUrl = process.env.PLAYWRIGHT_TEST_BASE_URL
   ?? 'http://127.0.0.1:4321/astro-astro-personal-knowledge-base-digital/';
@@ -46,6 +47,24 @@ test('home exposes YAML skill progress and Korean project metadata', async ({ pa
   await expect(metadata).toContainText('구축 중');
   await expect(metadata).toContainText('프로젝트');
   await expect(metadata).not.toContainText('Projects');
+});
+
+test('home keeps an accessible GitHub empty state when build credentials are absent', async ({ page }) => {
+  await page.goto(homeUrl, { waitUntil: 'networkidle' });
+
+  const section = page.locator('[data-github-activity]');
+  await expect(section.getByRole('heading', { name: 'GitHub 활동' })).toBeVisible();
+  await expect(section.getByRole('status')).toHaveText('GitHub 통계를 불러오지 못했습니다.');
+  await expect(section.getByRole('link', { name: /GitHub 프로필 보기/ })).toHaveAttribute(
+    'href',
+    'https://github.com/internalforces',
+  );
+
+  for (const viewport of [{ width: 1280, height: 900 }, { width: 390, height: 844 }]) {
+    await page.setViewportSize(viewport);
+    const results = await new AxeBuilder({ page }).include('[data-github-activity]').analyze();
+    expect(results.violations).toEqual([]);
+  }
 });
 
 test.describe('reduced motion', () => {

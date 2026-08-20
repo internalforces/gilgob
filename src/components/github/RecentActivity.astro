@@ -1,0 +1,65 @@
+---
+import { formatRelativeDate } from '../../lib/github/fetch-github';
+import type { GitHubActivity } from '../../lib/github/types';
+
+interface Props {
+  events: GitHubActivity[];
+  referenceTime: string;
+}
+
+const { events, referenceTime } = Astro.props;
+const reference = new Date(referenceTime);
+const absoluteDate = (createdAt: string) => new Intl.DateTimeFormat('ko-KR', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+  hour: 'numeric',
+  minute: '2-digit',
+  timeZone: 'Asia/Seoul',
+}).format(new Date(createdAt));
+---
+
+<section class="recent-activity" aria-labelledby="recent-activity-title">
+  <header>
+    <h3 id="recent-activity-title">최근 공개 활동</h3>
+    <p>GitHub 이벤트 API가 제공하는 최근 30일 내 활동입니다.</p>
+  </header>
+
+  {events.length > 0 ? (
+    <ol>
+      {events.map((event) => (
+        <li>
+          <a href={event.url} target="_blank" rel="noreferrer">
+            <span class="recent-activity__signal" aria-hidden="true"></span>
+            <span class="recent-activity__content">
+              <strong>{event.repository}</strong>
+              <span>{event.label}</span>
+            </span>
+            <time datetime={event.createdAt} title={absoluteDate(event.createdAt)}>
+              {formatRelativeDate(event.createdAt, reference)}
+            </time>
+          </a>
+        </li>
+      ))}
+    </ol>
+  ) : (
+    <p class="recent-activity__empty">표시할 최근 공개 활동이 없습니다.</p>
+  )}
+</section>
+
+<style>
+  .recent-activity { min-width: 0; padding: clamp(1.4rem, 3vw, 2rem); border: 1px solid color-mix(in srgb, var(--surface) 14%, transparent); border-radius: var(--radius); background: color-mix(in srgb, var(--surface) 7%, transparent); color: var(--surface); }
+  .recent-activity header { padding-block-end: 1.15rem; border-block-end: 1px solid color-mix(in srgb, var(--surface) 14%, transparent); }
+  .recent-activity h3 { margin: 0; font-size: 1.05rem; font-weight: 650; letter-spacing: -0.025em; }
+  .recent-activity header p { margin: 0.35rem 0 0; color: color-mix(in srgb, var(--surface) 58%, transparent); font-size: 0.72rem; }
+  .recent-activity ol { margin: 0; padding: 0; list-style: none; }
+  .recent-activity li + li { border-block-start: 1px solid color-mix(in srgb, var(--surface) 11%, transparent); }
+  .recent-activity a { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 0.8rem; padding-block: 0.9rem; color: inherit; text-decoration: none; transition: color 180ms ease, transform 180ms ease; }
+  .recent-activity a:hover { color: color-mix(in srgb, var(--signal) 82%, var(--surface)); transform: translateX(2px); }
+  .recent-activity__signal { width: 0.4rem; height: 0.4rem; border-radius: 50%; background: var(--signal); }
+  .recent-activity__content { display: grid; min-width: 0; }
+  .recent-activity__content strong { overflow: hidden; font-size: 0.75rem; font-weight: 650; text-overflow: ellipsis; white-space: nowrap; }
+  .recent-activity__content > span { color: color-mix(in srgb, var(--surface) 62%, transparent); font-size: 0.72rem; }
+  .recent-activity time { color: color-mix(in srgb, var(--surface) 48%, transparent); font-size: 0.66rem; white-space: nowrap; }
+  .recent-activity__empty { min-height: 9rem; display: grid; place-items: center; margin: 0; color: color-mix(in srgb, var(--surface) 62%, transparent); font-size: 0.8rem; text-align: center; }
+</style>
