@@ -1,17 +1,22 @@
+import { randomUUID } from 'node:crypto';
 import { readFileSync } from 'node:fs';
-import { mkdir, rename, writeFile } from 'node:fs/promises';
-import { dirname, join } from 'node:path';
+import { mkdir, rename, rm, writeFile } from 'node:fs/promises';
+import { basename, dirname, join } from 'node:path';
 import type { ContentIndex } from './types';
 
 export const DEFAULT_CONTENT_INDEX_PATH = '.cache/content-index.json';
 
 export async function writeContentIndex(index: ContentIndex, path: string): Promise<void> {
   const cacheDirectory = dirname(path);
-  const temporaryPath = join(cacheDirectory, 'content-index.tmp.json');
+  const temporaryPath = join(cacheDirectory, `.${basename(path)}.${process.pid}.${randomUUID()}.tmp`);
 
   await mkdir(cacheDirectory, { recursive: true });
-  await writeFile(temporaryPath, `${JSON.stringify(index, null, 2)}\n`, 'utf8');
-  await rename(temporaryPath, path);
+  try {
+    await writeFile(temporaryPath, `${JSON.stringify(index, null, 2)}\n`, 'utf8');
+    await rename(temporaryPath, path);
+  } finally {
+    await rm(temporaryPath, { force: true });
+  }
 }
 
 export function readContentIndex(path = DEFAULT_CONTENT_INDEX_PATH): ContentIndex {

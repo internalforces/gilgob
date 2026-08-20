@@ -82,13 +82,8 @@ async function parseDocument(contentRoot: string, sourcePath: string): Promise<P
 }
 
 function validateUniqueDocuments(documents: ContentRecord[]): void {
-  assertUnique(documents, (document) => document.id, '중복 슬러그');
-  assertUnique(documents, (document) => normalizeName(document.title), '중복 제목');
-
-  const aliases = documents.flatMap((document) =>
-    document.aliases.map((alias) => ({ ...document, alias: normalizeName(alias) })),
-  );
-  assertUnique(aliases, (document) => document.alias, '중복 별칭');
+  assertUnique(documents, (document) => normalizeName(document.slug), '중복 슬러그');
+  validateUniqueNames(documents);
 }
 
 function assertUnique<T>(items: T[], keyFor: (item: T) => string, label: string): void {
@@ -98,6 +93,32 @@ function assertUnique<T>(items: T[], keyFor: (item: T) => string, label: string)
     const key = keyFor(item);
     if (seen.has(key)) throw new Error(`[content] ${label}: ${key}`);
     seen.add(key);
+  }
+}
+
+function validateUniqueNames(documents: ContentRecord[]): void {
+  const owners = new Map<string, { documentId: string; kind: 'title' | 'alias' }>();
+
+  for (const document of documents) {
+    const names = [
+      { value: document.title, kind: 'title' as const },
+      ...document.aliases.map((value) => ({ value, kind: 'alias' as const })),
+    ];
+
+    for (const name of names) {
+      const key = normalizeName(name.value);
+      const owner = owners.get(key);
+      if (owner === undefined) {
+        owners.set(key, { documentId: document.id, kind: name.kind });
+        continue;
+      }
+      if (owner.documentId === document.id) continue;
+
+      const label = owner.kind === name.kind
+        ? name.kind === 'title' ? '중복 제목' : '중복 별칭'
+        : '중복 제목 또는 별칭';
+      throw new Error(`[content] ${label}: ${key}`);
+    }
   }
 }
 

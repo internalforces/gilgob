@@ -5,9 +5,11 @@ import { pathToFileURL } from 'node:url';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { AstroIntegration } from 'astro';
 import type { ViteDevServer } from 'vite';
+import * as contentBuilder from '../../src/lib/content/build-index';
 import { buildContentIndex } from '../../src/lib/content/build-index';
 import { readContentIndex, writeContentIndex } from '../../src/lib/content/index-store';
 import { contentIndexIntegration } from '../../src/integrations/content-index';
+import type { ContentIndex } from '../../src/lib/content/types';
 
 type ConfigSetupOptions = Parameters<NonNullable<AstroIntegration['hooks']['astro:config:setup']>>[0];
 type ConfigUpdate = Parameters<ConfigSetupOptions['updateConfig']>[0];
@@ -65,6 +67,14 @@ describe('content index', () => {
   it('fails on duplicate slugs and titles before deriving relations', async () => {
     await expect(buildContentIndex('tests/fixtures/duplicate-slug')).rejects.toThrow('중복 슬러그');
     await expect(buildContentIndex('tests/fixtures/duplicate-title')).rejects.toThrow('중복 제목');
+  });
+
+  it('fails when different collection kinds use the same normalized slug', async () => {
+    await expect(buildContentIndex('tests/fixtures/duplicate-slug-cross-kind')).rejects.toThrow('중복 슬러그');
+  });
+
+  it('fails when one document title collides with another document alias', async () => {
+    await expect(buildContentIndex('tests/fixtures/title-alias-collision')).rejects.toThrow('중복 제목 또는 별칭');
   });
 
   it('warns for unresolved links and missing attachments without failing the build', async () => {
@@ -168,4 +178,65 @@ describe('content index integration', () => {
       await rm(directory, { recursive: true, force: true });
     }
   });
+
+  it('serializes overlapping watcher rebuilds and preserves the last event', async () => {
+    const directory = await mkdtemp(join(tmpdir(), 'gilgob-overlap-'));
+    const contentRoot = join(directory, 'content');
+    const cachePath = join(directory, '.cache/content-index.json');
+    const listeners = new Map<string, (path: string) => void>();
+    let vitePlugin: CapturedVitePlugin | undefined;
+    let calls = 0;
+    let active = 0;
+    let maxActive = 0;
+    let releaseFirst: (() => void) | undefined;
+    const firstBuildBlocked = new Promise<void>((resolve) => { releaseFirst = resolve; });
+    vi.spyOn(contentBuilder, 'buildContentIndex').mockImplementation(async () => {
+      calls += 1;
+      const snapshot = calls;
+      active += 1;
+      maxActive = Math.max(maxActive, active);
+      if (snapshot === 1) await firstBuildBlocked;
+      active -= 1;
+      return indexSnapshot(`snapshot-${snapshot}`);
+    });
+    const setup = contentIndexIntegration().hooks['astro:config:setup'];
+
+    try {
+      await cp('tests/fixtures/content-index', contentRoot, { recursive: true });
+      await setup?.({
+        config: { root: pathToFileURL(`${directory}/`) },
+        logger: { error: () => undefined },
+        updateConfig: (config: ConfigUpdate) => {
+          vitePlugin = config.vite?.plugins?.[0] as unknown as CapturedVitePlugin;
+          return config as never;
+        },
+      } as unknown as ConfigSetupOptions);
+      vitePlugin?.configureServer?.({
+        watcher: {
+          on(event: string, listener: (path: string) => void) {
+            listeners.set(event, listener);
+            return this;
+          },
+        },
+        moduleGraph: { invalidateAll: () => undefined },
+      } as unknown as ViteDevServer);
+
+      const changedPath = join(contentRoot, 'knowledge/avl-tree.md');
+      listeners.get('add')?.(changedPath);
+      await vi.waitFor(() => expect(calls).toBe(1));
+      listeners.get('change')?.(changedPath);
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      releaseFirst?.();
+
+      await vi.waitFor(() => expect(calls).toBe(2));
+      await vi.waitFor(() => expect(readContentIndex(cachePath).generatedAt).toBe('snapshot-2'));
+      expect(maxActive).toBe(1);
+    } finally {
+      await rm(directory, { recursive: true, force: true });
+    }
+  });
 });
+
+function indexSnapshot(generatedAt: string): ContentIndex {
+  return { documents: [], graph: { nodes: [], edges: [] }, generatedAt };
+}

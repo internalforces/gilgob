@@ -16,21 +16,46 @@ export function contentIndexIntegration(): AstroIntegration {
         const contentRoot = join(projectRoot, 'content');
         const indexPath = join(projectRoot, DEFAULT_CONTENT_INDEX_PATH);
         let rebuildTimer: ReturnType<typeof setTimeout> | undefined;
+        let rebuildRunning = false;
+        let rerunRequested = false;
+        let generationQueue = Promise.resolve();
         const generate = async () => {
           const index = await buildContentIndex(contentRoot);
           await writeContentIndex(index, indexPath);
         };
+        const enqueueGeneration = () => {
+          const queuedGeneration = generationQueue.then(generate);
+          generationQueue = queuedGeneration.catch(() => undefined);
+          return queuedGeneration;
+        };
 
         const plugin: Plugin = {
           name: 'gilgob-content-index',
-          buildStart: generate,
+          buildStart: enqueueGeneration,
           configureServer(server) {
+            const rebuild = async () => {
+              if (rebuildRunning) {
+                rerunRequested = true;
+                return;
+              }
+
+              rebuildRunning = true;
+              try {
+                do {
+                  rerunRequested = false;
+                  await regenerateForDevelopment(enqueueGeneration, server, logger);
+                } while (rerunRequested);
+              } finally {
+                rebuildRunning = false;
+              }
+            };
+
             const scheduleRebuild = (changedPath: string) => {
               if (!isWithinContent(changedPath, projectRoot, contentRoot)) return;
               if (rebuildTimer !== undefined) clearTimeout(rebuildTimer);
               rebuildTimer = setTimeout(() => {
                 rebuildTimer = undefined;
-                void regenerateForDevelopment(generate, server, logger);
+                void rebuild();
               }, REBUILD_DELAY_MS);
             };
 
