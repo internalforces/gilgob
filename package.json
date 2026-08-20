@@ -1,0 +1,52 @@
+{
+  "name": "gilgob",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "dev": "astro dev",
+    "build": "astro check && astro build && node scripts/build-search.mjs",
+    "preview": "astro preview",
+    "check": "astro check",
+    "test:watch": "vitest",
+    "test:e2e": "playwright test",
+    "verify": "npm run check && npm run test && npm run build"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "private": true,
+  "dependencies": {
+    "@astrojs/markdown-remark": "^7.2.4",
+    "@astrojs/mdx": "^7.0.7",
+    "@astrojs/preact": "^6.0.4",
+    "@astrojs/rss": "^4.0.19",
+    "@astrojs/sitemap": "^3.7.3",
+    "@pagefind/default-ui": "^1.5.2",
+    "astro": "^7.2.4",
+    "cytoscape": "^3.34.1",
+    "fast-glob": "^3.3.3",
+    "gray-matter": "^4.0.3",
+    "gsap": "^3.15.0",
+    "js-yaml": "^5.3.0",
+    "pagefind": "^1.5.2",
+    "preact": "^10.29.8",
+    "remark-parse": "^11.0.0",
+    "unified": "^11.0.5",
+    "unist-util-visit": "^5.1.0"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.10",
+    "@axe-core/playwright": "^4.13.0",
+    "@playwright/test": "^1.62.1",
+    "@types/cytoscape": "^3.21.9",
+    "@types/js-yaml": "^4.0.9",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.11"
+  }
+}
