@@ -1,6 +1,7 @@
 ---
 import SiteFooter from '../components/navigation/SiteFooter.astro';
 import SiteHeader from '../components/navigation/SiteHeader.astro';
+import SearchDialog from '../components/search/SearchDialog';
 import { SITE_CONFIG, withBase } from '../config/site';
 import '@fontsource-variable/geist';
 import '../styles/global.css';
@@ -44,6 +45,7 @@ const socialImage = image
   <body>
     <a class="skip-link" href="#main-content">본문 바로가기</a>
     <SiteHeader />
+    <SearchDialog client:load base={SITE_CONFIG.base} />
     <main id="main-content" class="site-main" tabindex="-1">
       <slot />
     </main>

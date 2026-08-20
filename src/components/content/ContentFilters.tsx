@@ -70,7 +70,7 @@ export default function ContentFilters({ entries, initialSearchParams }: Props) 
   };
 
   return (
-    <section class="content-filters" aria-label="콘텐츠 필터">
+    <section class="content-filters" aria-label="콘텐츠 필터" data-pagefind-ignore>
       <div class="content-filters__search">
         <label for={searchId}>목록 검색</label>
         <input id={searchId} type="search" name="q" value={filters.q} onInput={update('q')} placeholder="제목, 설명, 태그 검색" />

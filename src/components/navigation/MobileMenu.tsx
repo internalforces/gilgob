@@ -9,11 +9,10 @@ interface NavigationItem {
 
 interface Props {
   items: NavigationItem[];
-  searchHref: string;
   githubHref: string;
 }
 
-export default function MobileMenu({ items, searchHref, githubHref }: Props) {
+export default function MobileMenu({ items, githubHref }: Props) {
   const [isOpen, setIsOpen] = useState(false);
   const menuId = useId();
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -64,9 +63,16 @@ export default function MobileMenu({ items, searchHref, githubHref }: Props) {
           ))}
         </ul>
         <div class="mobile-menu__actions">
-          <a class="button-link" href={searchHref} onClick={closeAndRestoreFocus} aria-label="검색 열기">
+          <button
+            class="button-link"
+            type="button"
+            data-search-trigger
+            aria-label="검색 열기"
+            aria-haspopup="dialog"
+            onClick={() => setIsOpen(false)}
+          >
             검색
-          </a>
+          </button>
           <a
             class="button-link"
             href={githubHref}

@@ -105,4 +105,15 @@ status: seed
 
     expect(html.indexOf('<div class="prose">')).toBeLessThan(html.indexOf('reading-toc--mobile'));
   });
+
+  it('emits Pagefind result metadata and ignores repeated reading chrome', async () => {
+    const html = await readFile(`${basePath}/knowledge/database/b-tree-index/index.html`, 'utf8');
+
+    expect(html).toContain('data-pagefind-meta="title"');
+    expect(html).toContain('data-pagefind-meta="description"');
+    expect(html).toContain('data-pagefind-meta="type"');
+    expect(html).toContain('data-pagefind-meta="category"');
+    expect(html).toContain('data-pagefind-meta="tags:B-Tree, Index, Oracle"');
+    expect(html.match(/data-pagefind-ignore/g)?.length).toBeGreaterThanOrEqual(6);
+  });
 });
