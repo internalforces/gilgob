@@ -3,6 +3,13 @@ import { z } from 'astro/zod';
 export const skillStatusSchema = z.enum(['mastered', 'learning', 'planned']);
 export type SkillStatus = z.infer<typeof skillStatusSchema>;
 
+export interface SkillProgress {
+  mastered: number;
+  learning: number;
+  planned: number;
+  percent: number;
+}
+
 export interface SkillNode {
   id: string;
   label: string;
@@ -18,6 +25,10 @@ export interface SkillField {
 
 export interface SkillTreeDocument {
   fields: SkillField[];
+}
+
+export interface SkillTreeData extends SkillTreeDocument {
+  progress: SkillProgress;
 }
 
 export const skillNodeSchema: z.ZodType<SkillNode> = z.object({

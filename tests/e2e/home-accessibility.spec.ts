@@ -38,10 +38,10 @@ test('home card links remain keyboard focusable before their scroll reveal', asy
   expect(focusedState).toBe(true);
 });
 
-test('home exposes source-accurate progress and Korean project metadata', async ({ page }) => {
+test('home exposes YAML skill progress and Korean project metadata', async ({ page }) => {
   await page.goto(homeUrl, { waitUntil: 'networkidle' });
 
-  await expect(page.getByRole('progressbar', { name: '공개 지식 문서 상태 기반 스킬 신호' })).toBeAttached();
+  await expect(page.getByRole('progressbar', { name: '스킬 트리 기준 전체 스킬 진척도' })).toBeAttached();
   const metadata = page.locator('.project-card__meta').first();
   await expect(metadata).toContainText('구축 중');
   await expect(metadata).toContainText('프로젝트');

@@ -1,0 +1,53 @@
+fields:
+  - id: computer-science
+    label: 컴퓨터 과학
+    children:
+      - id: database
+        label: 데이터베이스
+        children:
+          - id: b-tree-index
+            label: B-Tree 인덱스
+            status: mastered
+            related:
+              - knowledge/database/b-tree-index
+          - id: disk-index-design
+            label: 디스크 기반 인덱스 설계
+            status: mastered
+            related:
+              - knowledge/database/b-tree-index
+          - id: query-optimization
+            label: 쿼리 최적화
+            status: learning
+            related: []
+      - id: algorithms
+        label: 알고리즘
+        children:
+          - id: graph-traversal
+            label: 그래프 순회
+            status: planned
+            related: []
+  - id: data-mathematics
+    label: 데이터와 수학
+    children:
+      - id: statistics
+        label: 통계적 추론
+        status: learning
+        related: []
+      - id: linear-algebra
+        label: 선형대수
+        status: planned
+        related: []
+  - id: artificial-intelligence
+    label: 인공지능
+    children:
+      - id: language-model-evaluation
+        label: 언어 모델 평가
+        status: learning
+        related: []
+  - id: research
+    label: 연구
+    children:
+      - id: source-synthesis
+        label: 출처 비교와 지식 종합
+        status: learning
+        related: []

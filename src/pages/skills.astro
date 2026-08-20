@@ -1,0 +1,285 @@
+---
+import SkillTree from '../components/skills/SkillTree';
+import { withBase } from '../config/site';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { readContentIndex } from '../lib/content/index-store';
+import { loadSkills } from '../lib/skills/load-skills';
+
+const index = readContentIndex();
+const skills = await loadSkills('content/data/skills.yaml', index);
+const relatedDocuments = Object.fromEntries(index.documents
+  .filter((document) => document.kind === 'knowledge' && !document.draft)
+  .map((document) => [document.id, {
+    id: document.id,
+    title: document.title,
+    href: withBase(document.url),
+  }]));
+---
+
+<BaseLayout
+  title="스킬 트리"
+  description="명시한 학습 상태와 연결된 지식 문서로 현재의 기술 지도를 살펴봅니다."
+>
+  <div class="skills-page site-container">
+    <header class="skills-hero">
+      <div class="skills-hero__copy">
+        <h1>배움의 지도를 펼칩니다.</h1>
+        <p>
+          알고 있는 것과 배우는 중인 것, 다음에 탐구할 것을 한 지도에서 이어 봅니다.
+          진척은 문서 수가 아닌 직접 기록한 상태로 계산합니다.
+        </p>
+      </div>
+      <div class="skills-hero__radar" aria-hidden="true">
+        <span></span><span></span><span></span><i></i>
+      </div>
+    </header>
+
+    <SkillTree
+      client:load
+      fields={skills.fields}
+      progress={skills.progress}
+      relatedDocuments={relatedDocuments}
+    />
+
+    <nav class="skills-action" aria-label="스킬 트리 다음 탐색">
+      <div>
+        <strong>기술 뒤의 맥락을 읽어 보세요.</strong>
+        <p>정리된 글에서 개념과 선택의 근거를 더 깊게 살펴볼 수 있습니다.</p>
+      </div>
+      <a href={withBase('/knowledge/')}>전체 지식 보기 <span aria-hidden="true">→</span></a>
+    </nav>
+  </div>
+</BaseLayout>
+
+<style is:global>
+  .skills-page {
+    padding-block: clamp(4.5rem, 9vw, 8rem) clamp(6rem, 11vw, 10rem);
+  }
+
+  .skills-hero {
+    position: relative;
+    display: grid;
+    min-height: clamp(25rem, 54vw, 38rem);
+    grid-template-columns: minmax(0, 8fr) minmax(14rem, 4fr);
+    align-items: center;
+    gap: clamp(2rem, 6vw, 6rem);
+    overflow: hidden;
+    border-block-end: 1px solid var(--line);
+  }
+
+  .skills-hero__copy { position: relative; z-index: 1; }
+
+  .skills-hero h1 {
+    width: min(100%, 1200px);
+    margin: 0;
+    font-size: clamp(3rem, 6vw, 5.5rem);
+    font-weight: 650;
+    letter-spacing: -0.055em;
+    line-height: 0.98;
+    text-wrap: balance;
+  }
+
+  .skills-hero p {
+    max-width: 42rem;
+    margin: 2rem 0 0;
+    color: var(--muted);
+    font-size: clamp(1rem, 1.6vw, 1.18rem);
+    line-height: 1.75;
+  }
+
+  .skills-hero__radar {
+    position: relative;
+    width: min(26vw, 19rem);
+    min-width: 14rem;
+    aspect-ratio: 1;
+    justify-self: end;
+    border: 1px solid color-mix(in srgb, var(--primary) 22%, var(--line));
+    border-radius: 50%;
+    background:
+      linear-gradient(90deg, transparent calc(50% - .5px), var(--line) 50%, transparent calc(50% + .5px)),
+      linear-gradient(transparent calc(50% - .5px), var(--line) 50%, transparent calc(50% + .5px)),
+      radial-gradient(circle, color-mix(in srgb, var(--primary) 7%, transparent), transparent 66%);
+  }
+
+  .skills-hero__radar span {
+    position: absolute;
+    inset: 16%;
+    border: 1px solid var(--line);
+    border-radius: 50%;
+  }
+
+  .skills-hero__radar span:nth-child(2) { inset: 31%; }
+  .skills-hero__radar span:nth-child(3) { inset: 46%; }
+  .skills-hero__radar i {
+    position: absolute;
+    width: .6rem;
+    height: .6rem;
+    inset-block-start: 24%;
+    inset-inline-start: 69%;
+    border-radius: 50%;
+    background: var(--signal);
+    box-shadow: 0 0 0 .35rem color-mix(in srgb, var(--signal) 16%, transparent);
+  }
+
+  .skill-tree { padding-block-start: clamp(6rem, 11vw, 10rem); }
+
+  .skill-tree__summary {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(18rem, .75fr);
+    align-items: end;
+    gap: clamp(2rem, 6vw, 6rem);
+  }
+
+  .skill-tree__summary h2 {
+    margin: 0;
+    font-size: clamp(2rem, 4vw, 3.5rem);
+    font-weight: 620;
+    letter-spacing: -.045em;
+    line-height: 1.08;
+  }
+
+  .skill-tree__summary p { max-width: 34rem; margin: .8rem 0 0; color: var(--muted); }
+
+  .skill-progress { display: grid; min-width: 8rem; gap: .5rem; }
+  .skill-progress__value {
+    justify-self: end;
+    color: var(--muted);
+    font-family: ui-monospace, 'SFMono-Regular', Consolas, monospace;
+    font-size: .82rem;
+    font-weight: 650;
+  }
+  .skill-progress--prominent .skill-progress__value {
+    color: var(--ink);
+    font-size: clamp(2.7rem, 5vw, 4.5rem);
+    font-weight: 560;
+    letter-spacing: -.08em;
+    line-height: 1;
+  }
+  .skill-progress__track {
+    height: .45rem;
+    overflow: hidden;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--line) 80%, transparent);
+  }
+  .skill-progress__track > span {
+    display: block;
+    width: var(--skill-progress);
+    height: 100%;
+    border-radius: inherit;
+    background: var(--signal);
+  }
+
+  .skill-tree__legend {
+    display: grid;
+    grid-auto-flow: dense;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin: clamp(2.5rem, 5vw, 4rem) 0 0;
+    border-block: 1px solid var(--line);
+  }
+  .skill-tree__legend > div { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; padding: 1.2rem 1.5rem; }
+  .skill-tree__legend > div + div { border-inline-start: 1px solid var(--line); }
+  .skill-tree__legend dt { color: var(--muted); font-size: .82rem; }
+  .skill-tree__legend dd { margin: 0; font-family: ui-monospace, 'SFMono-Regular', Consolas, monospace; font-size: 1.15rem; font-weight: 650; }
+
+  .skill-tree__root,
+  .skill-field__children,
+  .skill-node__related { margin: 0; padding: 0; list-style: none; }
+  .skill-tree__root { display: grid; gap: 1rem; margin-block-start: 1.5rem; }
+  .skill-field { border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
+  .skill-field--level-1 { border-radius: .75rem; background: color-mix(in srgb, var(--canvas) 48%, var(--surface)); }
+
+  .skill-field__header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(10rem, 18rem);
+    align-items: center;
+    gap: 2rem;
+    padding: clamp(1.25rem, 3vw, 2rem);
+  }
+  .skill-field--level-1 > .skill-field__header { padding: 1.15rem 1.25rem; }
+
+  .skill-field__disclosure {
+    display: grid;
+    grid-template-columns: auto minmax(0, auto) 1fr auto;
+    align-items: center;
+    gap: .8rem;
+    min-width: 0;
+    padding: .25rem;
+    border: 0;
+    background: transparent;
+    text-align: start;
+    cursor: pointer;
+  }
+  .skill-field__marker { width: .58rem; height: .58rem; border-radius: 50%; background: var(--primary); }
+  .skill-field--level-1 .skill-field__marker { background: var(--signal); }
+  .skill-field__label { font-size: clamp(1.08rem, 2vw, 1.4rem); font-weight: 640; letter-spacing: -.025em; }
+  .skill-field__count { justify-self: start; color: var(--muted); font-size: .75rem; }
+  .skill-field__disclosure svg { color: var(--muted); transition: transform 180ms ease; }
+  .skill-field__disclosure[aria-expanded='true'] svg { transform: rotate(180deg); }
+
+  .skill-field__children {
+    display: grid;
+    gap: .75rem;
+    padding: 0 clamp(1.25rem, 3vw, 2rem) clamp(1.25rem, 3vw, 2rem) clamp(2.75rem, 5vw, 4.25rem);
+  }
+  .skill-field__children[hidden] { display: none; }
+
+  .skill-node {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(15rem, .8fr);
+    gap: 1.25rem;
+    padding: 1.15rem 1.25rem;
+    border-block-start: 1px solid var(--line);
+  }
+  .skill-node__line { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+  .skill-node__label { font-weight: 590; }
+  .skill-node__status { display: inline-flex; align-items: center; gap: .45rem; color: var(--muted); font-size: .75rem; white-space: nowrap; }
+  .skill-node__status > span { width: .45rem; height: .45rem; border: 1px solid currentColor; border-radius: 50%; }
+  .skill-node__status--mastered { color: color-mix(in srgb, var(--signal) 42%, var(--ink)); }
+  .skill-node__status--mastered > span { border-color: var(--signal); background: var(--signal); }
+  .skill-node__status--learning { color: var(--primary); }
+  .skill-node__status--learning > span { border-color: var(--primary); background: color-mix(in srgb, var(--primary) 24%, transparent); }
+
+  .skill-node__related { display: grid; align-content: start; gap: .35rem; }
+  .skill-node__related a { color: var(--primary); font-size: .82rem; font-weight: 590; text-decoration-thickness: 1px; text-underline-offset: .22em; }
+  .skill-node__related a::after { margin-inline-start: .4rem; content: '↗'; }
+
+  .skills-action {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 2rem;
+    margin-block-start: clamp(5rem, 10vw, 9rem);
+    padding: clamp(2rem, 5vw, 4rem);
+    border-radius: var(--radius);
+    background: var(--ink);
+    color: var(--surface);
+  }
+  .skills-action strong { font-size: clamp(1.5rem, 3vw, 2.4rem); font-weight: 610; letter-spacing: -.04em; }
+  .skills-action p { margin: .7rem 0 0; color: color-mix(in srgb, var(--surface) 68%, transparent); }
+  .skills-action a { color: var(--surface); font-weight: 650; text-decoration: none; white-space: nowrap; }
+
+  @media (max-width: 52rem) {
+    .skills-hero { grid-template-columns: minmax(0, 1fr); }
+    .skills-hero__radar { position: absolute; z-index: 0; width: 15rem; min-width: 0; inset-inline-end: -4rem; inset-block-end: 1rem; opacity: .55; }
+    .skill-tree__summary { grid-template-columns: minmax(0, 1fr); }
+    .skill-progress--prominent { width: min(100%, 24rem); }
+    .skill-field__header { grid-template-columns: minmax(0, 1fr); gap: 1rem; }
+    .skill-node { grid-template-columns: minmax(0, 1fr); }
+    .skills-action { grid-template-columns: minmax(0, 1fr); }
+    .skills-action a { justify-self: start; }
+  }
+
+  @media (max-width: 34rem) {
+    .skills-page { padding-block-start: 3rem; }
+    .skills-hero { min-height: 31rem; }
+    .skills-hero h1 { font-size: clamp(2.7rem, 14vw, 4.25rem); line-height: 1.02; }
+    .skill-tree__legend { grid-template-columns: minmax(0, 1fr); }
+    .skill-tree__legend > div + div { border-block-start: 1px solid var(--line); border-inline-start: 0; }
+    .skill-field__children { padding-inline: 1rem; }
+    .skill-field__count { display: none; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .skill-field__disclosure svg { transition: none; }
+  }
+</style>
