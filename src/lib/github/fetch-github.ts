@@ -1,4 +1,4 @@
-import { readGitHubCache, writeGitHubCache } from './cache';
+import { isGitHubStats, readGitHubCache, writeGitHubCache } from './cache';
 import {
   CONTRIBUTION_COLORS,
   GITHUB_USERNAME,
@@ -12,6 +12,8 @@ import {
 const GRAPHQL_ENDPOINT = 'https://api.github.com/graphql';
 const EVENTS_ENDPOINT = `https://api.github.com/users/${GITHUB_USERNAME}/events/public?per_page=30`;
 const FRESH_CACHE_TTL_MS = 6 * 60 * 60 * 1000;
+const DEFAULT_REQUEST_TIMEOUT_MS = 10_000;
+const MAX_REQUEST_TIMEOUT_MS = 30_000;
 const MAX_RECENT_EVENTS = 6;
 const ALLOWED_EVENT_TYPES = new Set([
   'PushEvent',
@@ -20,6 +22,13 @@ const ALLOWED_EVENT_TYPES = new Set([
   'CreateEvent',
   'ReleaseEvent',
 ]);
+const PULL_REQUEST_ACTIONS = new Set([
+  'opened', 'closed', 'merged', 'reopened', 'assigned', 'unassigned', 'labeled', 'unlabeled',
+]);
+const ISSUE_ACTIONS = new Set([
+  'opened', 'closed', 'reopened', 'assigned', 'unassigned', 'labeled', 'unlabeled',
+]);
+const SHA_PATTERN = /^[a-f0-9]{40}$/i;
 
 export const GITHUB_API_VERSION = '2026-03-10';
 
@@ -57,6 +66,7 @@ export interface GetGitHubStatsOptions {
   writeCache?: (stats: GitHubStats) => Promise<void>;
   warn?: (message: string) => void;
   cacheTtlMs?: number;
+  requestTimeoutMs?: number;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -125,7 +135,14 @@ export function normalizeContributionCalendar(payload: unknown): ContributionDat
   });
 
   weeks.sort((left, right) => (left.days[0]?.date ?? '').localeCompare(right.days[0]?.date ?? ''));
-  return { total: calendar.totalContributions as number, weeks };
+  const normalized = { total: calendar.totalContributions as number, weeks };
+  if (!isGitHubStats({
+    ...normalized,
+    events: [],
+    fetchedAt: '1970-01-01T00:00:00.000Z',
+    stale: false,
+  })) throw new TypeError('기여 캘린더 값이 서로 일치하지 않습니다.');
+  return normalized;
 }
 
 function validRepository(value: unknown): value is string {
@@ -141,6 +158,10 @@ function validDateTime(value: unknown): value is string {
 
 function positiveInteger(value: unknown): value is number {
   return Number.isInteger(value) && (value as number) > 0;
+}
+
+function nonEmptyString(value: unknown, maxLength = 512): value is string {
+  return typeof value === 'string' && value.length > 0 && value.length <= maxLength;
 }
 
 function constructedGitHubUrl(repository: string, suffix = ''): string {
@@ -186,18 +207,28 @@ function normalizeEvent(value: unknown): GitHubActivity | null {
 
   switch (value.type) {
     case 'PushEvent': {
+      if (!positiveInteger(payload.repository_id)
+        || !positiveInteger(payload.push_id)
+        || !nonEmptyString(payload.ref, 512)
+        || !/^refs\/(heads|tags)\/.+/.test(payload.ref)
+        || typeof payload.head !== 'string'
+        || !SHA_PATTERN.test(payload.head)
+        || typeof payload.before !== 'string'
+        || !SHA_PATTERN.test(payload.before)
+        || ('size' in payload && (!Number.isInteger(payload.size) || (payload.size as number) < 0))) return null;
       const size = positiveInteger(payload.size) ? payload.size : null;
       label = size ? `커밋 ${size}개를 푸시했습니다` : '커밋을 푸시했습니다';
-      const suffix = typeof payload.head === 'string' && /^[a-f0-9]{40,64}$/i.test(payload.head)
-        ? `/commit/${payload.head}`
-        : '';
-      url = constructedGitHubUrl(repository, suffix);
+      url = constructedGitHubUrl(repository, `/commit/${payload.head}`);
       break;
     }
     case 'PullRequestEvent': {
       const pullRequest = isRecord(payload.pull_request) ? payload.pull_request : null;
-      const merged = pullRequest?.merged === true;
-      label = merged
+      if (typeof payload.action !== 'string'
+        || !PULL_REQUEST_ACTIONS.has(payload.action)
+        || !positiveInteger(payload.number)
+        || !pullRequest
+        || !nonEmptyString(pullRequest.html_url, 2_048)) return null;
+      label = payload.action === 'merged'
         ? '풀 리퀘스트를 병합했습니다'
         : payload.action === 'closed'
           ? '풀 리퀘스트를 닫았습니다'
@@ -210,6 +241,11 @@ function normalizeEvent(value: unknown): GitHubActivity | null {
     }
     case 'IssuesEvent': {
       const issue = isRecord(payload.issue) ? payload.issue : null;
+      if (typeof payload.action !== 'string'
+        || !ISSUE_ACTIONS.has(payload.action)
+        || !issue
+        || !positiveInteger(issue.number)
+        || !nonEmptyString(issue.html_url, 2_048)) return null;
       label = payload.action === 'closed'
         ? '이슈를 닫았습니다'
         : payload.action === 'opened' || payload.action === 'reopened'
@@ -220,7 +256,15 @@ function normalizeEvent(value: unknown): GitHubActivity | null {
       break;
     }
     case 'CreateEvent': {
-      const ref = typeof payload.ref === 'string' && payload.ref.length <= 256 ? payload.ref : null;
+      if ((payload.ref_type !== 'branch' && payload.ref_type !== 'tag' && payload.ref_type !== 'repository')
+        || !nonEmptyString(payload.full_ref, 512)
+        || !nonEmptyString(payload.master_branch, 256)
+        || typeof payload.description !== 'string'
+        || (payload.pusher_type !== 'user' && payload.pusher_type !== 'deploy_key')) return null;
+      const ref = nonEmptyString(payload.ref, 256) ? payload.ref : null;
+      if (payload.ref_type === 'repository' ? payload.ref !== null : !ref) return null;
+      if (payload.ref_type === 'branch' && payload.full_ref !== `refs/heads/${ref}`) return null;
+      if (payload.ref_type === 'tag' && payload.full_ref !== `refs/tags/${ref}`) return null;
       if (payload.ref_type === 'branch') {
         label = '브랜치를 만들었습니다';
         url = constructedGitHubUrl(repository, ref ? `/tree/${encodeURIComponent(ref)}` : '/branches');
@@ -235,6 +279,7 @@ function normalizeEvent(value: unknown): GitHubActivity | null {
     }
     case 'ReleaseEvent': {
       const release = isRecord(payload.release) ? payload.release : null;
+      if (payload.action !== 'published' || !release || !nonEmptyString(release.html_url, 2_048)) return null;
       label = '릴리스를 게시했습니다';
       url = safeGitHubUrl(release?.html_url, repository, '/releases');
       break;
@@ -286,7 +331,16 @@ export function formatRelativeDate(createdAt: string, referenceTime: Date): stri
     throw new TypeError('GitHub 활동 시간이 올바르지 않습니다.');
   }
 
-  const elapsedSeconds = Math.max(0, Math.floor((referenceTime.getTime() - created.getTime()) / 1000));
+  const differenceMs = referenceTime.getTime() - created.getTime();
+  const absoluteDate = () => new Intl.DateTimeFormat('ko-KR', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    timeZone: 'UTC',
+  }).format(created);
+  if (differenceMs < -(5 * 60 * 1000)) return absoluteDate();
+
+  const elapsedSeconds = Math.max(0, Math.floor(differenceMs / 1000));
   if (elapsedSeconds < 60) return '방금 전';
   const elapsedMinutes = Math.floor(elapsedSeconds / 60);
   if (elapsedMinutes < 60) return `${elapsedMinutes}분 전`;
@@ -294,12 +348,7 @@ export function formatRelativeDate(createdAt: string, referenceTime: Date): stri
   if (elapsedHours < 24) return `${elapsedHours}시간 전`;
   const elapsedDays = Math.floor(elapsedHours / 24);
   if (elapsedDays <= 30) return `${elapsedDays}일 전`;
-  return new Intl.DateTimeFormat('ko-KR', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    timeZone: 'UTC',
-  }).format(created);
+  return absoluteDate();
 }
 
 function isFresh(stats: GitHubStats, now: Date, ttl: number): boolean {
@@ -311,10 +360,29 @@ async function fetchJson(
   request: GitHubRequest,
   input: string,
   init: RequestInit,
+  timeoutMs: number,
 ): Promise<unknown> {
-  const response = await request(input, init);
-  if (!response.ok) throw new Error('GitHub API 요청이 실패했습니다.');
-  return response.json() as Promise<unknown>;
+  const controller = new AbortController();
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const timeout = new Promise<never>((_resolve, reject) => {
+    timer = setTimeout(() => {
+      controller.abort();
+      reject(new Error('GitHub API 요청 시간이 초과되었습니다.'));
+    }, timeoutMs);
+  });
+
+  try {
+    return await Promise.race([
+      (async () => {
+        const response = await request(input, { ...init, signal: controller.signal });
+        if (!response.ok) throw new Error('GitHub API 요청이 실패했습니다.');
+        return await response.json() as unknown;
+      })(),
+      timeout,
+    ]);
+  } finally {
+    if (timer !== undefined) clearTimeout(timer);
+  }
 }
 
 export async function getGitHubStats(options: GetGitHubStatsOptions = {}): Promise<GitHubStats | null> {
@@ -324,6 +392,10 @@ export async function getGitHubStats(options: GetGitHubStatsOptions = {}): Promi
   const request = options.request ?? fetch;
   const warn = options.warn ?? console.warn;
   const ttl = options.cacheTtlMs ?? FRESH_CACHE_TTL_MS;
+  const requestedTimeout = options.requestTimeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS;
+  const requestTimeout = Number.isFinite(requestedTimeout) && requestedTimeout > 0
+    ? Math.min(requestedTimeout, MAX_REQUEST_TIMEOUT_MS)
+    : DEFAULT_REQUEST_TIMEOUT_MS;
   let cached: GitHubStats | null = null;
 
   try {
@@ -349,8 +421,13 @@ export async function getGitHubStats(options: GetGitHubStatsOptions = {}): Promi
       query: CONTRIBUTIONS_QUERY,
       variables: { login: GITHUB_USERNAME, from, to },
     }),
-  }).then(normalizeContributionCalendar);
-  const eventsPromise = fetchJson(request, EVENTS_ENDPOINT, { method: 'GET', headers }).then(normalizeEvents);
+  }, requestTimeout).then(normalizeContributionCalendar);
+  const eventsPromise = fetchJson(
+    request,
+    EVENTS_ENDPOINT,
+    { method: 'GET', headers },
+    requestTimeout,
+  ).then(normalizeEvents);
   const [contributionResult, eventsResult] = await Promise.allSettled([contributionPromise, eventsPromise]);
 
   if (contributionResult.status === 'fulfilled' && eventsResult.status === 'fulfilled') {

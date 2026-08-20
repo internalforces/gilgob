@@ -20,6 +20,18 @@ test('fixture GitHub activity remains safe and accessible on desktop and mobile'
     await expect(section.getByRole('img', { name: /2026년 8월 20일, 기여 2회/ })).toBeAttached();
     await expect(section.getByRole('table', { name: '날짜별 GitHub 기여 횟수', includeHidden: true })).toBeAttached();
     await expect(section.getByText('커밋 2개를 푸시했습니다')).toBeVisible();
+    if (expectedState === 'stale') {
+      await expect(section.locator('.recent-activity time').first()).not.toHaveText('방금 전');
+    }
+    if (name === 'desktop') {
+      const calendarHeight = await section.locator('.contribution-calendar').evaluate((element) => (
+        element.getBoundingClientRect().height
+      ));
+      const activityHeight = await section.locator('.recent-activity').evaluate((element) => (
+        element.getBoundingClientRect().height
+      ));
+      expect(calendarHeight).toBeLessThan(activityHeight);
+    }
     const eventUrls = await section.locator('.recent-activity a').evaluateAll((links) => (
       links.map((link) => (link as HTMLAnchorElement).href)
     ));

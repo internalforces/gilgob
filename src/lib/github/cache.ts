@@ -4,6 +4,8 @@ import { dirname, resolve } from 'node:path';
 import {
   CONTRIBUTION_COLORS,
   type ContributionLevel,
+  type ContributionWeek,
+  type GitHubActivity,
   type GitHubStats,
 } from './types';
 
@@ -49,8 +51,10 @@ function isContributionDay(value: unknown): boolean {
   if (!isRecord(value) || !hasExactKeys(value, ['date', 'count', 'level', 'color'])) return false;
   if (!isIsoDate(value.date, true) || !Number.isInteger(value.count) || (value.count as number) < 0) return false;
   if (!Number.isInteger(value.level) || (value.level as number) < 0 || (value.level as number) > 4) return false;
+  const count = value.count as number;
   const level = value.level as ContributionLevel;
-  return value.color === CONTRIBUTION_COLORS[level];
+  const expectedLevel: ContributionLevel = count === 0 ? 0 : count === 1 ? 1 : count <= 3 ? 2 : count <= 7 ? 3 : 4;
+  return level === expectedLevel && value.color === CONTRIBUTION_COLORS[level];
 }
 
 function isContributionWeek(value: unknown): boolean {
@@ -76,8 +80,87 @@ function isGitHubActivity(value: unknown): boolean {
     && isIsoDate(value.createdAt);
 }
 
+const CANONICAL_ACTIVITY_LABELS = new Set([
+  '커밋을 푸시했습니다',
+  '풀 리퀘스트를 병합했습니다',
+  '풀 리퀘스트를 닫았습니다',
+  '풀 리퀘스트를 열었습니다',
+  '풀 리퀘스트를 업데이트했습니다',
+  '이슈를 닫았습니다',
+  '이슈를 열었습니다',
+  '이슈를 업데이트했습니다',
+  '브랜치를 만들었습니다',
+  '태그를 만들었습니다',
+  '저장소를 만들었습니다',
+  '릴리스를 게시했습니다',
+]);
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+function utcDay(value: string): number {
+  return Date.parse(`${value}T00:00:00.000Z`);
+}
+
+function weekStart(value: string): number {
+  const date = new Date(`${value}T00:00:00.000Z`);
+  return date.getTime() - date.getUTCDay() * DAY_MS;
+}
+
+function hasCoherentContributions(total: number, weeks: ContributionWeek[]): boolean {
+  const dates = new Set<string>();
+  let previousDate = '';
+  let previousDayTimestamp: number | null = null;
+  let previousWeekStart: number | null = null;
+  let calculatedTotal = 0;
+
+  for (const week of weeks) {
+    if (week.days.length === 0) return false;
+    const currentWeekStart = weekStart(week.days[0]!.date);
+    if (previousWeekStart !== null && currentWeekStart - previousWeekStart !== 7 * DAY_MS) return false;
+
+    for (const day of week.days) {
+      const dayTimestamp = utcDay(day.date);
+      if (weekStart(day.date) !== currentWeekStart
+        || dates.has(day.date)
+        || (previousDate !== '' && day.date <= previousDate)
+        || (previousDayTimestamp !== null && dayTimestamp - previousDayTimestamp !== DAY_MS)) return false;
+      dates.add(day.date);
+      previousDate = day.date;
+      previousDayTimestamp = dayTimestamp;
+      calculatedTotal += day.count;
+    }
+    previousWeekStart = currentWeekStart;
+  }
+
+  if (calculatedTotal !== total) return false;
+  if (dates.size > 365) return false;
+  if (dates.size > 1) {
+    const orderedDates = [...dates];
+    if (utcDay(orderedDates.at(-1)!) - utcDay(orderedDates[0]!) > 364 * DAY_MS) return false;
+  }
+  return true;
+}
+
+function isCanonicalActivityLabel(label: string): boolean {
+  return CANONICAL_ACTIVITY_LABELS.has(label) || /^커밋 [1-9]\d*개를 푸시했습니다$/.test(label);
+}
+
+function hasCoherentEvents(events: GitHubActivity[]): boolean {
+  const ids = new Set<string>();
+  let previous: GitHubActivity | null = null;
+  for (const event of events) {
+    if (ids.has(event.id) || !isCanonicalActivityLabel(event.label)) return false;
+    if (previous
+      && (event.createdAt > previous.createdAt
+        || (event.createdAt === previous.createdAt && event.id < previous.id))) return false;
+    ids.add(event.id);
+    previous = event;
+  }
+  return true;
+}
+
 export function isGitHubStats(value: unknown): value is GitHubStats {
-  return isRecord(value)
+  if (!(isRecord(value)
     && hasExactKeys(value, ['total', 'weeks', 'events', 'fetchedAt', 'stale'])
     && Number.isInteger(value.total)
     && (value.total as number) >= 0
@@ -88,7 +171,10 @@ export function isGitHubStats(value: unknown): value is GitHubStats {
     && value.events.length <= 6
     && value.events.every(isGitHubActivity)
     && isIsoDate(value.fetchedAt)
-    && typeof value.stale === 'boolean';
+    && typeof value.stale === 'boolean')) return false;
+
+  const stats = value as unknown as GitHubStats;
+  return hasCoherentContributions(stats.total, stats.weeks) && hasCoherentEvents(stats.events);
 }
 
 export async function readGitHubCache(path = DEFAULT_GITHUB_CACHE_PATH): Promise<GitHubStats | null> {

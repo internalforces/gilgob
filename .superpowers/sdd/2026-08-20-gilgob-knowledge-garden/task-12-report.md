@@ -78,3 +78,32 @@ Fresh final no-token run:
 
 - 기존 `src/lib/content/schema.ts` Zod `.url()` deprecation hint와 Pagefind의 한국어 stemming 미지원 안내는 Task 12 범위 밖이라 변경하지 않았다.
 - `.cache/`는 의도적으로 Git에 커밋하지 않는다. CI 간 stale fallback을 보존하는 외부 cache restore/save wiring은 후속 배포 workflow 범위에서 이 파일을 사용해야 한다.
+
+## Fix Round 1 — Reviewer Findings
+
+### Corrections
+
+- GitHub의 [공식 Event type 계약](https://docs.github.com/en/rest/using-the-rest-api/github-event-types?apiVersion=2026-03-10)에 맞춰 allowlist 다섯 타입의 payload를 각자 검증한다. Push는 repository/push ID, full ref와 40자리 head/before SHA를, PullRequest와 Issues는 action enum과 핵심 resource를, Create는 ref type·full ref·default branch·description·pusher type을, Release는 `published`와 release resource를 요구한다. 미지원 타입은 계속 제외하지만 지원 타입이 malformed면 REST source 전체를 실패로 처리해 false empty 캐시를 쓰지 않는다.
+- GraphQL과 REST 중 하나만 성공한 경우 cache `fetchedAt`은 마지막 전체 확인 시각으로 보존한다. 최근 이벤트 상대 시각은 그 값이 아니라 한 번 고정한 현재 build time을 기준으로 렌더링하므로, REST만 새로 받은 이벤트가 오래된 확인 시각 때문에 `방금 전`으로 보이지 않는다. 5분을 넘는 미래 timestamp는 clock skew를 음수 상대 시각으로 숨기지 않고 절대 날짜로 표시한다.
+- 캐시 parser는 shape뿐 아니라 기여 합계와 day count 합, count-level-color 대응, 전역 날짜 uniqueness/연속 오름차순, 같은 Sunday week 소속, 연속 주차와 365일 범위를 검증한다. 이벤트는 ID uniqueness, `createdAt` 내림차순/ID tie-break, 정규화기가 생성할 수 있는 한국어 canonical label만 허용한다. 같은 검증을 GraphQL 정규화 결과에도 적용해 서로 불일치하는 API calendar를 source failure로 처리한다.
+- 두 GitHub 요청에 독립적인 AbortController와 기본 10초(주입값 최대 30초) deadline을 적용했다. timeout, non-2xx, JSON parse 성공/실패 어느 경로에서도 timer를 `finally`에서 정리한다.
+- 8/4 데스크톱 grid의 cross-axis를 `start`로 맞춰 짧은 기여 캘린더가 긴 최근 활동 카드 높이까지 늘어나지 않게 했다. 기존 seed 80 C+B palette, spacing, responsive stack은 그대로 유지했다.
+
+### TDD and Browser Evidence
+
+1. allowlist 타입별 필수 payload가 없어도 통과하는 다섯 RED를 확인한 뒤 strict contract로 GREEN 전환했다.
+2. 미래 이벤트가 `방금 전`으로 표시되는 unit RED와 stale fixture browser RED를 확인했다. explicit build reference time 적용 뒤 현재 이벤트 상대 시각과 stale 확인 시각을 분리했다.
+3. 합계 불일치 cache가 승인되는 semantic RED를 시작으로 duplicate/descending dates, incoherent weeks, duplicate/unsorted event IDs, noncanonical label을 거부하도록 했다. API contribution total 불일치도 별도 RED→GREEN으로 검증했다.
+4. timeout 테스트는 처음 두 RequestInit에 signal이 없어 즉시 실패하는 RED였고, 이후 GraphQL/REST signal 모두 abort, stale fallback, 단일 sanitized warning, timer count 0을 확인했다.
+5. 1280px fixture에서 두 카드 높이가 모두 `472.234375px`로 늘어나는 browser RED를 기록했다. `align-items: start` 후 calendar가 자연 높이를 유지하는 GREEN과 desktop/mobile axe violations 0을 확인했다.
+6. REST success + GraphQL 503 회귀 테스트는 새 events, cached `fetchedAt`, current build-time `2시간 전`, no partial cache overwrite를 함께 확인한다.
+
+### Fix Verification
+
+- focused GitHub unit: 28 tests passed.
+- `GITHUB_TOKEN= npm run verify`: Astro check 0 errors, Vitest 16 files / 126 tests, static 12 pages and Pagefind build 완료.
+- ready fixture desktop 1280×900 / mobile 390×844: state, SR table, safe GitHub URLs, document overflow 없음, axe violations 0; calendar/activity natural heights와 C+B balance를 screenshot으로 확인했다.
+- stale fixture desktop/mobile: current build 기준 activity time, cached `마지막으로 확인된 활동`, axe violations 0을 확인했다.
+- cache 파일을 제거한 no-token full Playwright: 26 passed, fixture-only 1 skipped; null state desktop/mobile 계약 유지.
+- `.cache/github-stats.json`은 no-token build 전후 존재하지 않았고, `dist/` token/header 문자열 scan은 일치 항목이 없었다.
+- 기존 Zod deprecation hint 1개와 Pagefind 한국어 stemming 안내만 남으며 이번 범위와 무관하다.

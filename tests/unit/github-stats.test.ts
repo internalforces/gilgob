@@ -22,7 +22,7 @@ const fixture = async (name: 'graphql' | 'events') => JSON.parse(
 
 const now = new Date('2026-08-20T12:00:00.000Z');
 const cached: GitHubStats = {
-  total: 42,
+  total: 2,
   weeks: [{
     days: [{
       date: '2026-08-18',
@@ -43,6 +43,7 @@ const cached: GitHubStats = {
 };
 
 afterEach(() => {
+  vi.useRealTimers();
   vi.restoreAllMocks();
 });
 
@@ -54,12 +55,12 @@ describe('GitHub payload normalization', () => {
       total: 14,
       weeks: [
         { days: [
-          { date: '2026-08-16', count: 0, level: 0, color: '#edf1f5' },
-          { date: '2026-08-17', count: 1, level: 1, color: '#c9f0df' },
-          { date: '2026-08-18', count: 4, level: 3, color: '#37c998' },
+          { date: '2026-08-13', count: 0, level: 0, color: '#edf1f5' },
+          { date: '2026-08-14', count: 1, level: 1, color: '#c9f0df' },
+          { date: '2026-08-15', count: 4, level: 3, color: '#37c998' },
         ] },
         { days: [
-          { date: '2026-08-19', count: 9, level: 4, color: '#167c61' },
+          { date: '2026-08-16', count: 9, level: 4, color: '#167c61' },
         ] },
       ],
     });
@@ -72,6 +73,12 @@ describe('GitHub payload normalization', () => {
       data: { user: { contributionsCollection: { contributionCalendar: {
         totalContributions: 1,
         weeks: [{ contributionDays: [{ date: '20-08-2026', contributionCount: -1 }] }],
+      } } } },
+    })).toThrow();
+    expect(() => normalizeContributionCalendar({
+      data: { user: { contributionsCollection: { contributionCalendar: {
+        totalContributions: 2,
+        weeks: [{ contributionDays: [{ date: '2026-08-16', contributionCount: 1 }] }],
       } } } },
     })).toThrow();
   });
@@ -124,6 +131,23 @@ describe('GitHub payload normalization', () => {
       { id: '4', type: 'PushEvent', public: true, created_at: '2026-08-20T00:00:00Z', repo: { name: '../escape' }, payload: {} },
     ])).toThrow();
   });
+
+  it.each([
+    ['PushEvent', { repository_id: 1, push_id: 2, ref: 'main', head: 'not-a-sha', before: 'also-not-a-sha' }],
+    ['PullRequestEvent', { action: 'synchronize', number: 12, pull_request: { html_url: 'https://github.com/internalforces/bad/pull/12' } }],
+    ['IssuesEvent', { action: 'edited', issue: { number: 7, html_url: 'https://github.com/internalforces/bad/issues/7' } }],
+    ['CreateEvent', { ref: null, ref_type: 'branch', full_ref: 'refs/heads/main', master_branch: 'main', description: null, pusher_type: 'user' }],
+    ['ReleaseEvent', { action: 'created', release: { html_url: 'https://github.com/internalforces/bad/releases/tag/v1' } }],
+  ])('rejects a %s payload outside the documented event contract', (type, payload) => {
+    expect(() => normalizeEvents([{
+      id: `malformed-${type}`,
+      type,
+      repo: { name: 'internalforces/bad' },
+      payload,
+      public: true,
+      created_at: '2026-08-20T00:00:00Z',
+    }])).toThrow();
+  });
 });
 
 describe('GitHub activity dates', () => {
@@ -133,6 +157,10 @@ describe('GitHub activity dates', () => {
     expect(formatRelativeDate('2026-08-20T10:00:00.000Z', now)).toBe('2시간 전');
     expect(formatRelativeDate('2026-08-17T12:00:00.000Z', now)).toBe('3일 전');
     expect(formatRelativeDate('2026-07-01T12:00:00.000Z', now)).toBe('2026년 7월 1일');
+  });
+
+  it('uses an absolute date for an event beyond a small future clock skew', () => {
+    expect(formatRelativeDate('2026-08-21T12:00:00.000Z', now)).toBe('2026년 8월 21일');
   });
 });
 
@@ -231,7 +259,7 @@ describe('GitHub request and fallback policy', () => {
       warn: vi.fn(),
     });
 
-    expect(result).toMatchObject({ total: 42, stale: true });
+    expect(result).toMatchObject({ total: 2, stale: true });
     expect(request).not.toHaveBeenCalled();
   });
 
@@ -263,7 +291,7 @@ describe('GitHub request and fallback policy', () => {
       warn,
     });
 
-    expect(result).toMatchObject({ total: 42, stale: true });
+    expect(result).toMatchObject({ total: 2, stale: true });
     expect(warn).toHaveBeenCalledTimes(1);
     expect(JSON.stringify(warn.mock.calls)).not.toContain('secret-value-never-log');
   });
@@ -288,6 +316,32 @@ describe('GitHub request and fallback policy', () => {
     expect(result).toMatchObject({ total: 14, events: cached.events, stale: true });
     expect(writeCache).not.toHaveBeenCalled();
     expect(warn).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps the cached check time but dates fresh REST events from the current build time', async () => {
+    const events = await fixture('events');
+    const writeCache = vi.fn();
+    const result = await getGitHubStats({
+      token: 'secret',
+      now: () => now,
+      request: vi.fn(async (input: string | URL | Request) => (
+        String(input).endsWith('/graphql')
+          ? new Response('unavailable', { status: 503 })
+          : new Response(JSON.stringify(events), { status: 200 })
+      )),
+      readCache: async () => cached,
+      writeCache,
+      warn: vi.fn(),
+    });
+
+    expect(result).toMatchObject({
+      total: cached.total,
+      fetchedAt: cached.fetchedAt,
+      stale: true,
+    });
+    expect(result?.events[0]?.id).toBe('push-1');
+    expect(formatRelativeDate(result!.events[0]!.createdAt, now)).toBe('2시간 전');
+    expect(writeCache).not.toHaveBeenCalled();
   });
 
   it('returns null and one warning on a partial failure without cache', async () => {
@@ -325,8 +379,40 @@ describe('GitHub request and fallback policy', () => {
       warn,
     });
 
-    expect(result).toMatchObject({ total: 42, stale: true });
+    expect(result).toMatchObject({ total: 2, stale: true });
     expect(warn).toHaveBeenCalledTimes(1);
+  });
+
+  it('bounds both requests, aborts them, and clears timeout timers', async () => {
+    vi.useFakeTimers();
+    const signals: AbortSignal[] = [];
+    const request = vi.fn((_input: string | URL | Request, init?: RequestInit) => (
+      new Promise<Response>((_resolve, reject) => {
+        const signal = init?.signal;
+        if (!signal) return reject(new Error('missing signal'));
+        signals.push(signal);
+        signal.addEventListener('abort', () => reject(new Error('aborted')), { once: true });
+      })
+    ));
+    const warn = vi.fn();
+
+    const resultPromise = getGitHubStats({
+      token: 'secret-never-log',
+      now: () => now,
+      request,
+      requestTimeoutMs: 50,
+      readCache: async () => cached,
+      writeCache: vi.fn(),
+      warn,
+    });
+    await vi.advanceTimersByTimeAsync(50);
+    const result = await resultPromise;
+
+    expect(result).toMatchObject({ total: 2, stale: true });
+    expect(signals).toHaveLength(2);
+    expect(signals.every((signal) => signal.aborted)).toBe(true);
+    expect(warn).toHaveBeenCalledTimes(1);
+    expect(vi.getTimerCount()).toBe(0);
   });
 });
 
@@ -335,10 +421,57 @@ describe('GitHub cache schema and persistence', () => {
     expect(isGitHubStats(cached)).toBe(true);
     expect(isGitHubStats({ ...cached, token: 'must-not-persist' })).toBe(false);
     expect(isGitHubStats({ ...cached, weeks: [{ days: [{ ...cached.weeks[0]!.days[0]!, color: 'red' }] }] })).toBe(false);
+    expect(isGitHubStats({
+      ...cached,
+      total: 8,
+      weeks: [{ days: [{ ...cached.weeks[0]!.days[0]!, count: 8, level: 1, color: '#c9f0df' }] }],
+    })).toBe(false);
     expect(isGitHubStats({ ...cached, events: [{ ...cached.events[0]!, url: 'javascript:alert(1)' }] })).toBe(false);
     expect(isGitHubStats({
       ...cached,
       events: [{ ...cached.events[0]!, url: 'https://github.com/internalforces/another-repository' }],
+    })).toBe(false);
+  });
+
+  it('rejects semantically inconsistent contribution and event caches', () => {
+    const day = cached.weeks[0]!.days[0]!;
+    const event = cached.events[0]!;
+    expect(isGitHubStats({ ...cached, total: 3 })).toBe(false);
+    expect(isGitHubStats({
+      ...cached,
+      total: 4,
+      weeks: [cached.weeks[0], { days: [{ ...day }] }],
+    })).toBe(false);
+    expect(isGitHubStats({
+      ...cached,
+      total: 3,
+      weeks: [{ days: [day, { date: '2026-08-17', count: 1, level: 1, color: '#c9f0df' }] }],
+    })).toBe(false);
+    expect(isGitHubStats({
+      ...cached,
+      total: 3,
+      weeks: [{ days: [
+        { ...day, date: '2026-08-16' },
+        { date: '2026-08-18', count: 1, level: 1, color: '#c9f0df' },
+      ] }],
+    })).toBe(false);
+    expect(isGitHubStats({
+      ...cached,
+      total: 3,
+      weeks: [cached.weeks[0], { days: [{ date: '2026-08-20', count: 1, level: 1, color: '#c9f0df' }] }],
+    })).toBe(false);
+    expect(isGitHubStats({ ...cached, events: [event, { ...event }] })).toBe(false);
+    expect(isGitHubStats({
+      ...cached,
+      events: [event, {
+        ...event,
+        id: 'newer-event',
+        createdAt: '2026-08-19T00:00:00.000Z',
+      }],
+    })).toBe(false);
+    expect(isGitHubStats({
+      ...cached,
+      events: [{ ...event, label: '임의 활동을 했습니다' }],
     })).toBe(false);
   });
 
