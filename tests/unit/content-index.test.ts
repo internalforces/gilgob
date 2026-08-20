@@ -1,4 +1,4 @@
-import { cp, mkdtemp, readFile, rm } from 'node:fs/promises';
+import { cp, mkdir, mkdtemp, readFile, rm, symlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
@@ -17,6 +17,7 @@ type CapturedVitePlugin = {
   buildStart?: () => void | Promise<void>;
   configureServer?: (server: ViteDevServer) => void;
 };
+type BuildDoneOptions = Parameters<NonNullable<AstroIntegration['hooks']['astro:build:done']>>[0];
 
 afterEach(() => {
   vi.restoreAllMocks();
@@ -120,6 +121,57 @@ describe('content index store', () => {
 });
 
 describe('content index integration', () => {
+  it('copies only contained regular attachments into the base-aware build directory', async () => {
+    const directory = await mkdtemp(join(tmpdir(), 'gilgob-attachments-'));
+    const attachmentRoot = join(directory, 'content/attachments');
+    const outputRoot = join(directory, 'dist');
+    const outsideFile = join(directory, 'outside-secret.txt');
+    const integration = contentIndexIntegration();
+
+    try {
+      await mkdir(join(attachmentRoot, 'diagrams'), { recursive: true });
+      await mkdir(join(attachmentRoot, '..assets'), { recursive: true });
+      await writeFile(join(attachmentRoot, 'diagrams/tree.txt'), 'tree');
+      await writeFile(join(attachmentRoot, '..assets/safe.txt'), 'safe');
+      await writeFile(outsideFile, 'secret');
+      await symlink(outsideFile, join(attachmentRoot, 'escape.txt'));
+      await integration.hooks['astro:config:setup']?.({
+        config: { root: pathToFileURL(`${directory}/`), base: '/repo' },
+        updateConfig: (config: ConfigUpdate) => config as never,
+      } as unknown as ConfigSetupOptions);
+      await integration.hooks['astro:build:done']?.({
+        dir: pathToFileURL(`${outputRoot}/`),
+      } as unknown as BuildDoneOptions);
+
+      await expect(readFile(join(outputRoot, 'repo/content-assets/diagrams/tree.txt'), 'utf8')).resolves.toBe('tree');
+      await expect(readFile(join(outputRoot, 'repo/content-assets/..assets/safe.txt'), 'utf8')).resolves.toBe('safe');
+      await expect(readFile(join(outputRoot, 'repo/content-assets/escape.txt'), 'utf8')).rejects.toMatchObject({ code: 'ENOENT' });
+    } finally {
+      await rm(directory, { recursive: true, force: true });
+    }
+  });
+
+  it('does not fail when the optional attachment directory is absent', async () => {
+    const directory = await mkdtemp(join(tmpdir(), 'gilgob-no-attachments-'));
+    const integration = contentIndexIntegration();
+    const buildDone = integration.hooks['astro:build:done'];
+
+    try {
+      await integration.hooks['astro:config:setup']?.({
+        config: { root: pathToFileURL(`${directory}/`), base: '/' },
+        updateConfig: (config: ConfigUpdate) => config as never,
+      } as unknown as ConfigSetupOptions);
+
+      expect(buildDone).toBeTypeOf('function');
+      if (buildDone === undefined) return;
+      await expect(buildDone({
+        dir: pathToFileURL(`${directory}/dist/`),
+      } as unknown as BuildDoneOptions)).resolves.toBeUndefined();
+    } finally {
+      await rm(directory, { recursive: true, force: true });
+    }
+  });
+
   it('generates the cache in the Vite buildStart hook', async () => {
     const directory = await mkdtemp(join(tmpdir(), 'gilgob-integration-'));
     const contentRoot = join(directory, 'content');

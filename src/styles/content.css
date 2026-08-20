@@ -1,0 +1,84 @@
+.prose {
+  color: var(--color-ink, #22201d);
+  line-height: 1.75;
+}
+
+.prose a,
+.prose .wiki-link {
+  color: var(--color-link, #315f70);
+  text-decoration-color: color-mix(in srgb, currentColor 45%, transparent);
+  text-underline-offset: 0.2em;
+}
+
+.prose .wiki-link--missing {
+  color: var(--color-muted, #77716a);
+  cursor: help;
+  text-decoration: underline dotted;
+}
+
+.prose .callout {
+  --callout-accent: #4f7180;
+  margin-block: 1.5rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid color-mix(in srgb, var(--callout-accent) 38%, transparent);
+  border-inline-start: 0.25rem solid var(--callout-accent);
+  border-radius: 0.5rem;
+  background: color-mix(in srgb, var(--callout-accent) 8%, transparent);
+}
+
+.prose .callout--tip { --callout-accent: #39745a; }
+.prose .callout--warning,
+.prose .callout--caution { --callout-accent: #a35d25; }
+.prose .callout--important { --callout-accent: #7b4c91; }
+
+.prose .callout__label {
+  display: block;
+  margin-block-end: 0.35rem;
+  color: var(--callout-accent);
+}
+
+.prose table {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+  border-collapse: collapse;
+}
+
+.prose th,
+.prose td {
+  padding: 0.55rem 0.75rem;
+  border: 1px solid var(--color-border, #d8d2c9);
+  text-align: start;
+}
+
+.prose :not(pre) > code {
+  padding: 0.1em 0.35em;
+  border-radius: 0.25rem;
+  background: var(--color-code-surface, #f0ece5);
+  font-size: 0.9em;
+}
+
+.prose pre {
+  max-width: 100%;
+  padding: 1rem;
+  overflow-x: auto;
+  border-radius: 0.5rem;
+}
+
+.prose figure {
+  margin-inline: 0;
+}
+
+.prose figure img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.4rem;
+}
+
+.prose figcaption {
+  margin-block-start: 0.5rem;
+  color: var(--color-muted, #77716a);
+  font-size: 0.875rem;
+  text-align: center;
+}

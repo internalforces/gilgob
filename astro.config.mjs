@@ -5,6 +5,7 @@ import sitemap from '@astrojs/sitemap';
 import { defineConfig } from 'astro/config';
 import { SITE_CONFIG } from './src/config/site';
 import { contentIndexIntegration } from './src/integrations/content-index';
+import { remarkObsidian } from './src/lib/markdown/remark-obsidian';
 
 export default defineConfig({
   site: SITE_CONFIG.site,
@@ -12,6 +13,8 @@ export default defineConfig({
   output: 'static',
   integrations: [contentIndexIntegration(), preact(), mdx(), sitemap()],
   markdown: {
-    processor: unified({ remarkPlugins: [] }),
+    processor: unified({
+      remarkPlugins: [[remarkObsidian, { indexPath: '.cache/content-index.json', base: SITE_CONFIG.base }]],
+    }),
   },
 });
