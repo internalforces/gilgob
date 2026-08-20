@@ -27,6 +27,7 @@
     "@astrojs/preact": "^6.0.4",
     "@astrojs/rss": "^4.0.19",
     "@astrojs/sitemap": "^3.7.3",
+    "@fontsource-variable/geist": "^5.3.0",
     "@pagefind/default-ui": "^1.5.2",
     "astro": "^7.2.4",
     "cytoscape": "^3.34.1",

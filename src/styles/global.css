@@ -20,13 +20,12 @@ body {
     radial-gradient(circle at 86% -8%, color-mix(in srgb, var(--primary) 7%, transparent), transparent 31rem),
     var(--canvas);
   color: var(--ink);
-  font-family: 'Geist', 'Pretendard', 'Noto Sans KR', 'Apple SD Gothic Neo', system-ui, sans-serif;
+  font-family: 'Geist Variable', 'Pretendard', 'Noto Sans KR', 'Apple SD Gothic Neo', system-ui, sans-serif;
   font-size: 1rem;
   line-height: 1.6;
   text-rendering: optimizeLegibility;
 }
 
-body,
 button,
 input,
 textarea,
@@ -59,7 +58,7 @@ svg {
 }
 
 :focus-visible {
-  outline: 3px solid color-mix(in srgb, var(--primary) 72%, var(--surface));
+  outline: 3px solid var(--primary);
   outline-offset: 3px;
 }
 

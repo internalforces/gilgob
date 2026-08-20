@@ -47,13 +47,8 @@
 .prose .callout__label {
   display: block;
   margin-block-end: 0.35rem;
-  color: var(--primary);
+  color: var(--ink);
 }
-
-.prose .callout--tip .callout__label { color: color-mix(in srgb, var(--signal) 72%, var(--ink)); }
-.prose .callout--warning .callout__label,
-.prose .callout--caution .callout__label { color: var(--danger); }
-.prose .callout--important .callout__label { color: var(--ink); }
 
 .prose table {
   display: block;
