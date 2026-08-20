@@ -24,7 +24,7 @@ export const explorationSchema = commonSchema.extend({
 
 export const projectSchema = commonSchema.extend({
   status: z.enum(['idea', 'building', 'maintained', 'archived']),
-  repository: z.string().url().optional(),
+  repository: z.url().optional(),
 });
 
 export const logSchema = commonSchema;

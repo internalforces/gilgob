@@ -1,8 +1,8 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
+import { pagePath } from './helpers';
 
-const homeUrl = process.env.PLAYWRIGHT_TEST_BASE_URL
-  ?? 'http://127.0.0.1:4321/astro-astro-personal-knowledge-base-digital/';
+const homeUrl = pagePath('/');
 const expectedState = process.env.GITHUB_EXPECT_STATE ?? 'ready';
 
 test.skip(!process.env.GITHUB_EXPECT_STATE, 'GitHub 캐시 fixture 상태를 명시한 검증에서만 실행합니다.');

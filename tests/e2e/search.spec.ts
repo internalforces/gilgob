@@ -1,5 +1,6 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
+import { pagePath } from './helpers';
 
 async function mockSequencedPagefind(page: Page, delays: number[]) {
   await page.route('**/pagefind/pagefind.js', (route) => route.fulfill({
@@ -38,7 +39,7 @@ async function waitForSearchCalls(page: Page, count: number) {
 }
 
 test('opens Korean search with the command shortcut and restores focus on Escape', async ({ page }) => {
-  await page.goto('./', { waitUntil: 'networkidle' });
+  await page.goto(pagePath('/'), { waitUntil: 'networkidle' });
   const trigger = page.getByRole('button', { name: '통합 검색 열기' });
 
   await trigger.focus();
@@ -67,7 +68,7 @@ test('opens Korean search with the command shortcut and restores focus on Escape
 });
 
 test('finds the Korean B-Tree document and supports result keyboard navigation', async ({ page }) => {
-  await page.goto('./', { waitUntil: 'networkidle' });
+  await page.goto(pagePath('/'), { waitUntil: 'networkidle' });
   await page.keyboard.press('ControlOrMeta+k');
   const input = page.getByRole('searchbox', { name: '지식 전체 검색' });
 
@@ -87,7 +88,7 @@ test('finds the Korean B-Tree document and supports result keyboard navigation',
 });
 
 test('waits until Korean composition ends before searching', async ({ page }) => {
-  await page.goto('./', { waitUntil: 'networkidle' });
+  await page.goto(pagePath('/'), { waitUntil: 'networkidle' });
   await page.keyboard.press('ControlOrMeta+k');
   const input = page.getByRole('searchbox', { name: '지식 전체 검색' });
 
@@ -111,7 +112,7 @@ test('waits until Korean composition ends before searching', async ({ page }) =>
 
 test('uses an accessible full-screen search surface on mobile', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto('./', { waitUntil: 'networkidle' });
+  await page.goto(pagePath('/'), { waitUntil: 'networkidle' });
   await page.keyboard.press('ControlOrMeta+k');
   const dialog = page.getByRole('dialog', { name: '통합 검색' });
 
@@ -127,7 +128,7 @@ test('uses an accessible full-screen search surface on mobile', async ({ page })
 
 test('restores mobile search focus to the visible menu trigger', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto('./', { waitUntil: 'networkidle' });
+  await page.goto(pagePath('/'), { waitUntil: 'networkidle' });
   const menuTrigger = page.getByRole('button', { name: '모바일 메뉴 열기' });
 
   await menuTrigger.click();
@@ -141,7 +142,7 @@ test('restores mobile search focus to the visible menu trigger', async ({ page }
 
 test('invalidates an in-flight result immediately when the query is cleared', async ({ page }) => {
   await mockSequencedPagefind(page, [220]);
-  await page.goto('./', { waitUntil: 'networkidle' });
+  await page.goto(pagePath('/'), { waitUntil: 'networkidle' });
   await page.keyboard.press('ControlOrMeta+k');
   const dialog = page.getByRole('dialog', { name: '통합 검색' });
   const input = dialog.getByRole('searchbox');
@@ -157,7 +158,7 @@ test('invalidates an in-flight result immediately when the query is cleared', as
 
 test('keeps a stale result out while the next query waits for debounce', async ({ page }) => {
   await mockSequencedPagefind(page, [80, 10]);
-  await page.goto('./', { waitUntil: 'networkidle' });
+  await page.goto(pagePath('/'), { waitUntil: 'networkidle' });
   await page.keyboard.press('ControlOrMeta+k');
   const dialog = page.getByRole('dialog', { name: '통합 검색' });
   const input = dialog.getByRole('searchbox');
@@ -174,7 +175,7 @@ test('keeps a stale result out while the next query waits for debounce', async (
 
 test('distinguishes repeated query text from an older request', async ({ page }) => {
   await mockSequencedPagefind(page, [280, 10]);
-  await page.goto('./', { waitUntil: 'networkidle' });
+  await page.goto(pagePath('/'), { waitUntil: 'networkidle' });
   await page.keyboard.press('ControlOrMeta+k');
   const dialog = page.getByRole('dialog', { name: '통합 검색' });
   const input = dialog.getByRole('searchbox');
@@ -193,7 +194,7 @@ test('distinguishes repeated query text from an older request', async ({ page })
 
 test('invalidates an in-flight result when Korean composition starts', async ({ page }) => {
   await mockSequencedPagefind(page, [300, 10]);
-  await page.goto('./', { waitUntil: 'networkidle' });
+  await page.goto(pagePath('/'), { waitUntil: 'networkidle' });
   await page.keyboard.press('ControlOrMeta+k');
   const dialog = page.getByRole('dialog', { name: '통합 검색' });
   const input = dialog.getByRole('searchbox');
@@ -220,7 +221,7 @@ test('shows the Korean unavailable state when the build sentinel is present', as
     contentType: 'application/json',
     body: '{"available":false}',
   }));
-  await page.goto('./', { waitUntil: 'networkidle' });
+  await page.goto(pagePath('/'), { waitUntil: 'networkidle' });
   await page.keyboard.press('ControlOrMeta+k');
 
   await page.getByRole('searchbox', { name: '지식 전체 검색' }).fill('데이터');
@@ -230,7 +231,7 @@ test('shows the Korean unavailable state when the build sentinel is present', as
 });
 
 test('announces loading and an empty result in Korean', async ({ page }) => {
-  await page.goto('./', { waitUntil: 'networkidle' });
+  await page.goto(pagePath('/'), { waitUntil: 'networkidle' });
   await page.keyboard.press('ControlOrMeta+k');
   const dialog = page.getByRole('dialog', { name: '통합 검색' });
 
@@ -241,7 +242,7 @@ test('announces loading and an empty result in Korean', async ({ page }) => {
 
 test('announces a Pagefind loading error in Korean', async ({ page }) => {
   await page.route('**/pagefind/pagefind.js', (route) => route.abort());
-  await page.goto('./', { waitUntil: 'networkidle' });
+  await page.goto(pagePath('/'), { waitUntil: 'networkidle' });
   await page.keyboard.press('ControlOrMeta+k');
   const dialog = page.getByRole('dialog', { name: '통합 검색' });
 

@@ -1,8 +1,8 @@
 import { expect, test } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
+import { pagePath } from './helpers';
 
-const homeUrl = process.env.PLAYWRIGHT_TEST_BASE_URL
-  ?? 'http://127.0.0.1:4321/astro-astro-personal-knowledge-base-digital/';
+const homeUrl = pagePath('/');
 
 test('home card links remain keyboard focusable before their scroll reveal', async ({ page }) => {
   await page.goto(homeUrl, { waitUntil: 'networkidle' });

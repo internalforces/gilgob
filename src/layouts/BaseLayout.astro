@@ -16,11 +16,11 @@ export interface Props {
 const { title, description, image, noindex = false } = Astro.props;
 const pageTitle = title === SITE_CONFIG.name ? title : `${title} · ${SITE_CONFIG.name}`;
 const canonicalUrl = new URL(Astro.url.pathname, SITE_CONFIG.site).href;
-const socialImage = image
-  ? image.startsWith('http')
-    ? image
-    : new URL(withBase(image), SITE_CONFIG.site).href
-  : undefined;
+const socialImagePath = image ?? '/og-default.svg';
+const socialImage = socialImagePath
+  .startsWith('http')
+    ? socialImagePath
+    : new URL(withBase(socialImagePath), SITE_CONFIG.site).href;
 ---
 
 <!doctype html>
@@ -31,6 +31,8 @@ const socialImage = image
     <meta name="generator" content={Astro.generator} />
     <title>{pageTitle}</title>
     <meta name="description" content={description} />
+    <link rel="icon" type="image/svg+xml" href={withBase('/favicon.svg')} />
+    <link rel="alternate" type="application/rss+xml" title="gilgob RSS" href={withBase('/rss.xml')} />
     <link rel="canonical" href={canonicalUrl} />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content={SITE_CONFIG.name} />
@@ -38,7 +40,8 @@ const socialImage = image
     <meta property="og:title" content={pageTitle} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonicalUrl} />
-    {socialImage && <meta property="og:image" content={socialImage} />}
+    <meta property="og:image" content={socialImage} />
+    <meta property="og:image:alt" content="gilgob 지식 정원" />
     {noindex && <meta name="robots" content="noindex, nofollow" />}
     <slot name="head" />
   </head>

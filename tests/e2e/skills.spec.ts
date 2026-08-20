@@ -1,8 +1,8 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
+import { pagePath } from './helpers';
 
-const skillsUrl = process.env.PLAYWRIGHT_TEST_BASE_URL
-  ?? 'http://127.0.0.1:4321/astro-astro-personal-knowledge-base-digital/skills/';
+const skillsUrl = pagePath('/skills/');
 
 test('renders the linked skill hierarchy with semantic progress', async ({ page }) => {
   await page.goto(skillsUrl, { waitUntil: 'networkidle' });
@@ -18,7 +18,7 @@ test('renders the linked skill hierarchy with semantic progress', async ({ page 
   const related = page.getByRole('link', { name: 'B-Tree는 왜 DB Index에 사용될까?' }).first();
   await expect(related).toHaveAttribute(
     'href',
-    '/astro-astro-personal-knowledge-base-digital/knowledge/database/b-tree-index',
+    pagePath('/knowledge/database/b-tree-index'),
   );
 });
 

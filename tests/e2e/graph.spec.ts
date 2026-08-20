@@ -1,8 +1,8 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
+import { pagePath } from './helpers';
 
-const graphUrl = process.env.PLAYWRIGHT_TEST_BASE_URL
-  ?? 'http://127.0.0.1:4321/astro-astro-personal-knowledge-base-digital/graph/';
+const graphUrl = pagePath('/graph/');
 
 test('mounts the graph only on its route and exposes real keyboard node controls', async ({ page }) => {
   const cytoscapeRequests: string[] = [];
@@ -10,7 +10,7 @@ test('mounts the graph only on its route and exposes real keyboard node controls
     if (request.url().toLowerCase().includes('cytoscape')) cytoscapeRequests.push(request.url());
   });
 
-  await page.goto(graphUrl.replace('/graph/', '/'), { waitUntil: 'networkidle' });
+  await page.goto(pagePath('/'), { waitUntil: 'networkidle' });
   expect(cytoscapeRequests).toEqual([]);
   await expect(page.locator('[data-graph-canvas]')).toHaveCount(0);
 
@@ -24,7 +24,7 @@ test('mounts the graph only on its route and exposes real keyboard node controls
   await expect(page.getByRole('region', { name: '선택한 노드 상세' })).toContainText('B-Tree는 왜 DB Index에 사용될까?');
   await expect(page.getByRole('link', { name: '문서 읽기' })).toHaveAttribute(
     'href',
-    '/astro-astro-personal-knowledge-base-digital/knowledge/database/b-tree-index',
+    pagePath('/knowledge/database/b-tree-index'),
   );
 });
 
