@@ -1,0 +1,93 @@
+---
+import SiteFooter from '../components/navigation/SiteFooter.astro';
+import SiteHeader from '../components/navigation/SiteHeader.astro';
+import SearchDialog from '../components/search/SearchDialog';
+import { SITE_CONFIG, withBase } from '../config/site';
+import '@fontsource-variable/geist';
+import '../styles/global.css';
+
+export interface Props {
+  title: string;
+  description: string;
+  image?: string;
+  noindex?: boolean;
+}
+
+const { title, description, image, noindex = false } = Astro.props;
+const pageTitle = title === SITE_CONFIG.name ? title : `${title} · ${SITE_CONFIG.name}`;
+const canonicalUrl = new URL(Astro.url.pathname, SITE_CONFIG.site).href;
+const socialImagePath = image ?? '/og-default.svg';
+const socialImage = socialImagePath
+  .startsWith('http')
+    ? socialImagePath
+    : new URL(withBase(socialImagePath), SITE_CONFIG.site).href;
+---
+
+<!doctype html>
+<html lang="ko" data-site="gilgob">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="icon" type="image/svg+xml" href={withBase('/favicon.svg')} />
+    <link rel="alternate" type="application/rss+xml" title="gilgob RSS" href={withBase('/rss.xml')} />
+    <link rel="canonical" href={canonicalUrl} />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={SITE_CONFIG.name} />
+    <meta property="og:locale" content={SITE_CONFIG.locale.replace('-', '_')} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:image" content={socialImage} />
+    <meta property="og:image:alt" content="gilgob 지식 정원" />
+    {noindex && <meta name="robots" content="noindex, nofollow" />}
+    <slot name="head" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">본문 바로가기</a>
+    <SiteHeader />
+    <SearchDialog client:load base={SITE_CONFIG.base} />
+    <main id="main-content" class="site-main" tabindex="-1">
+      <slot />
+    </main>
+    <SiteFooter />
+  </body>
+</html>
+
+<style is:global>
+  .skip-link {
+    position: fixed;
+    z-index: 100;
+    inset-block-start: 0.75rem;
+    inset-inline-start: 0.75rem;
+    padding: 0.65rem 0.9rem;
+    border-radius: 0.5rem;
+    background: var(--ink);
+    color: var(--surface);
+    font-weight: 650;
+    text-decoration: none;
+    transform: translateY(calc(-100% - 1rem));
+    transition: transform 160ms ease;
+  }
+
+  .skip-link:focus-visible {
+    transform: translateY(0);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+
+    *,
+    *::before,
+    *::after {
+      scroll-behavior: auto !important;
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+</style>

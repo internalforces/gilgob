@@ -1,0 +1,135 @@
+---
+interface Props {
+  variant?: 'header' | 'home';
+  label?: string;
+}
+
+const { variant = 'header', label = variant === 'home' ? '통합 검색 열기' : '검색 열기' } = Astro.props;
+---
+
+<button
+  class:list={['search-trigger', `search-trigger--${variant}`]}
+  type="button"
+  aria-label={label}
+  aria-haspopup="dialog"
+  data-search-trigger
+  data-search-reveal={variant === 'home' ? '' : undefined}
+>
+  <span class="search-trigger__icon" aria-hidden="true">
+    <svg viewBox="0 0 24 24" width={variant === 'home' ? 22 : 18} height={variant === 'home' ? 22 : 18} fill="none" stroke="currentColor" stroke-width="1.8">
+      <circle cx="11" cy="11" r="6.5"></circle>
+      <path d="m16 16 4 4"></path>
+    </svg>
+  </span>
+  {variant === 'home' && (
+    <>
+      <span class="search-trigger__copy">
+        <strong>지식 전체에서 검색</strong>
+        <small>제목, 본문, 태그와 분야를 찾아보세요.</small>
+      </span>
+      <kbd><span aria-hidden="true">⌘</span><span class="sr-only">Command</span> K</kbd>
+    </>
+  )}
+</button>
+
+<style>
+  .search-trigger {
+    cursor: pointer;
+  }
+
+  .search-trigger--header {
+    display: grid;
+    width: 2.5rem;
+    height: 2.5rem;
+    place-items: center;
+    padding: 0;
+    border: 1px solid transparent;
+    border-radius: 0.6rem;
+    background: transparent;
+    color: var(--muted);
+    transition: border-color 180ms ease, background 180ms ease, color 180ms ease;
+  }
+
+  .search-trigger--header:hover {
+    border-color: var(--line);
+    background: var(--surface);
+    color: var(--ink);
+  }
+
+  .search-trigger--home {
+    position: absolute;
+    z-index: 3;
+    inset-block-end: 0;
+    inset-inline: 0;
+    display: grid;
+    min-height: 6.25rem;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 1rem;
+    width: 100%;
+    padding: 1.2rem clamp(1.25rem, 3vw, 2rem);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: color-mix(in srgb, var(--surface) 94%, transparent);
+    box-shadow: 0 1.25rem 3.5rem color-mix(in srgb, var(--ink) 8%, transparent);
+    color: var(--ink);
+    text-align: start;
+    backdrop-filter: blur(18px);
+    transition: border-color 180ms ease, transform 180ms ease;
+  }
+
+  .search-trigger--home:hover {
+    border-color: color-mix(in srgb, var(--primary) 45%, var(--line));
+    transform: translateY(-2px);
+  }
+
+  .search-trigger__icon {
+    display: grid;
+    place-items: center;
+  }
+
+  .search-trigger--home .search-trigger__icon {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--primary) 9%, var(--surface));
+    color: var(--primary);
+  }
+
+  .search-trigger__copy {
+    display: grid;
+    gap: 0.1rem;
+  }
+
+  .search-trigger__copy strong { font-size: 1rem; }
+  .search-trigger__copy small { color: var(--muted); font-size: 0.875rem; }
+
+  .search-trigger kbd {
+    padding: 0.35rem 0.55rem;
+    border: 1px solid var(--line);
+    border-block-end-width: 2px;
+    border-radius: 0.4rem;
+    background: var(--canvas);
+    color: var(--muted);
+    font-family: inherit;
+    font-size: 0.78rem;
+    font-weight: 650;
+  }
+
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  @media (max-width: 31rem) {
+    .search-trigger__copy small,
+    .search-trigger kbd { display: none; }
+  }
+</style>

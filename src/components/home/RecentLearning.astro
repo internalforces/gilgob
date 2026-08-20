@@ -1,0 +1,91 @@
+---
+import { withBase } from '../../config/site';
+import type { NormalizedEntry } from '../../lib/content/queries';
+
+interface Props {
+  entries: NormalizedEntry[];
+}
+
+const { entries } = Astro.props;
+const dateFormatter = new Intl.DateTimeFormat('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
+---
+
+<section class="recent-learning home-section" aria-labelledby="recent-learning-title">
+  <header class="recent-learning__heading">
+    <div>
+      <h2 id="recent-learning-title">최근 배운 것</h2>
+      <p>짧게 기록하고, 나중에 더 큰 지식으로 연결할 학습의 단서입니다.</p>
+    </div>
+    <a href={withBase('/logs/')}>학습 기록 보기 <span aria-hidden="true">→</span></a>
+  </header>
+
+  {entries.length > 0 ? (
+    <div class="recent-learning__list">
+      {entries.slice(0, 3).map((entry, index) => {
+        const updated = entry.data.updated ?? entry.data.created;
+        return (
+          <article class="learning-row" data-home-card>
+            <span class="learning-row__index" aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
+            <div class="learning-row__copy">
+              <h3><a href={withBase(entry.url)}>{entry.data.title}</a></h3>
+              <p>{entry.data.description}</p>
+            </div>
+            <div class="learning-row__meta">
+              <time datetime={updated.toISOString()}>{dateFormatter.format(updated)}</time>
+              <ul aria-label="태그">
+                {entry.data.tags.slice(0, 2).map((tag) => <li>#{tag}</li>)}
+              </ul>
+            </div>
+          </article>
+        );
+      })}
+    </div>
+  ) : (
+    <p class="recent-learning__empty">아직 공개된 학습 기록이 없습니다.</p>
+  )}
+</section>
+
+<style>
+  .home-section { padding-block-start: clamp(7rem, 13vw, 11rem); }
+
+  .recent-learning__heading {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: 2rem;
+    margin-block-end: clamp(2rem, 4vw, 3.5rem);
+  }
+
+  .recent-learning__heading h2 { margin: 0; font-size: clamp(2rem, 4vw, 3.5rem); font-weight: 620; letter-spacing: -0.045em; line-height: 1.08; }
+  .recent-learning__heading p { max-width: 40rem; margin: 0.8rem 0 0; color: var(--muted); }
+  .recent-learning__heading > a { color: var(--primary); font-size: 0.9rem; font-weight: 650; text-decoration: none; white-space: nowrap; }
+
+  .recent-learning__list { border-block-start: 1px solid var(--line); }
+
+  .learning-row {
+    display: grid;
+    grid-template-columns: 3rem minmax(0, 1fr) minmax(12rem, auto);
+    align-items: start;
+    gap: clamp(1rem, 3vw, 2.5rem);
+    padding-block: clamp(1.75rem, 4vw, 3rem);
+    border-block-end: 1px solid var(--line);
+    transition: padding-inline 180ms ease, background 180ms ease;
+  }
+
+  .learning-row:hover { padding-inline: 0.75rem; background: color-mix(in srgb, var(--surface) 75%, transparent); }
+  .learning-row__index { padding-block-start: 0.3rem; color: var(--muted); font-family: ui-monospace, 'SFMono-Regular', Consolas, monospace; font-size: 0.72rem; }
+  .learning-row h3 { margin: 0; font-size: clamp(1.25rem, 2.4vw, 1.85rem); font-weight: 610; letter-spacing: -0.035em; line-height: 1.25; }
+  .learning-row h3 a { text-decoration: none; }
+  .learning-row h3 a:hover { color: var(--primary); }
+  .learning-row__copy p { max-width: 42rem; margin: 0.7rem 0 0; color: var(--muted); font-size: 0.9rem; }
+  .learning-row__meta { display: grid; justify-items: end; gap: 0.65rem; color: var(--muted); font-size: 0.76rem; }
+  .learning-row__meta ul { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 0.4rem; margin: 0; padding: 0; list-style: none; }
+  .recent-learning__empty { padding: 2rem; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); color: var(--muted); }
+
+  @media (max-width: 46rem) {
+    .recent-learning__heading { align-items: start; flex-direction: column; }
+    .learning-row { grid-template-columns: 2rem minmax(0, 1fr); }
+    .learning-row__meta { grid-column: 2; justify-items: start; }
+    .learning-row__meta ul { justify-content: flex-start; }
+  }
+</style>

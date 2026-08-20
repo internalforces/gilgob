@@ -1,0 +1,25 @@
+{
+  "data": {
+    "user": {
+      "contributionsCollection": {
+        "contributionCalendar": {
+          "totalContributions": 14,
+          "weeks": [
+            {
+              "contributionDays": [
+                { "date": "2026-08-13", "contributionCount": 0, "color": "#ebedf0" },
+                { "date": "2026-08-14", "contributionCount": 1, "color": "#9be9a8" },
+                { "date": "2026-08-15", "contributionCount": 4, "color": "url(javascript:alert(1))" }
+              ]
+            },
+            {
+              "contributionDays": [
+                { "date": "2026-08-16", "contributionCount": 9, "color": "#216e39" }
+              ]
+            }
+          ]
+        }
+      }
+    }
+  }
+}

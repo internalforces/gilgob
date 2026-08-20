@@ -1,0 +1,95 @@
+---
+import type { MarkdownHeading } from 'astro';
+import Backlinks from '../components/content/Backlinks.astro';
+import { withBase } from '../config/site';
+import type { NormalizedEntry } from '../lib/content/queries';
+import type { ContentRecord } from '../lib/content/types';
+import { categoryLabel } from '../lib/content/taxonomy';
+import BaseLayout from './BaseLayout.astro';
+
+interface Props {
+  entry: NormalizedEntry;
+  headings: MarkdownHeading[];
+  backlinks: ContentRecord[];
+  related: ContentRecord[];
+}
+
+const { entry, headings, backlinks, related } = Astro.props;
+const typeLabels = { knowledge: '지식', explorations: '탐구', projects: '프로젝트', logs: '학습 기록' } as const;
+const statusLabels: Record<string, string> = {
+  seed: '씨앗', growing: '성장 중', mastered: '숙련',
+  active: '탐구 중', paused: '잠시 멈춤', complete: '완료',
+  idea: '아이디어', building: '구축 중', maintained: '유지 중', archived: '보관',
+};
+const toc = headings.filter(({ depth }) => depth === 2 || depth === 3);
+const created = entry.data.created.toLocaleDateString('ko-KR');
+const updated = (entry.data.updated ?? entry.data.created).toLocaleDateString('ko-KR');
+---
+
+<BaseLayout title={entry.data.title} description={entry.data.description}>
+  <article class="reading-page" data-pagefind-body>
+    <header class="reading-hero site-container">
+      <p class="reading-hero__eyebrow" data-pagefind-ignore>
+        <span data-pagefind-meta="type">{typeLabels[entry.kind]}</span>
+        {' / '}
+        <span data-pagefind-meta={`category:${entry.data.category}`}>{categoryLabel(entry.data.category)}</span>
+      </p>
+      <h1 data-pagefind-meta="title">{entry.data.title}</h1>
+      <p class="reading-hero__description" data-pagefind-meta="description">{entry.data.description}</p>
+      <dl class="reading-hero__metadata" data-pagefind-ignore>
+        <div><dt>작성</dt><dd><time datetime={entry.data.created.toISOString()}>{created}</time></dd></div>
+        <div><dt>업데이트</dt><dd><time datetime={(entry.data.updated ?? entry.data.created).toISOString()}>{updated}</time></dd></div>
+        {entry.data.status && <div><dt>상태</dt><dd>{statusLabels[entry.data.status] ?? entry.data.status}</dd></div>}
+      </dl>
+      <ul class="reading-hero__tags" aria-label="태그" data-pagefind-ignore data-pagefind-meta={`tags:${entry.data.tags.join(', ')}`}>
+        {entry.data.tags.map((tag) => <li data-pagefind-filter={`tag:${tag}`}>#{tag}</li>)}
+      </ul>
+    </header>
+
+    <div class="reading-grid site-container">
+      <aside class="reading-context" aria-label="문서 맥락" data-pagefind-ignore>
+        <p class="reading-context__label">분야 신호</p>
+        <strong>{categoryLabel(entry.data.category)}</strong>
+        <span>{typeLabels[entry.kind]} 컬렉션</span>
+      </aside>
+
+      <div class="reading-column">
+        <div class="prose"><slot /></div>
+        {toc.length > 0 && (
+          <details class="reading-toc reading-toc--mobile" data-pagefind-ignore>
+            <summary>목차</summary>
+            <ol>{toc.map((heading) => <li class={`toc-depth-${heading.depth}`}><a href={`#${heading.slug}`}>{heading.text}</a></li>)}</ol>
+          </details>
+        )}
+
+        {entry.data.nextQuestions?.length && (
+          <section class="next-questions" aria-labelledby="next-questions-title">
+            <p>열린 질문</p>
+            <h2 id="next-questions-title">다음 탐구 질문</h2>
+            <ol>{entry.data.nextQuestions.map((question) => <li>{question}</li>)}</ol>
+          </section>
+        )}
+
+        <Backlinks entries={backlinks} />
+        <section class="reading-links" aria-labelledby="related-title" data-pagefind-ignore>
+          <div class="reading-links__heading">
+            <p class="reading-links__eyebrow">연결 / 가까운 문서</p>
+            <h2 id="related-title">관련 지식</h2>
+          </div>
+          {related.length > 0 ? (
+            <ul>
+              {related.map((item) => <li><a href={withBase(item.url)}>{item.title}</a><span>{item.description}</span></li>)}
+            </ul>
+          ) : <p class="reading-links__empty">연결된 공개 문서를 더 모으는 중입니다.</p>}
+        </section>
+      </div>
+
+      <aside class="reading-toc reading-toc--desktop" aria-label="목차" data-pagefind-ignore>
+        <p>목차</p>
+        {toc.length > 0
+          ? <ol>{toc.map((heading) => <li class={`toc-depth-${heading.depth}`}><a href={`#${heading.slug}`}>{heading.text}</a></li>)}</ol>
+          : <span>이 문서에는 하위 제목이 없습니다.</span>}
+      </aside>
+    </div>
+  </article>
+</BaseLayout>

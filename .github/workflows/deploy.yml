@@ -1,0 +1,110 @@
+name: Deploy gilgob to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+  schedule:
+    - cron: '17 18 * * *'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Verify and build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7.0.1
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7.0.0
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Resolve GitHub stats cache key
+        id: cache-date
+        shell: bash
+        run: echo "value=$(date -u +%Y-%m-%d)" >> "$GITHUB_OUTPUT"
+
+      - name: Restore GitHub stats cache
+        id: github-stats-cache
+        uses: actions/cache/restore@v6.1.0
+        with:
+          path: .cache/github-stats.json
+          key: github-stats-${{ runner.os }}-${{ steps.cache-date.outputs.value }}
+          restore-keys: |
+            github-stats-${{ runner.os }}-
+
+      - name: Verify site
+        run: npm run verify
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SITE_URL: https://internalforces.github.io
+          BASE_PATH: /gilgob
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Run browser acceptance tests
+        run: npm run test:e2e
+        env:
+          BASE_PATH: /gilgob
+
+      - name: Build and upload Pages artifact
+        uses: withastro/action@v6.1.2
+        with:
+          node-version: 22
+          build-cmd: npm run build
+          cache: false
+          out-dir: dist
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SITE_URL: https://internalforces.github.io
+          BASE_PATH: /gilgob
+
+      - name: Check GitHub stats cache output
+        if: always()
+        id: github-stats-output
+        shell: bash
+        run: |
+          if [[ -f .cache/github-stats.json ]]; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Save GitHub stats cache
+        if: always() && steps.github-stats-output.outputs.exists == 'true' && steps.github-stats-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v6.1.0
+        with:
+          path: .cache/github-stats.json
+          key: github-stats-${{ runner.os }}-${{ steps.cache-date.outputs.value }}
+
+  deploy:
+    name: Deploy
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4.0.5

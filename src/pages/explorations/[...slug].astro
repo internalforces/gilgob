@@ -1,0 +1,19 @@
+---
+import type { GetStaticPaths } from 'astro';
+import { getCollection, render, type CollectionEntry } from 'astro:content';
+import ContentLayout from '../../layouts/ContentLayout.astro';
+import { filterAndSortEntries, getEntryRelations, isProductionBuild, normalizeEntry } from '../../lib/content/queries';
+
+export const getStaticPaths = (async () => {
+  const entries = filterAndSortEntries(await getCollection('explorations'), isProductionBuild());
+  return entries.map((entry) => ({ params: { slug: entry.data.slug ?? entry.id.replace(/\.(?:md|mdx)$/i, '') }, props: { entry } }));
+}) satisfies GetStaticPaths;
+
+interface Props { entry: CollectionEntry<'explorations'> }
+const { entry } = Astro.props;
+const normalized = normalizeEntry('explorations', entry);
+const { Content, headings } = await render(entry);
+const relations = getEntryRelations(normalized.id);
+---
+
+<ContentLayout entry={normalized} headings={headings} {...relations}><Content /></ContentLayout>

@@ -1,0 +1,14 @@
+:root {
+  color-scheme: light;
+  --canvas: #f6f8fb;
+  --surface: #ffffff;
+  --ink: #0d1b36;
+  --muted: #65708a;
+  --line: #dce3ec;
+  --primary: #1d63ff;
+  --signal: #37c998;
+  --danger: #c43d4b;
+  --radius: 12px;
+  --content-max: 1280px;
+  --reading-max: 760px;
+}

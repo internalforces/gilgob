@@ -1,0 +1,57 @@
+---
+import { withBase } from '../../config/site';
+import type { NormalizedEntry } from '../../lib/content/queries';
+import { categoryLabel } from '../../lib/content/taxonomy';
+
+interface Props {
+  entry: NormalizedEntry;
+}
+
+const { entry } = Astro.props;
+const typeLabels = {
+  knowledge: '지식',
+  explorations: '탐구',
+  projects: '프로젝트',
+  logs: '학습 기록',
+} as const;
+const statusLabels: Record<string, string> = {
+  seed: '씨앗',
+  growing: '성장 중',
+  mastered: '숙련',
+  active: '탐구 중',
+  paused: '잠시 멈춤',
+  complete: '완료',
+  idea: '아이디어',
+  building: '구축 중',
+  maintained: '유지 중',
+  archived: '보관',
+};
+const updated = entry.data.updated ?? entry.data.created;
+---
+
+<article
+  class="content-card"
+  data-filter-card
+  data-entry-id={entry.id}
+  data-draft={String(entry.data.draft)}
+  data-pagefind-meta={`type:${typeLabels[entry.kind]}`}
+>
+  <div class="content-card__signal" aria-hidden="true"></div>
+  <div class="content-card__meta">
+    <span>{typeLabels[entry.kind]}</span>
+    <span>{categoryLabel(entry.data.category)}</span>
+    {entry.data.status && <span>{statusLabels[entry.data.status] ?? entry.data.status}</span>}
+  </div>
+  <h2 class="content-card__title">
+    <a href={withBase(entry.url)}>{entry.data.title}</a>
+  </h2>
+  <p class="content-card__description">{entry.data.description}</p>
+  <div class="content-card__footer">
+    <ul class="content-card__tags" aria-label="태그">
+      {entry.data.tags.map((tag) => <li>#{tag}</li>)}
+    </ul>
+    <time datetime={updated.toISOString()}>
+      {updated.toLocaleDateString('ko-KR')}
+    </time>
+  </div>
+</article>

@@ -1,0 +1,200 @@
+---
+import FeaturedProjects from '../components/home/FeaturedProjects.astro';
+import FieldIndex from '../components/home/FieldIndex.astro';
+import Hero from '../components/home/Hero.astro';
+import RecentLearning from '../components/home/RecentLearning.astro';
+import SignalPanel from '../components/home/SignalPanel.astro';
+import ContributionCalendar from '../components/github/ContributionCalendar.astro';
+import RecentActivity from '../components/github/RecentActivity.astro';
+import { withBase } from '../config/site';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { readContentIndex } from '../lib/content/index-store';
+import { getPublicEntries } from '../lib/content/queries';
+import { calculateContentStats, loadSkillSignal } from '../lib/content/stats';
+import type { ContentIndex } from '../lib/content/types';
+import { getGitHubStats } from '../lib/github/fetch-github';
+
+const entries = await getPublicEntries();
+const publicIds = new Set(entries.map((entry) => entry.id));
+let indexedEntries = new Map<string, { outgoing: string[] }>();
+let connectionsAvailable = true;
+let contentIndex: ContentIndex | null = null;
+
+try {
+  contentIndex = readContentIndex();
+  indexedEntries = new Map(contentIndex.documents
+    .filter((entry) => publicIds.has(entry.id))
+    .map((entry) => [entry.id, {
+      outgoing: entry.outgoing.filter((target) => publicIds.has(target)),
+    }]));
+} catch {
+  connectionsAvailable = false;
+}
+
+const statsEntries = entries.map((entry) => ({
+  kind: entry.kind,
+  category: entry.data.category,
+  status: entry.data.status,
+  outgoing: indexedEntries.get(entry.id)?.outgoing ?? [],
+}));
+const stats = calculateContentStats(statsEntries);
+const skillSignal = await loadSkillSignal(statsEntries, contentIndex);
+const activeExplorations = entries.filter((entry) => (
+  entry.kind === 'explorations' && entry.data.status === 'active'
+));
+const recentLearning = entries.filter((entry) => entry.kind === 'logs');
+const featuredProjects = entries.filter((entry) => (
+  entry.kind === 'projects' && entry.data.featured
+));
+const githubBuildTime = new Date();
+const githubStats = await getGitHubStats({
+  token: process.env.GITHUB_TOKEN,
+  now: () => githubBuildTime,
+});
+const githubFetchDate = githubStats ? new Intl.DateTimeFormat('ko-KR', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+  hour: 'numeric',
+  minute: '2-digit',
+  timeZone: 'Asia/Seoul',
+}).format(new Date(githubStats.fetchedAt)) : null;
+---
+
+<BaseLayout
+  title="gilgob"
+  description="internalforces가 지식, 탐구, 프로젝트와 학습 기록을 연결해 가꾸는 한국어 디지털 가든입니다."
+>
+  <div class="home-dashboard site-container" data-home-dashboard>
+    <Hero />
+    <FieldIndex entries={entries} />
+    <SignalPanel
+      activeExplorations={activeExplorations}
+      stats={stats}
+      skillSignal={skillSignal}
+      connectionsAvailable={connectionsAvailable}
+    />
+    <RecentLearning entries={recentLearning} />
+    <FeaturedProjects entries={featuredProjects} />
+
+    <section
+      class="github-activity"
+      aria-labelledby="github-activity-title"
+      data-github-activity
+      data-state={githubStats ? githubStats.stale ? 'stale' : 'ready' : 'empty'}
+    >
+      <header class="github-activity__heading">
+        <div>
+          <h2 id="github-activity-title">GitHub 활동</h2>
+          <p>코드에서 이어지는 기여의 흐름과 최근 공개 신호를 함께 봅니다.</p>
+        </div>
+        <a href="https://github.com/internalforces" target="_blank" rel="noreferrer">
+          GitHub 프로필 보기 <span aria-hidden="true">↗</span>
+        </a>
+      </header>
+
+      {githubStats ? (
+        <>
+          {githubStats.stale && (
+            <p class="github-activity__stale" role="status">
+              마지막으로 확인된 활동 · {githubFetchDate}
+            </p>
+          )}
+          <div class="github-activity__grid">
+            <ContributionCalendar total={githubStats.total} weeks={githubStats.weeks} />
+            <RecentActivity events={githubStats.events} referenceTime={githubBuildTime.toISOString()} />
+          </div>
+        </>
+      ) : (
+        <div class="github-activity__empty" role="status">
+          <svg aria-hidden="true" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.6">
+            <path d="M4 18V9m5 9V5m5 13v-7m5 7V3"></path>
+          </svg>
+          <span>GitHub 통계를 불러오지 못했습니다.</span>
+        </div>
+      )}
+    </section>
+
+    <nav class="home-quick-links" aria-label="홈 하단 바로가기">
+      <a href={withBase('/knowledge/')}>정리된 지식</a>
+      <a href={withBase('/projects/')}>진행한 프로젝트</a>
+    </nav>
+  </div>
+
+  <script>
+    import '../scripts/home-motion';
+  </script>
+</BaseLayout>
+
+<style>
+  .home-dashboard { width: min(calc(100% - 3rem), var(--content-max)); }
+  .home-dashboard :global([data-home-card][data-home-focus-final]) { transition: none !important; }
+
+  .github-activity {
+    margin-block-start: clamp(7rem, 13vw, 11rem);
+    padding: clamp(2rem, 5vw, 4rem);
+    border: 1px solid color-mix(in srgb, var(--surface) 18%, transparent);
+    border-radius: var(--radius);
+    background:
+      radial-gradient(circle at 90% 15%, color-mix(in srgb, var(--primary) 34%, transparent), transparent 20rem),
+      var(--ink);
+    color: var(--surface);
+  }
+
+  .github-activity__heading { display: flex; align-items: end; justify-content: space-between; gap: 2rem; }
+  .github-activity__heading h2 { margin: 0; font-size: clamp(1.75rem, 3vw, 2.75rem); font-weight: 620; letter-spacing: -0.04em; }
+  .github-activity__heading p { max-width: 34rem; margin: 0.65rem 0 0; color: color-mix(in srgb, var(--surface) 66%, transparent); font-size: 0.9rem; }
+  .github-activity__heading > a { color: var(--surface); font-size: 0.86rem; font-weight: 650; text-decoration: none; white-space: nowrap; }
+
+  .github-activity__grid { display: grid; grid-template-columns: minmax(0, 8fr) minmax(18rem, 4fr); grid-auto-flow: dense; align-items: start; gap: 1rem; margin-block-start: clamp(2rem, 4vw, 3rem); }
+
+  .github-activity__stale { width: fit-content; margin: 1.4rem 0 0; padding: 0.5rem 0.7rem; border-inline-start: 2px solid var(--signal); background: color-mix(in srgb, var(--surface) 8%, transparent); color: color-mix(in srgb, var(--surface) 72%, transparent); font-size: 0.72rem; }
+
+  .github-activity__empty {
+    display: flex;
+    min-height: 8rem;
+    align-items: center;
+    justify-content: center;
+    gap: 0.9rem;
+    margin-block-start: 2rem;
+    padding: 1rem 1.25rem;
+    border: 1px dashed color-mix(in srgb, var(--surface) 28%, transparent);
+    border-radius: 0.75rem;
+    color: color-mix(in srgb, var(--surface) 75%, transparent);
+    font-size: 0.82rem;
+  }
+
+  .home-quick-links {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+    margin-block-start: clamp(4rem, 8vw, 7rem);
+  }
+
+  .home-quick-links a {
+    display: flex;
+    min-height: 5.5rem;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.5rem 2rem;
+    border-block: 1px solid var(--line);
+    color: var(--ink);
+    font-size: 1rem;
+    font-weight: 620;
+    text-decoration: none;
+    transition: color 180ms ease, padding-inline 180ms ease;
+  }
+
+  .home-quick-links a::after { color: var(--primary); content: '→'; }
+  .home-quick-links a:hover { padding-inline: 2.15rem 1.85rem; color: var(--primary); }
+
+  @media (max-width: 52rem) {
+    .github-activity__heading { align-items: start; flex-direction: column; }
+    .github-activity__grid { grid-template-columns: minmax(0, 1fr); }
+  }
+
+  @media (max-width: 45rem) {
+    .home-dashboard { width: min(calc(100% - 2rem), var(--content-max)); }
+    .home-quick-links { grid-template-columns: minmax(0, 1fr); }
+  }
+</style>

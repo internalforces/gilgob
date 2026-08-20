@@ -4,6 +4,9 @@ dist/
 .cache/
 .superpowers/
 .worktrees/
+test-results/
+playwright-report/
+blob-report/
 .DS_Store
 *.log
 

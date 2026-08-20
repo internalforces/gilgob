@@ -1,0 +1,137 @@
+---
+import { withBase } from '../../config/site';
+import type { NormalizedEntry } from '../../lib/content/queries';
+import { categoryLabel } from '../../lib/content/taxonomy';
+
+interface Props {
+  entries: NormalizedEntry[];
+}
+
+const { entries } = Astro.props;
+const fields = [
+  { label: categoryLabel('Computer Science'), category: 'Computer Science', href: '/knowledge/?category=Computer%20Science' },
+  { label: categoryLabel('Data & Mathematics'), category: 'Data & Mathematics', href: '/knowledge/?category=Data%20%26%20Mathematics' },
+  { label: categoryLabel('AI'), category: 'AI', href: '/explorations/?category=AI' },
+  { label: categoryLabel('Finance'), category: 'Finance', href: '/knowledge/?category=Finance' },
+  { label: categoryLabel('Research'), category: 'Research', href: '/explorations/?category=Research' },
+  { label: categoryLabel('Projects'), category: 'Projects', href: '/projects/?category=Projects' },
+  { label: categoryLabel('Learning'), category: 'Learning', href: '/logs/?category=Learning' },
+  { label: '모든 지식', kind: 'knowledge', href: '/knowledge/' },
+].map((field) => ({
+  ...field,
+  count: field.kind === 'knowledge'
+    ? entries.filter((entry) => entry.kind === 'knowledge').length
+    : entries.filter((entry) => entry.data.category === field.category).length,
+}));
+---
+
+<section class="field-index home-section" aria-labelledby="field-index-title">
+  <header class="home-section__heading">
+    <div>
+      <h2 id="field-index-title">분야별 지식 탐색</h2>
+      <p>관심 분야에서 시작해 연결된 개념과 탐구를 따라가 보세요.</p>
+    </div>
+    <a href={withBase('/knowledge/')}>전체 지식 보기 <span aria-hidden="true">→</span></a>
+  </header>
+
+  <div class="field-index__grid">
+    {fields.map((field, index) => (
+      <a class="field-index__item" href={withBase(field.href)} data-home-card>
+        <span class="field-index__number" aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
+        <strong>{field.label}</strong>
+        <span>{field.count.toLocaleString('ko-KR')}개의 기록</span>
+      </a>
+    ))}
+  </div>
+</section>
+
+<style>
+  .home-section { padding-block-start: clamp(7rem, 13vw, 11rem); }
+
+  .home-section__heading {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: 2rem;
+    margin-block-end: clamp(2rem, 4vw, 3.5rem);
+  }
+
+  .home-section__heading h2 {
+    margin: 0;
+    font-size: clamp(2rem, 4vw, 3.5rem);
+    font-weight: 620;
+    letter-spacing: -0.045em;
+    line-height: 1.08;
+  }
+
+  .home-section__heading p {
+    max-width: 36rem;
+    margin: 0.8rem 0 0;
+    color: var(--muted);
+  }
+
+  .home-section__heading > a {
+    color: var(--primary);
+    font-size: 0.9rem;
+    font-weight: 650;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .field-index__grid {
+    display: grid;
+    grid-auto-flow: dense;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    border-block-start: 1px solid var(--line);
+    border-inline-start: 1px solid var(--line);
+  }
+
+  .field-index__item {
+    display: grid;
+    min-height: 12rem;
+    grid-template-rows: auto 1fr auto;
+    gap: 1rem;
+    padding: clamp(1.25rem, 2.5vw, 2rem);
+    border-block-end: 1px solid var(--line);
+    border-inline-end: 1px solid var(--line);
+    background: color-mix(in srgb, var(--surface) 78%, transparent);
+    color: var(--ink);
+    text-decoration: none;
+    transition: background 180ms ease, color 180ms ease, transform 180ms ease;
+  }
+
+  .field-index__item:hover {
+    z-index: 1;
+    background: var(--surface);
+    color: var(--primary);
+    transform: translateY(-2px);
+  }
+
+  .field-index__number {
+    color: var(--muted);
+    font-family: ui-monospace, 'SFMono-Regular', Consolas, monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+  }
+
+  .field-index__item strong {
+    align-self: center;
+    font-size: clamp(1.2rem, 2vw, 1.6rem);
+    font-weight: 610;
+    letter-spacing: -0.035em;
+  }
+
+  .field-index__item > span:last-child {
+    color: var(--muted);
+    font-size: 0.82rem;
+  }
+
+  @media (max-width: 52rem) {
+    .field-index__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+
+  @media (max-width: 35rem) {
+    .home-section__heading { align-items: start; flex-direction: column; }
+    .field-index__item { min-height: 9rem; }
+  }
+</style>
