@@ -42,9 +42,9 @@ Obsidian의 Templates 플러그인에서 다음 파일을 선택합니다.
 - `content/templates/log.md`: 별도 `status`가 없는 학습 기록
 - `content/templates/portfolio.md`: 직접 공유하는 링크 전용 포트폴리오
 
-템플릿을 적용한 뒤 제목, 설명, 분야, 날짜, 상태를 실제 값으로 바꾸고 알맞은 컬렉션 폴더에 저장합니다. 파일 경로가 기본 slug가 되며 `slug`를 명시하면 그 값을 사용합니다.
+`knowledge`, `exploration`, `project`, `log` 템플릿을 적용한 뒤 제목, 설명, 분야, 날짜, 상태를 실제 값으로 바꾸고 알맞은 컬렉션 폴더에 저장합니다. 이 공개 문서는 파일 경로가 기본 slug가 되며 `slug`를 명시하면 그 값을 사용합니다.
 
-포트폴리오는 `shareId`를 반드시 명시해 만든 직접 링크용 미노출 페이지입니다. 공개 목록, 사이트맵, RSS와 사이트 내 검색에서는 제외되지만 인증으로 보호되지는 않으므로 URL을 아는 사람은 열 수 있습니다. 민감한 정보나 NDA 자료는 저장하지 마세요.
+포트폴리오는 공개 문서용 `category`, `status`, `slug` 규칙을 쓰지 않습니다. `title`, `description`, `shareId`, `project`, `targetRole`, `period`, `projectType`, `role`, `tags`, `updated`, `draft`를 작성하고, 필요하면 `repository`, `package`, `demo` HTTPS 링크를 추가합니다. `shareId`는 파일명과 무관한 직접 공유 경로이며, 템플릿처럼 충분히 긴 임의형 접두사를 사용하면 우연한 발견을 줄일 수 있습니다. 다만 이는 인증이 아니므로 URL을 아는 사람은 열 수 있으며, 민감한 정보나 NDA 자료는 저장하지 마세요. 포트폴리오는 공개 목록, 사이트맵, RSS와 사이트 내 검색에서 제외됩니다.
 
 ## frontmatter 표
 

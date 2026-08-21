@@ -8,7 +8,11 @@ const basePath = 'dist';
 const draftFixture = 'content/knowledge/__integration-draft.md';
 const publicLinkFixture = 'content/knowledge/__integration-public-link.md';
 const portfolioFixture = 'content/portfolio/__integration-unlisted.md';
+const portfolioDraftFixture = 'content/portfolio/__integration-unlisted-draft.md';
+const duplicatePortfolioFixture = 'content/portfolio/__integration-unlisted-duplicate.md';
 const portfolioShareId = '8c5e1a7d3b92-route-fixture';
+const publishedPortfolioShareId = '8c5e1a7d3b92-signal-hub';
+const portfolioDraftShareId = 'b91d2e4f6a80-draft-fixture';
 
 describe('content routes', () => {
   beforeAll(async () => {
@@ -60,6 +64,22 @@ package: "https://www.npmjs.com/package/csv-to-signal"
 
 통합 테스트 전용 본문이다.
 `, 'utf8');
+    await writeFile(portfolioDraftFixture, `---
+title: "프로덕션에서 제외되는 포트폴리오 초안"
+description: "포트폴리오 초안 정적 경로 제외를 검증한다."
+shareId: "${portfolioDraftShareId}"
+project: "signal-hub"
+targetRole: "백엔드 개발자"
+period: "2026.08–현재"
+projectType: "개인 프로젝트"
+role: ["설계"]
+tags: ["TypeScript"]
+updated: 2026-08-21
+draft: true
+---
+
+초안 본문이다.
+`, 'utf8');
     try {
       await execFileAsync('npm', ['run', 'build'], {
         cwd: process.cwd(),
@@ -71,6 +91,7 @@ package: "https://www.npmjs.com/package/csv-to-signal"
         rm(draftFixture, { force: true }),
         rm(publicLinkFixture, { force: true }),
         rm(portfolioFixture, { force: true }),
+        rm(portfolioDraftFixture, { force: true }),
       ]);
     }
   }, 60_000);
@@ -179,6 +200,11 @@ package: "https://www.npmjs.com/package/csv-to-signal"
     expect(html).toContain('https://www.npmjs.com/package/csv-to-signal');
   });
 
+  it('does not emit a production route for a draft portfolio', async () => {
+    await expect(access(`${basePath}/portfolio/${portfolioDraftShareId}/index.html`))
+      .rejects.toMatchObject({ code: 'ENOENT' });
+  });
+
   it('keeps portfolio routes out of public discovery surfaces', async () => {
     await expect(access(`${basePath}/portfolio/index.html`)).rejects.toMatchObject({ code: 'ENOENT' });
     const [sitemap, rss, home, project, index] = await Promise.all([
@@ -193,4 +219,32 @@ package: "https://www.npmjs.com/package/csv-to-signal"
       expect(output).not.toContain('통합 테스트 링크 전용 포트폴리오');
     }
   });
+
+  it('rejects duplicate portfolio share IDs instead of choosing a document', async () => {
+    await writeFile(duplicatePortfolioFixture, `---
+title: "중복 공유 식별자 포트폴리오"
+description: "중복 공유 식별자 검증 전용 문서다."
+shareId: "${publishedPortfolioShareId}"
+project: "signal-hub"
+targetRole: "백엔드 개발자"
+period: "2026.08–현재"
+projectType: "개인 프로젝트"
+role: ["설계"]
+tags: ["TypeScript"]
+updated: 2026-08-21
+draft: false
+---
+
+중복 문서 본문이다.
+`, 'utf8');
+    try {
+      await expect(execFileAsync('npm', ['run', 'build'], {
+        cwd: process.cwd(),
+        env: { ...process.env, NODE_ENV: 'production' },
+        maxBuffer: 10 * 1024 * 1024,
+      })).rejects.toThrow(/Duplicate portfolio shareId/i);
+    } finally {
+      await rm(duplicatePortfolioFixture, { force: true });
+    }
+  }, 60_000);
 });

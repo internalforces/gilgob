@@ -5,13 +5,25 @@ import PortfolioLayout from '../../layouts/PortfolioLayout.astro';
 import { isProductionBuild } from '../../lib/content/queries';
 
 export const getStaticPaths = (async () => {
-  const entries = (await getCollection('portfolio'))
-    .filter((entry) => !isProductionBuild() || !entry.data.draft);
+  const entries = await getCollection('portfolio');
+  const entryByShareId = new Map<string, string>();
 
-  return entries.map((entry) => ({
-    params: { shareId: entry.data.shareId },
-    props: { entry },
-  }));
+  for (const entry of entries) {
+    const existingEntryId = entryByShareId.get(entry.data.shareId);
+    if (existingEntryId) {
+      throw new Error(
+        `[portfolio] Duplicate portfolio shareId "${entry.data.shareId}" in "${existingEntryId}" and "${entry.id}".`,
+      );
+    }
+    entryByShareId.set(entry.data.shareId, entry.id);
+  }
+
+  return entries
+    .filter((entry) => !isProductionBuild() || !entry.data.draft)
+    .map((entry) => ({
+      params: { shareId: entry.data.shareId },
+      props: { entry },
+    }));
 }) satisfies GetStaticPaths;
 
 interface Props {
