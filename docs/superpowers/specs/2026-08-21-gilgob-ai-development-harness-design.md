@@ -122,7 +122,7 @@ If content work requires a schema, layout, or runtime change, Content Writer or 
 ## Documentation and State Policy
 
 - Harness version is `1.1`; tier is `standard`.
-- The root entry point, Harness documents, design, and implementation plan are English.
+- The root entry point, Harness documents, and design are English.
 - Generated Harness documents use the unified Purpose, Owner, Update Trigger, and Harness Version header.
 - All paths are repository-root-relative.
 - The roadmap contains no invented milestone or feature.
@@ -135,7 +135,7 @@ If content work requires a schema, layout, or runtime change, Content Writer or 
 The completed Harness must pass:
 
 1. Standard-tier manifest validation, including nine active-role prompts and five specialized workflow prompts.
-2. Unified-header validation for the root entry point, Harness Markdown, design, and plan.
+2. Unified-header validation for the root entry point, Harness Markdown, and design.
 3. English-prose validation for every Harness-related document.
 4. Unfinished-token validation.
 5. Repository-root-relative local-path validation.
