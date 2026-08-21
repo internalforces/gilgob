@@ -16,6 +16,11 @@ const httpsUrlSchema = z.url().refine((value) => new URL(value).protocol === 'ht
   message: 'HTTPS URL만 사용할 수 있습니다.',
 });
 
+const shareIdSchema = z.string().min(12).regex(
+  /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
+  'shareId는 소문자 영숫자와 하이픈으로 구성된 안전한 단일 경로여야 합니다.',
+);
+
 export const commonSchema = z.object({
   title: z.string().min(1),
   description: z.string().min(1),
@@ -44,5 +49,22 @@ export const projectSchema = commonSchema.extend({
 });
 
 export const logSchema = commonSchema;
+
+export const portfolioSchema = z.object({
+  title: z.string().min(1),
+  description: z.string().min(1),
+  shareId: shareIdSchema,
+  project: safeSlugSchema,
+  targetRole: z.string().min(1),
+  period: z.string().min(1),
+  projectType: z.string().min(1),
+  role: z.array(z.string().min(1)).min(1),
+  tags: z.array(z.string().min(1)).min(1),
+  updated: z.coerce.date(),
+  draft: z.boolean().default(true),
+  repository: httpsUrlSchema.optional(),
+  package: httpsUrlSchema.optional(),
+  demo: httpsUrlSchema.optional(),
+});
 
 export type ContentFrontmatter = z.infer<typeof commonSchema> & { status?: string };

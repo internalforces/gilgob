@@ -6,6 +6,7 @@ import {
   explorationSchema,
   knowledgeSchema,
   logSchema,
+  portfolioSchema,
   projectSchema,
 } from '../../src/lib/content/schema';
 
@@ -17,6 +18,22 @@ const common = {
   created: '2026-08-20',
   draft: false,
   aliases: ['B-Tree Index'],
+};
+
+const portfolio = {
+  title: 'Signal Hub 포트폴리오',
+  description: '결정론적 시계열 분석 엔진을 설계하고 배포한 과정이다.',
+  shareId: '8c5e1a7d3b92-signal-hub',
+  project: 'signal-hub',
+  targetRole: '백엔드 개발자',
+  period: '2026.08–현재',
+  projectType: '개인 프로젝트',
+  role: ['아키텍처 설계', 'CLI와 분석 엔진 구현', 'npm 배포'],
+  tags: ['TypeScript', 'SQLite', 'CLI'],
+  updated: '2026-08-21',
+  draft: false,
+  repository: 'https://github.com/internalforces/SignalHub',
+  package: 'https://www.npmjs.com/package/csv-to-signal',
 };
 
 describe('content schemas', () => {
@@ -84,12 +101,34 @@ describe('content schemas', () => {
     expect(value.nextQuestions).toEqual(['분기 계수는 읽기 비용에 어떤 영향을 줄까?']);
   });
 
+  it('accepts an unlisted portfolio case study', () => {
+    expect(portfolioSchema.parse(portfolio).shareId).toBe(portfolio.shareId);
+  });
+
+  it.each(['../secret', 'nested/share', 'encoded%2fpath', 'query?x=1', 'fragment#x'])
+    ('rejects unsafe portfolio share id %s', (shareId) => {
+      expect(() => portfolioSchema.parse({ ...portfolio, shareId })).toThrow();
+    });
+
+  it('requires at least one portfolio role', () => {
+    const { role: _role, ...portfolioWithoutRole } = portfolio;
+    expect(() => portfolioSchema.parse(portfolioWithoutRole)).toThrow();
+  });
+
+  it('accepts only HTTPS portfolio links', () => {
+    expect(() => portfolioSchema.parse({
+      ...portfolio,
+      repository: 'http://github.com/internalforces/SignalHub',
+    })).toThrow();
+  });
+
   it('validates the frontmatter in every Obsidian template', () => {
     const templates = [
       ['knowledge', knowledgeSchema],
       ['exploration', explorationSchema],
       ['project', projectSchema],
       ['log', logSchema],
+      ['portfolio', portfolioSchema],
     ] as const;
 
     for (const [name, schema] of templates) {

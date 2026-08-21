@@ -1,6 +1,12 @@
 import { defineCollection } from 'astro:content';
 import { glob } from 'astro/loaders';
-import { explorationSchema, knowledgeSchema, logSchema, projectSchema } from './lib/content/schema';
+import {
+  explorationSchema,
+  knowledgeSchema,
+  logSchema,
+  portfolioSchema,
+  projectSchema,
+} from './lib/content/schema';
 
 export const collections = {
   knowledge: defineCollection({
@@ -18,5 +24,9 @@ export const collections = {
   logs: defineCollection({
     loader: glob({ pattern: '**/*.(md|mdx)', base: './content/logs', retainBody: true }),
     schema: logSchema,
+  }),
+  portfolio: defineCollection({
+    loader: glob({ pattern: '**/*.(md|mdx)', base: './content/portfolio', retainBody: true }),
+    schema: portfolioSchema,
   }),
 };
