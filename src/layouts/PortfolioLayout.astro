@@ -1,0 +1,67 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { withBase } from '../config/site';
+import '../styles/portfolio.css';
+import BaseLayout from './BaseLayout.astro';
+
+export interface Props {
+  entry: CollectionEntry<'portfolio'>;
+}
+
+const { entry } = Astro.props;
+const actionLinks = [
+  { href: withBase(`/projects/${entry.data.project}/`), label: '기술 문서' },
+  entry.data.repository && { href: entry.data.repository, label: 'GitHub 저장소' },
+  entry.data.package && { href: entry.data.package, label: '패키지 보기' },
+  entry.data.demo && { href: entry.data.demo, label: '데모 보기' },
+].filter((link): link is { href: string; label: string } => Boolean(link));
+---
+
+<BaseLayout
+  title={entry.data.title}
+  description={entry.data.description}
+  robots="noindex, nofollow, noarchive, nosnippet"
+  searchable={false}
+>
+  <article class="portfolio-page">
+    <header class="portfolio-hero site-container">
+      <p class="portfolio-hero__eyebrow">포트폴리오 / {entry.data.projectType}</p>
+      <h1>{entry.data.title}</h1>
+      <p class="portfolio-hero__description">{entry.data.description}</p>
+
+      <dl class="portfolio-metadata">
+        <div><dt>지원 직무</dt><dd>{entry.data.targetRole}</dd></div>
+        <div><dt>기간</dt><dd>{entry.data.period}</dd></div>
+        <div><dt>프로젝트 유형</dt><dd>{entry.data.projectType}</dd></div>
+      </dl>
+
+      <div class="portfolio-signals">
+        <section aria-labelledby="portfolio-role-title">
+          <h2 id="portfolio-role-title">맡은 역할</h2>
+          <ul>{entry.data.role.map((role) => <li>{role}</li>)}</ul>
+        </section>
+        <section aria-labelledby="portfolio-tag-title">
+          <h2 id="portfolio-tag-title">기술</h2>
+          <ul>{entry.data.tags.map((tag) => <li>#{tag}</li>)}</ul>
+        </section>
+      </div>
+
+      <div class="portfolio-actions" aria-label="프로젝트 링크">
+        {actionLinks.map((link, index) => (
+          <a
+            class:list={['button-link', { 'button-link--primary': index === 0 }]}
+            href={link.href}
+            target={index === 0 ? undefined : '_blank'}
+            rel={index === 0 ? undefined : 'noreferrer'}
+          >
+            {link.label}
+          </a>
+        ))}
+      </div>
+    </header>
+
+    <div class="portfolio-content site-container">
+      <div class="prose"><slot /></div>
+    </div>
+  </article>
+</BaseLayout>

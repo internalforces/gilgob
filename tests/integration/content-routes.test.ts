@@ -7,6 +7,8 @@ const execFileAsync = promisify(execFile);
 const basePath = 'dist';
 const draftFixture = 'content/knowledge/__integration-draft.md';
 const publicLinkFixture = 'content/knowledge/__integration-public-link.md';
+const portfolioFixture = 'content/portfolio/__integration-unlisted.md';
+const portfolioShareId = '8c5e1a7d3b92-route-fixture';
 
 describe('content routes', () => {
   beforeAll(async () => {
@@ -38,6 +40,26 @@ status: seed
 
 [[공개되지 않는 초안|초안 링크]]
 `, 'utf8');
+    await writeFile(portfolioFixture, `---
+title: "통합 테스트 링크 전용 포트폴리오"
+description: "직접 링크 접근과 공개 표면 제외를 검증한다."
+shareId: "8c5e1a7d3b92-route-fixture"
+project: "signal-hub"
+targetRole: "백엔드 개발자"
+period: "2026.08–현재"
+projectType: "개인 프로젝트"
+role: ["설계", "구현", "배포"]
+tags: ["TypeScript", "SQLite"]
+updated: 2026-08-21
+draft: false
+repository: "https://github.com/internalforces/SignalHub"
+package: "https://www.npmjs.com/package/csv-to-signal"
+---
+
+## 30초 요약
+
+통합 테스트 전용 본문이다.
+`, 'utf8');
     try {
       await execFileAsync('npm', ['run', 'build'], {
         cwd: process.cwd(),
@@ -48,6 +70,7 @@ status: seed
       await Promise.all([
         rm(draftFixture, { force: true }),
         rm(publicLinkFixture, { force: true }),
+        rm(portfolioFixture, { force: true }),
       ]);
     }
   }, 60_000);
@@ -144,5 +167,30 @@ status: seed
 
     expect(chunk).not.toMatch(/Zod(?:Error|Type|Check)|invalid_type|safeParse/);
     expect(Buffer.byteLength(chunk)).toBeLessThan(20_000);
+  });
+
+  it('builds the direct portfolio route with unlisted metadata', async () => {
+    const html = await readFile(`${basePath}/portfolio/${portfolioShareId}/index.html`, 'utf8');
+
+    expect(html).toContain('content="noindex, nofollow, noarchive, nosnippet"');
+    expect(html).toMatch(/<body[^>]*data-pagefind-ignore="all"/);
+    expect(html).toContain('/gilgob/projects/signal-hub/');
+    expect(html).toContain('https://github.com/internalforces/SignalHub');
+    expect(html).toContain('https://www.npmjs.com/package/csv-to-signal');
+  });
+
+  it('keeps portfolio routes out of public discovery surfaces', async () => {
+    await expect(access(`${basePath}/portfolio/index.html`)).rejects.toMatchObject({ code: 'ENOENT' });
+    const [sitemap, rss, home, project, index] = await Promise.all([
+      readFile(`${basePath}/sitemap-0.xml`, 'utf8'),
+      readFile(`${basePath}/rss.xml`, 'utf8'),
+      readFile(`${basePath}/index.html`, 'utf8'),
+      readFile(`${basePath}/projects/signal-hub/index.html`, 'utf8'),
+      readFile('.cache/content-index.json', 'utf8'),
+    ]);
+    for (const output of [sitemap, rss, home, project, index]) {
+      expect(output).not.toContain('/portfolio/');
+      expect(output).not.toContain('통합 테스트 링크 전용 포트폴리오');
+    }
   });
 });

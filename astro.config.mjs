@@ -11,7 +11,14 @@ export default defineConfig({
   site: SITE_CONFIG.site,
   base: SITE_CONFIG.base,
   output: 'static',
-  integrations: [contentIndexIntegration(), preact(), mdx(), sitemap()],
+  integrations: [
+    contentIndexIntegration(),
+    preact(),
+    mdx(),
+    sitemap({
+      filter: (page) => !new URL(page).pathname.includes('/portfolio/'),
+    }),
+  ],
   markdown: {
     processor: unified({
       remarkPlugins: [[remarkObsidian, {

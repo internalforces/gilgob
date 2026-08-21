@@ -11,9 +11,19 @@ export interface Props {
   description: string;
   image?: string;
   noindex?: boolean;
+  robots?: string;
+  searchable?: boolean;
 }
 
-const { title, description, image, noindex = false } = Astro.props;
+const {
+  title,
+  description,
+  image,
+  noindex = false,
+  robots,
+  searchable = true,
+} = Astro.props;
+const robotsContent = robots ?? (noindex ? 'noindex, nofollow' : undefined);
 const pageTitle = title === SITE_CONFIG.name ? title : `${title} · ${SITE_CONFIG.name}`;
 const canonicalUrl = new URL(Astro.url.pathname, SITE_CONFIG.site).href;
 const socialImagePath = image ?? '/og-default.svg';
@@ -42,10 +52,10 @@ const socialImage = socialImagePath
     <meta property="og:url" content={canonicalUrl} />
     <meta property="og:image" content={socialImage} />
     <meta property="og:image:alt" content="gilgob 지식 정원" />
-    {noindex && <meta name="robots" content="noindex, nofollow" />}
+    {robotsContent && <meta name="robots" content={robotsContent} />}
     <slot name="head" />
   </head>
-  <body>
+  <body data-pagefind-ignore={searchable ? undefined : 'all'}>
     <a class="skip-link" href="#main-content">본문 바로가기</a>
     <SiteHeader />
     <SearchDialog client:load base={SITE_CONFIG.base} />

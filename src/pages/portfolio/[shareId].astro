@@ -1,0 +1,25 @@
+---
+import type { GetStaticPaths } from 'astro';
+import { getCollection, render, type CollectionEntry } from 'astro:content';
+import PortfolioLayout from '../../layouts/PortfolioLayout.astro';
+import { isProductionBuild } from '../../lib/content/queries';
+
+export const getStaticPaths = (async () => {
+  const entries = (await getCollection('portfolio'))
+    .filter((entry) => !isProductionBuild() || !entry.data.draft);
+
+  return entries.map((entry) => ({
+    params: { shareId: entry.data.shareId },
+    props: { entry },
+  }));
+}) satisfies GetStaticPaths;
+
+interface Props {
+  entry: CollectionEntry<'portfolio'>;
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+---
+
+<PortfolioLayout entry={entry}><Content /></PortfolioLayout>
