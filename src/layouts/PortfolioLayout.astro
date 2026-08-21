@@ -33,6 +33,15 @@ const actionLinks = [
         <div><dt>지원 직무</dt><dd>{entry.data.targetRole}</dd></div>
         <div><dt>기간</dt><dd>{entry.data.period}</dd></div>
         <div><dt>프로젝트 유형</dt><dd>{entry.data.projectType}</dd></div>
+        <div class="portfolio-metadata__domains">
+          <dt>지원 산업 분야</dt>
+          <dd>
+            <strong>1순위 · {entry.data.targetDomains.primary}</strong>
+            <ul aria-label="지원 서브도메인">
+              {entry.data.targetDomains.subdomains.map((domain) => <li>{domain}</li>)}
+            </ul>
+          </dd>
+        </div>
       </dl>
 
       <div class="portfolio-signals">

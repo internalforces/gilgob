@@ -57,6 +57,37 @@
   font-weight: 650;
 }
 
+.portfolio-metadata__domains {
+  grid-column: 1 / -1;
+}
+
+.portfolio-metadata__domains dd,
+.portfolio-metadata__domains ul {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.portfolio-metadata__domains strong {
+  margin-inline-end: 0.5rem;
+  color: var(--primary);
+}
+
+.portfolio-metadata__domains ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.portfolio-metadata__domains li {
+  padding: 0.3rem 0.5rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--primary) 9%, var(--surface));
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
 .portfolio-signals {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

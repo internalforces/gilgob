@@ -56,6 +56,10 @@ export const portfolioSchema = z.object({
   shareId: shareIdSchema,
   project: safeSlugSchema,
   targetRole: z.string().min(1),
+  targetDomains: z.object({
+    primary: z.string().min(1),
+    subdomains: z.array(z.string().min(1)).min(1),
+  }),
   period: z.string().min(1),
   projectType: z.string().min(1),
   role: z.array(z.string().min(1)).min(1),

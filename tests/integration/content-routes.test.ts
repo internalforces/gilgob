@@ -50,6 +50,9 @@ description: "직접 링크 접근과 공개 표면 제외를 검증한다."
 shareId: "8c5e1a7d3b92-route-fixture"
 project: "signal-hub"
 targetRole: "백엔드 개발자"
+targetDomains:
+  primary: "데이터 플랫폼"
+  subdomains: ["시계열 분석", "핀테크 데이터", "개발자 도구"]
 period: "2026.08–현재"
 projectType: "개인 프로젝트"
 role: ["설계", "구현", "배포"]
@@ -70,6 +73,9 @@ description: "포트폴리오 초안 정적 경로 제외를 검증한다."
 shareId: "${portfolioDraftShareId}"
 project: "signal-hub"
 targetRole: "백엔드 개발자"
+targetDomains:
+  primary: "데이터 플랫폼"
+  subdomains: ["시계열 분석"]
 period: "2026.08–현재"
 projectType: "개인 프로젝트"
 role: ["설계"]
@@ -198,6 +204,11 @@ draft: true
     expect(html).toContain('/gilgob/projects/signal-hub/');
     expect(html).toContain('https://github.com/internalforces/SignalHub');
     expect(html).toContain('https://www.npmjs.com/package/csv-to-signal');
+    expect(html).toContain('지원 산업 분야');
+    expect(html).toContain('데이터 플랫폼');
+    expect(html).toContain('시계열 분석');
+    expect(html).toContain('핀테크 데이터');
+    expect(html).toContain('개발자 도구');
   });
 
   it('does not emit a production route for a draft portfolio', async () => {
@@ -227,6 +238,9 @@ description: "중복 공유 식별자 검증 전용 문서다."
 shareId: "${publishedPortfolioShareId}"
 project: "signal-hub"
 targetRole: "백엔드 개발자"
+targetDomains:
+  primary: "데이터 플랫폼"
+  subdomains: ["시계열 분석"]
 period: "2026.08–현재"
 projectType: "개인 프로젝트"
 role: ["설계"]

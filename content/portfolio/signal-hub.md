@@ -4,6 +4,12 @@ description: "결정론적 시계열 신호 생성과 SQLite 중복 방지를 �
 shareId: "8c5e1a7d3b92-signal-hub"
 project: "signal-hub"
 targetRole: "백엔드 개발자"
+targetDomains:
+  primary: "데이터 플랫폼"
+  subdomains:
+    - "시계열 분석"
+    - "핀테크 데이터"
+    - "개발자 도구"
 period: "2026.08–현재"
 projectType: "개인 프로젝트"
 role:

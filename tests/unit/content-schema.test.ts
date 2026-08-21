@@ -26,6 +26,10 @@ const portfolio = {
   shareId: '8c5e1a7d3b92-signal-hub',
   project: 'signal-hub',
   targetRole: '백엔드 개발자',
+  targetDomains: {
+    primary: '데이터 플랫폼',
+    subdomains: ['시계열 분석', '핀테크 데이터', '개발자 도구'],
+  },
   period: '2026.08–현재',
   projectType: '개인 프로젝트',
   role: ['아키텍처 설계', 'CLI와 분석 엔진 구현', 'npm 배포'],
@@ -103,6 +107,20 @@ describe('content schemas', () => {
 
   it('accepts an unlisted portfolio case study', () => {
     expect(portfolioSchema.parse(portfolio).shareId).toBe(portfolio.shareId);
+  });
+
+  it('requires prioritized portfolio target domains', () => {
+    expect(portfolioSchema.parse(portfolio).targetDomains).toEqual({
+      primary: '데이터 플랫폼',
+      subdomains: ['시계열 분석', '핀테크 데이터', '개발자 도구'],
+    });
+
+    const { targetDomains: _targetDomains, ...portfolioWithoutTargetDomains } = portfolio;
+    expect(() => portfolioSchema.parse(portfolioWithoutTargetDomains)).toThrow();
+    expect(() => portfolioSchema.parse({
+      ...portfolio,
+      targetDomains: { primary: '데이터 플랫폼', subdomains: [] },
+    })).toThrow();
   });
 
   it.each(['../secret', 'nested/share', 'encoded%2fpath', 'query?x=1', 'fragment#x'])
