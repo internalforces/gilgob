@@ -102,6 +102,18 @@ Reviewer: read request and diff
   -> verdict: Approved | Request Changes
 ```
 
+## Specialized On-Demand Workflows
+
+| Trigger | Prompt | Active roles |
+|---|---|---|
+| Behavior-preserving structural improvement | `gilgob-harness/prompts/refactor.md` | Implementer and Reviewer |
+| Release or deployment preparation | `gilgob-harness/prompts/release.md` | Reviewer and Implementer |
+| Security, privacy, secret, or disclosure review | `gilgob-harness/prompts/security.md` | Reviewer and Researcher |
+| Reproducible performance analysis | `gilgob-harness/prompts/performance.md` | Researcher and Tester |
+| Schema, path, URL, hosting, or infrastructure migration | `gilgob-harness/prompts/migration.md` | Architect and Implementer |
+
+These prompts do not grant new permissions. Every approval gate in `gilgob-harness/AGENTS.md` remains in force.
+
 ## Release Workflow
 
 ```text

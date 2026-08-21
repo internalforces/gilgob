@@ -35,8 +35,8 @@ _Last updated: 2026-08-21_
 | Harness | The complete agent operating-document system under `gilgob-harness/`, plus the root entry point |
 | Constitution | `gilgob-harness/AGENTS.md`, the highest-priority project-specific agent rules |
 | Session | One bounded agent work period with a goal and handoff state |
-| Active task | Work that is genuinely in progress and recorded in `tasks/active.md` |
-| ADR | Architecture Decision Record stored in `memory/decisions.md` |
+| Active task | Work that is genuinely in progress and recorded in `gilgob-harness/tasks/active.md` |
+| ADR | Architecture Decision Record stored in `gilgob-harness/memory/decisions.md` |
 | Human Approval Gate | A checkpoint where the agent must name the exact action and wait for user approval before mutation |
 | Content Writer | Role responsible for creating and improving documents |
 | Content Curator | Role responsible for inventory, organization, merge, archive, and deletion proposals |

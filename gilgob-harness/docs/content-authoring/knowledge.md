@@ -32,7 +32,15 @@ Status describes document maturity, not the author's personal expertise. A mater
 
 ## Frontmatter
 
-Use the shared fields from `README.md` plus the required knowledge status. `nextQuestions` is especially useful for turning missing depth into explicit future exploration.
+| Field group | Requirement |
+|---|---|
+| `title`, `description`, `category`, `tags`, `created`, `draft`, `aliases`, `featured` | Required; follow the shared contract |
+| `status` | Required: `seed`, `growing`, or `mastered` |
+| `updated` | Optional; use for a material revision |
+| `slug` | Optional safe route override |
+| `nextQuestions` | Optional concrete future questions |
+
+See `gilgob-harness/docs/content-authoring/README.md` for exact shared field rules. `nextQuestions` is especially useful for turning missing depth into explicit future exploration.
 
 Prefer a question-shaped title when the document explains a decision or misconception. Prefer a direct noun phrase when it serves as a reference entry.
 
@@ -82,4 +90,4 @@ When a referenced document does not exist, either leave an intentional unresolve
 - [ ] Terms and tags match existing usage.
 - [ ] Useful relationships are linked without decorative noise.
 - [ ] `nextQuestions` contains concrete open questions when needed.
-- [ ] Shared publication checks in `README.md` pass.
+- [ ] Shared publication checks in `gilgob-harness/docs/content-authoring/README.md` pass.

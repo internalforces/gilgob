@@ -1,6 +1,13 @@
+<!--
+Purpose:        Executed implementation plan for the gilgob AI Development Harness
+Owner:          Architect and Implementer
+Update Trigger: Harness implementation scope, manifest, or verification requirements change
+Harness Version: 1.1
+-->
+
 # gilgob AI Development Harness Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Completed steps use checked Markdown boxes.
 
 **Goal:** Build an English Standard AI Development Harness v1.1 that gives agents durable project context and collection-specific workflows for writing, reviewing, organizing, merging, moving, archiving, and deleting gilgob content.
 
@@ -13,6 +20,8 @@
 ## Global Constraints
 
 - Write the root entry point and every document under `gilgob-harness/` in English.
+- Write this plan and its design specification in English.
+- Interpret every documented path relative to the repository root.
 - Conform to AI Development Harness version 1.1 and the Standard tier.
 - Preserve the current content files and `content/templates/*.md` without modification.
 - Do not invent product milestones, roadmap items, bugs, technical debt, or feature backlog.
@@ -39,23 +48,23 @@
 - Consumes: `README.md`, `package.json`, `astro.config.mjs`, `.github/workflows/deploy.yml`, and the approved design spec.
 - Produces: the context-loading contract and stable operational facts used by every later harness document.
 
-- [ ] **Step 1: Write the root discovery file and version marker**
+- [x] **Step 1: Write the root discovery file and version marker**
 
 Create a short root constitution that requires agents to read `gilgob-harness/AGENTS.md`, then record version `1.1`, creation date `2026-08-21`, and tier `standard`.
 
-- [ ] **Step 2: Write the full project constitution**
+- [x] **Step 2: Write the full project constitution**
 
 Document the project summary, active roles, absolute restrictions, human approval gates, context-loading order, collection routing table, and session-end checklist. Include both Content Writer and Content Curator; require approval before Content Curator moves, merges, or deletes documents.
 
-- [ ] **Step 3: Write orchestration and command references**
+- [x] **Step 3: Write orchestration and command references**
 
 Define feature, bug, research, content-writing, content-curation, and release workflows. Record exact setup, development, type-check, test, build, deployment-equivalent verification, and GitHub Pages base-path commands from the repository.
 
-- [ ] **Step 4: Write standards, stack, dependencies, and deferred roadmap**
+- [x] **Step 4: Write standards, stack, dependencies, and deferred roadmap**
 
 Capture current code/content standards, direct dependency purposes, repository architecture, environments, and the fact that no product roadmap is currently committed. Do not add fictional milestones.
 
-- [ ] **Step 5: Validate Task 1**
+- [x] **Step 5: Validate Task 1**
 
 Run:
 
@@ -88,19 +97,19 @@ Expected: every command exits with status 0 and the role/approval search returns
 - Consumes: the facts and rules established in Task 1.
 - Produces: session continuity and task-state files referenced by the constitution and prompts.
 
-- [ ] **Step 1: Write verified project and architecture memory**
+- [x] **Step 1: Write verified project and architecture memory**
 
 Describe the current static knowledge-garden architecture, file-based content flow, generated index, wiki-link processing, Pagefind indexing, and GitHub Pages deployment. Record Harness adoption as ADR-001 and English harness documentation as ADR-002.
 
-- [ ] **Step 2: Initialize issue, glossary, and session memory**
+- [x] **Step 2: Initialize issue, glossary, and session memory**
 
 Use explicit empty states for known issues and technical debt. Define project terms such as Knowledge Garden, collection, draft, wiki-link, backlink, related entry, unlisted portfolio, Harness, and Human Approval Gate. Record the harness-generation session without claiming unrelated work.
 
-- [ ] **Step 3: Initialize task state without fictional backlog**
+- [x] **Step 3: Initialize task state without fictional backlog**
 
 Keep active and backlog tables empty and record only the harness setup in completed work.
 
-- [ ] **Step 4: Validate Task 2**
+- [x] **Step 4: Validate Task 2**
 
 Run:
 
@@ -125,34 +134,43 @@ Expected: every command exits with status 0 and no invented backlog items appear
 - Create: `gilgob-harness/prompts/testing.md`
 - Create: `gilgob-harness/prompts/content-writing.md`
 - Create: `gilgob-harness/prompts/content-curation.md`
+- Create: `gilgob-harness/prompts/refactor.md`
+- Create: `gilgob-harness/prompts/release.md`
+- Create: `gilgob-harness/prompts/security.md`
+- Create: `gilgob-harness/prompts/performance.md`
+- Create: `gilgob-harness/prompts/migration.md`
 
 **Interfaces:**
 - Consumes: the constitution, operational references, memory, and task-state files.
 - Produces: focused startup order, boundaries, output format, and completion checklist for each active role.
 
-- [ ] **Step 1: Write development-role prompts**
+- [x] **Step 1: Write development-role prompts**
 
 Adapt the Standard Harness prompts to gilgob's static-site architecture. Remove database and staging assumptions that do not apply. Require evidence-backed verification and exact updates to memory and task state.
 
-- [ ] **Step 2: Write the Content Writer prompt**
+- [x] **Step 2: Write the Content Writer prompt**
 
 Route each request to one collection guide, require use of the existing collection template, keep drafts private during writing, distinguish facts from interpretation, and run the appropriate verification before publication.
 
-- [ ] **Step 3: Write the Content Curator prompt**
+- [x] **Step 3: Write the Content Curator prompt**
 
 Require an inventory and link-impact report before proposing keep, improve, move, merge, archive, or delete actions. Forbid moves, merges, and deletions before explicit approval and require post-change index/build verification.
 
-- [ ] **Step 4: Validate Task 3**
+- [x] **Step 4: Write specialized Standard-tier workflow prompts**
+
+Add on-demand prompts for behavior-preserving refactoring, release preparation, security review, reproducible performance analysis, and reversible schema, URL, path, hosting, or infrastructure migration. Route them to active roles without inventing standing roles or a database.
+
+- [x] **Step 5: Validate Task 3**
 
 Run:
 
 ```bash
-test "$(find gilgob-harness/prompts -type f -name '*.md' | wc -l | tr -d ' ')" = "9"
+test "$(find gilgob-harness/prompts -type f -name '*.md' | wc -l | tr -d ' ')" = "14"
 rg -n "explicit user approval|Content Writer|Content Curator" gilgob-harness/prompts
 git diff --check
 ```
 
-Expected: nine prompts exist, destructive content operations are approval-gated, and formatting is clean.
+Expected: nine active-role prompts and five specialized workflow prompts exist, destructive content operations are approval-gated, and formatting is clean.
 
 ### Task 4: Add shared and collection-specific content authoring guides
 
@@ -168,23 +186,23 @@ Expected: nine prompts exist, destructive content operations are approval-gated,
 - Consumes: `README.md`, `src/lib/content/schema.ts`, `src/lib/content/build-index.ts`, `src/lib/content/wiki-links.ts`, `src/lib/content/taxonomy.ts`, `content/templates/*.md`, and representative content files.
 - Produces: executable writing and publication checklists used by Content Writer and Content Curator.
 
-- [ ] **Step 1: Write the shared workflow**
+- [x] **Step 1: Write the shared workflow**
 
 Document collection selection, template use, common frontmatter, canonical category values, safe slugs, title and alias uniqueness, wiki-link resolution, attachments, drafts, publication, updates, and verification. Link to the authoritative source files instead of duplicating implementation details unnecessarily.
 
-- [ ] **Step 2: Write the knowledge and exploration guides**
+- [x] **Step 2: Write the knowledge and exploration guides**
 
 Define purpose, status transitions, recommended outlines, evidence standards, linking expectations, anti-patterns, and publication checklists for reusable knowledge and open-ended research.
 
-- [ ] **Step 3: Write the project and log guides**
+- [x] **Step 3: Write the project and log guides**
 
 Define purpose, project lifecycle states, decision/result evidence, date-based log naming, concise log structure, and promotion of reusable learning into knowledge documents.
 
-- [ ] **Step 4: Write the portfolio guide**
+- [x] **Step 4: Write the portfolio guide**
 
 Document every portfolio field, safe share identifier requirements, project linkage, HTTPS-only action links, role/domain targeting, recommended six-section narrative, unlisted/noindex behavior, and the warning that direct-link obscurity is not authentication.
 
-- [ ] **Step 5: Validate Task 4**
+- [x] **Step 5: Validate Task 4**
 
 Run:
 
@@ -206,19 +224,19 @@ Expected: six guides exist and cover every schema status and portfolio safety co
 - Consumes: all harness documents and current repository contracts.
 - Produces: fresh evidence that the harness is complete, internally consistent, English-only for prose, and compatible with the current build.
 
-- [ ] **Step 1: Validate unified headers and version marker**
+- [x] **Step 1: Validate unified headers and version marker**
 
-Run a repository-local script that checks every Markdown file under `gilgob-harness/` for `Purpose`, `Owner`, `Update Trigger`, and `Harness Version: 1.1`. Confirm `.harness-version` contains the exact version, date, and tier.
+Run a repository-local script that checks root `AGENTS.md`, every Markdown file under `gilgob-harness/`, this plan, and its design specification for `Purpose`, `Owner`, `Update Trigger`, and `Harness Version: 1.1`. Confirm `gilgob-harness/.harness-version` contains the exact version, date, and tier.
 
-- [ ] **Step 2: Scan for unfinished template text**
+- [x] **Step 2: Scan for unfinished template text**
 
 Search all generated harness files for unfilled uppercase bracket tokens and incomplete markers. Review any matches and remove unintended template residue.
 
-- [ ] **Step 3: Validate referenced local paths**
+- [x] **Step 3: Validate referenced local paths**
 
 Check every backtick-delimited repository path used by the authoring guides and operational documents against the filesystem or an explicitly documented output path.
 
-- [ ] **Step 4: Run project verification**
+- [x] **Step 4: Run project verification**
 
 Run:
 

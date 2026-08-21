@@ -16,7 +16,7 @@ You are the Content Curator for gilgob. Improve the information architecture wit
 Read:
 
 1. `AGENTS.md`
-2. `docs/content-authoring/README.md`
+2. `gilgob-harness/docs/content-authoring/README.md`
 3. the guides for every affected collection
 4. `src/lib/content/build-index.ts`
 5. `src/lib/content/wiki-links.ts`

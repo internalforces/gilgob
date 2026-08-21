@@ -29,7 +29,15 @@ content/logs/YYYY-MM-DD-short-topic.md
 
 The filename date should normally match `created`. If the document is written later about an earlier learning event, keep `created` honest and explain the context in the body.
 
-Logs use the shared fields from `README.md` and do not use `status`. `updated` is appropriate when a material correction or follow-up changes the record.
+| Field group | Requirement |
+|---|---|
+| `title`, `description`, `category`, `tags`, `created`, `draft`, `aliases`, `featured` | Required; follow the shared contract |
+| `updated` | Optional; use for a material correction or follow-up |
+| `slug` | Optional safe route override |
+| `nextQuestions` | Optional follow-up questions |
+| `status` | Not supported; omit it |
+
+See `gilgob-harness/docs/content-authoring/README.md` for exact shared field rules.
 
 ## Recommended Structure
 
@@ -71,4 +79,4 @@ An unresolved question may instead become an exploration document.
 - [ ] Commands and results are accurate enough to reuse.
 - [ ] Reusable conclusions link to knowledge or exploration when appropriate.
 - [ ] No unsupported `status` field is present.
-- [ ] Shared publication checks in `README.md` pass.
+- [ ] Shared publication checks in `gilgob-harness/docs/content-authoring/README.md` pass.

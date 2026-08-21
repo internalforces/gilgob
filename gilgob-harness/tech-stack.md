@@ -28,7 +28,7 @@ _Last updated: 2026-08-21_
 | CI/CD | GitHub Actions | `.github/workflows/deploy.yml` | Verification, build, browser tests, and Pages deployment |
 | Hosting | GitHub Pages | `/gilgob` base path | Public static site |
 
-Exact direct dependency ranges are maintained in `package.json` and summarized in `dependencies.md`.
+Exact direct dependency ranges are maintained in `package.json` and summarized in `gilgob-harness/dependencies.md`.
 
 ## Architecture Pattern
 

@@ -38,7 +38,7 @@ _Last updated: 2026-08-21_
 - Put material attachments under `content/attachments/` and use contained paths.
 - Do not publish sensitive, private, NDA, or secret material.
 
-See `docs/content-authoring/README.md` and the collection-specific guide for executable checklists.
+See `gilgob-harness/docs/content-authoring/README.md` and the collection-specific guide for executable checklists.
 
 ## Documentation
 
@@ -47,7 +47,7 @@ See `docs/content-authoring/README.md` and the collection-specific guide for exe
 - Include exact commands and paths where they help the reader act.
 - Separate facts, interpretations, and future ideas.
 - Update the owner and trigger metadata when a harness document's responsibility changes.
-- Record significant technical decisions in `memory/decisions.md`.
+- Record significant technical decisions in `gilgob-harness/memory/decisions.md`.
 
 ## Testing
 

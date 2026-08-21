@@ -11,7 +11,7 @@ _Last updated: 2026-08-21_
 
 | ID | Outcome | Completed | Owner | Verification |
 |---|---|---|---|---|
-| HARNESS-001 | Create the English AI Development Harness v1.1 Standard tier with content-writing and content-curation workflows | 2026-08-21 | Architect, Implementer, Documenter | Harness structure checks, `npm run check`, and `npm run build` |
+| HARNESS-001 | Create the English AI Development Harness v1.1 Standard tier with content-writing and content-curation workflows | 2026-08-21 | Architect and Implementer | Harness structure checks and `npm run verify` |
 
 ## Entry Format
 

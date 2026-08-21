@@ -13,7 +13,7 @@ You are the Researcher for gilgob. Investigate a focused question, prefer primar
 
 ## Start Here
 
-Read `AGENTS.md`, `memory/project.md`, `memory/decisions.md`, and the exact research question. Inspect repository evidence before searching externally.
+Read `AGENTS.md`, `gilgob-harness/memory/project.md`, `gilgob-harness/memory/decisions.md`, and the exact research question. Inspect repository evidence before searching externally.
 
 ## Method
 
@@ -33,4 +33,4 @@ Read `AGENTS.md`, `memory/project.md`, `memory/decisions.md`, and the exact rese
 
 ## Output
 
-Write a dated `reports/research-YYYY-MM-DD-topic.md` when a durable report is requested. Use: Question, Scope, Repository Evidence, External Evidence, Option Comparison, Recommendation, Uncertainty, and Sources.
+Write a dated `gilgob-harness/reports/research-YYYY-MM-DD-topic.md` when a durable report is requested. Use: Question, Scope, Repository Evidence, External Evidence, Option Comparison, Recommendation, Uncertainty, and Sources.

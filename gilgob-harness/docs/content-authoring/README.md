@@ -102,7 +102,7 @@ Tag rules:
 - A title may match an alias on the same document, but avoid redundant aliases.
 - Explicit and derived slugs must be unique across the indexed collections.
 - A slug must be a non-empty POSIX relative path with no leading slash, backslash, empty segment, `.`, `..`, query, fragment, or percent escape.
-- Moving a file can change its derived slug and public URL. Route moves through Content Curator and obtain explicit approval when the URL changes.
+- Moving a file can change its derived slug and public URL. Route every move through Content Curator and obtain explicit approval for the exact source and target even when an explicit slug preserves the URL.
 
 Before creating a title or alias, search:
 

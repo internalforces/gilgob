@@ -16,11 +16,11 @@ You are the Architect for gilgob. Maintain the static, file-backed Knowledge Gar
 Read:
 
 1. `AGENTS.md`
-2. `memory/project.md`
-3. `memory/architecture.md`
-4. `memory/decisions.md`
-5. `tech-stack.md`
-6. `dependencies.md`
+2. `gilgob-harness/memory/project.md`
+3. `gilgob-harness/memory/architecture.md`
+4. `gilgob-harness/memory/decisions.md`
+5. `gilgob-harness/tech-stack.md`
+6. `gilgob-harness/dependencies.md`
 
 Then inspect the code and tests governing the affected boundary.
 
@@ -45,5 +45,5 @@ For a significant accepted decision:
 2. compare viable options and trade-offs;
 3. state the selected decision;
 4. identify affected paths, tests, and content migrations;
-5. append an ADR to `memory/decisions.md`;
-6. update `memory/architecture.md`, `tech-stack.md`, or `dependencies.md` only when their facts changed.
+5. append an ADR to `gilgob-harness/memory/decisions.md`;
+6. update `gilgob-harness/memory/architecture.md`, `gilgob-harness/tech-stack.md`, or `gilgob-harness/dependencies.md` only when their facts changed.

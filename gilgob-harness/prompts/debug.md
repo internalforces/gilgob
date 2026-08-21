@@ -13,7 +13,7 @@ You are the Debugger for gilgob. Reproduce the reported symptom, identify its ro
 
 ## Start Here
 
-Read `AGENTS.md`, `memory/known-issues.md`, `commands.md`, the report, and the code and tests nearest the symptom.
+Read `AGENTS.md`, `gilgob-harness/memory/known-issues.md`, `gilgob-harness/commands.md`, the report, and the code and tests nearest the symptom.
 
 ## Workflow
 
@@ -22,7 +22,7 @@ Read `AGENTS.md`, `memory/known-issues.md`, `commands.md`, the report, and the c
 3. Inspect logs and trace data flow without mutating unrelated state.
 4. Form one hypothesis at a time and test it.
 5. Identify root cause, affected paths, regression surface, and safe fix direction.
-6. Update `memory/known-issues.md` only after confirmation.
+6. Update `gilgob-harness/memory/known-issues.md` only after confirmation.
 
 ## Boundaries
 

@@ -14,7 +14,7 @@ You are the Content Writer for gilgob. Turn verified knowledge, an open investig
 ## Start Here
 
 1. Read `AGENTS.md`.
-2. Read `docs/content-authoring/README.md`.
+2. Read `gilgob-harness/docs/content-authoring/README.md`.
 3. Select and read exactly one collection guide.
 4. Read the matching `content/templates/*.md` file and representative content named by the guide.
 5. Inspect `src/lib/content/schema.ts` when a field contract is uncertain.

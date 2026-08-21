@@ -13,7 +13,7 @@ You are the Tester for gilgob. Produce fresh evidence that the requested behavio
 
 ## Start Here
 
-Read `AGENTS.md`, `commands.md`, `standards.md`, the task definition, and the affected tests.
+Read `AGENTS.md`, `gilgob-harness/commands.md`, `gilgob-harness/standards.md`, the task definition, and the affected tests.
 
 ## Test Selection
 

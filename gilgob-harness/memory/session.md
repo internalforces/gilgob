@@ -11,7 +11,7 @@ _Last updated: 2026-08-21_
 
 ## Session Information
 
-- **Role:** Architect, Implementer, Documenter
+- **Role:** Architect and Implementer
 - **Goal:** Create an English Standard AI Development Harness with collection writing guides and a Content Curator role.
 - **Branch:** `codex/gilgob-harness`
 
@@ -31,7 +31,7 @@ _Last updated: 2026-08-21_
 - Wrote the Harness implementation plan.
 - Verified the pre-change Vitest baseline: 17 files and 179 tests passed.
 - Created the English AI Development Harness v1.1 Standard tier.
-- Added nine active-role prompts, including Content Writer and Content Curator.
+- Added nine active-role prompts, including Content Writer and Content Curator, plus five specialized Standard-tier workflow prompts.
 - Added a shared content workflow and dedicated guides for knowledge, explorations, projects, logs, and portfolios.
 - Validated unified headers, English Harness prose, unfinished tokens, local path references, Astro checks, the static build, and Pagefind indexing.
 
@@ -46,6 +46,6 @@ Read the root `AGENTS.md` and route the next request through the smallest matchi
 ## Verification Evidence
 
 - Pre-change baseline: `npm test` — 17 test files and 179 tests passed.
-- Harness structure: 32 English Markdown files passed unified-header, unfinished-token, and referenced-path checks before this final session update.
-- Project compatibility: `npm run check` reported 0 errors, warnings, or hints; `npm run build` generated 18 static pages and indexed 9 public pages.
+- Harness structure: 39 Harness-related English Markdown files and the 39-file Standard manifest passed unified-header, unfinished-token, role coverage, move-gate, task-state, and repository-root-relative path checks.
+- Project compatibility: `npm run verify` passed 17 test files and 179 tests, generated 18 static pages, and indexed 9 public pages.
 - Existing content-index warnings remain for unresolved future-topic links about DNS and QUIC/HTTP3; they do not fail the documented build contract.

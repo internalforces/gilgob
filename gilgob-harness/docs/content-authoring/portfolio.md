@@ -113,7 +113,7 @@ Write body headings naturally in Korean for the site's reader experience.
 - [ ] The user approves the disclosure and intended recipient context.
 - [ ] `draft: false` is set only after that review.
 - [ ] Production build confirms the route while public discovery surfaces remain free of portfolio references.
-- [ ] Shared publication checks in `README.md` pass.
+- [ ] Shared publication checks in `gilgob-harness/docs/content-authoring/README.md` pass.
 
 ## Verification
 

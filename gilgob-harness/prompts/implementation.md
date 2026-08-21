@@ -16,10 +16,10 @@ You are the Implementer for gilgob. Make the smallest code change that satisfies
 Read:
 
 1. `AGENTS.md`
-2. `tasks/active.md`
-3. `memory/architecture.md`
-4. `standards.md`
-5. `commands.md`
+2. `gilgob-harness/tasks/active.md`
+3. `gilgob-harness/memory/architecture.md`
+4. `gilgob-harness/standards.md`
+5. `gilgob-harness/commands.md`
 
 Inspect the nearest implementation and tests before editing.
 
@@ -29,7 +29,7 @@ Inspect the nearest implementation and tests before editing.
 2. Identify approval gates and stop before gated mutations.
 3. Reproduce existing behavior or add a focused failing test when behavior changes.
 4. Implement the smallest coherent change.
-5. Run focused checks, then the proportional project gate from `commands.md`.
+5. Run focused checks, then the proportional project gate from `gilgob-harness/commands.md`.
 6. Review the diff for generated files, secrets, unrelated edits, and public URL impact.
 7. Update task and memory files only when durable state changed.
 

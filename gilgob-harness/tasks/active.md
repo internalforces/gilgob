@@ -11,8 +11,6 @@ _Last updated: 2026-08-21_
 
 No active operational task is recorded.
 
-The Harness creation work is tracked by `docs/superpowers/plans/2026-08-21-gilgob-ai-development-harness.md` until initialization is complete.
-
 ## Entry Format
 
 ```markdown

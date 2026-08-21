@@ -32,9 +32,16 @@ Do not use `maintained` merely because a repository exists. State the actual sup
 
 ## Frontmatter
 
-Use the shared fields from `README.md` plus project status.
+| Field group | Requirement |
+|---|---|
+| `title`, `description`, `category`, `tags`, `created`, `draft`, `aliases`, `featured` | Required; follow the shared contract |
+| `status` | Required: `idea`, `building`, `maintained`, or `archived` |
+| `updated` | Optional; use for a material revision or lifecycle change |
+| `slug` | Optional safe route override |
+| `nextQuestions` | Optional open questions |
+| `repository` | Optional public HTTPS repository URL |
 
-Optional `repository` must be a valid HTTPS URL. Do not add a private, unavailable, or guessed repository link. Use `featured: true` only when the project is intentionally selected for home-page emphasis.
+See `gilgob-harness/docs/content-authoring/README.md` for exact shared field rules. Do not add a private, unavailable, or guessed repository link. Use `featured: true` only when the project is intentionally selected for home-page emphasis.
 
 ## Recommended Structure
 
@@ -85,4 +92,4 @@ Moving to `archived` is an in-place lifecycle update, not permission to delete t
 - [ ] Results are evidence-backed and future work is labeled.
 - [ ] General knowledge and portfolio-specific evidence are linked rather than duplicated.
 - [ ] Repository URL is HTTPS and intentionally public when present.
-- [ ] Shared publication checks in `README.md` pass.
+- [ ] Shared publication checks in `gilgob-harness/docs/content-authoring/README.md` pass.

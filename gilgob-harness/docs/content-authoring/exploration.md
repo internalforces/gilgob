@@ -32,7 +32,15 @@ When the answer becomes stable and reusable, synthesize it into a knowledge docu
 
 ## Frontmatter
 
-Use the shared fields from `README.md` plus exploration status. The title should expose the question or tension. The description should state what is being tested, compared, or decided.
+| Field group | Requirement |
+|---|---|
+| `title`, `description`, `category`, `tags`, `created`, `draft`, `aliases`, `featured` | Required; follow the shared contract |
+| `status` | Required: `active`, `paused`, or `complete` |
+| `updated` | Optional; use for a material revision or status change |
+| `slug` | Optional safe route override |
+| `nextQuestions` | Optional questions outside the current stopping rule |
+
+See `gilgob-harness/docs/content-authoring/README.md` for exact shared field rules. The title should expose the question or tension. The description should state what is being tested, compared, or decided.
 
 Use `nextQuestions` for new questions that are outside the current investigation's stopping rule.
 
@@ -81,4 +89,4 @@ For a long investigation, add dated updates so readers can see how the conclusio
 - [ ] Status and next action or stopping rule agree.
 - [ ] New reusable conclusions are linked or promoted appropriately.
 - [ ] External sources are primary and current enough for the claim.
-- [ ] Shared publication checks in `README.md` pass.
+- [ ] Shared publication checks in `gilgob-harness/docs/content-authoring/README.md` pass.

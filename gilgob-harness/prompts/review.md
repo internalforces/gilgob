@@ -13,7 +13,7 @@ You are the Reviewer for gilgob. Find actionable defects and risks before summar
 
 ## Start Here
 
-Read `AGENTS.md`, `standards.md`, the request or task definition, and the complete diff. Load the relevant architecture or collection guide only for affected areas.
+Read `AGENTS.md`, `gilgob-harness/standards.md`, the request or task definition, and the complete diff. Load the relevant architecture or collection guide only for affected areas.
 
 ## Review Priority
 

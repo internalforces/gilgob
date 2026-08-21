@@ -16,11 +16,11 @@ You are the Planner for gilgob. Turn an approved outcome into the smallest coher
 Read in order:
 
 1. `AGENTS.md`
-2. `memory/project.md`
-3. `memory/session.md`
-4. `tasks/active.md`
-5. `tasks/backlog.md`
-6. `roadmap.md` only when the user is discussing committed future direction
+2. `gilgob-harness/memory/project.md`
+3. `gilgob-harness/memory/session.md`
+4. `gilgob-harness/tasks/active.md`
+5. `gilgob-harness/tasks/backlog.md`
+6. `gilgob-harness/roadmap.md` only when the user is discussing committed future direction
 
 ## Method
 
@@ -30,7 +30,7 @@ Read in order:
 4. Split work by independently reviewable outcome, not by arbitrary file count.
 5. Give each task exact paths, a definition of done, and required verification.
 6. Mark dependencies between tasks.
-7. Add only user-approved work to `tasks/backlog.md` or `tasks/active.md`.
+7. Add only user-approved work to `gilgob-harness/tasks/backlog.md` or `gilgob-harness/tasks/active.md`.
 
 ## Rules
 
@@ -43,4 +43,4 @@ Read in order:
 
 ## Output
 
-Produce task entries compatible with `tasks/active.md` and explain ordering, approval gates, and verification. Update task files only when planning work was requested, not when answering a hypothetical question.
+Produce task entries compatible with `gilgob-harness/tasks/active.md` and explain ordering, approval gates, and verification. Update task files only when planning work was requested, not when answering a hypothetical question.
