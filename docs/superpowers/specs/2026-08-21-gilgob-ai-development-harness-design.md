@@ -103,6 +103,7 @@ gilgob-harness/
 ## 운영 문서 원칙
 
 - Harness Version은 `1.1`, Tier는 `standard`로 기록한다.
+- 루트 진입점과 `gilgob-harness/` 아래의 모든 하네스 운영 문서는 영어로 작성한다.
 - 모든 하네스 문서는 Purpose, Owner, Update Trigger, Harness Version 헤더를 가진다.
 - 로드맵에는 임의의 마일스톤이나 기능을 만들지 않는다. 현재 계획 없음과 갱신 조건만 기록한다.
 - `tasks/`에는 존재하지 않는 기능 백로그를 채우지 않는다.
