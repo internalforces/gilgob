@@ -250,3 +250,19 @@ test('announces a Pagefind loading error in Korean', async ({ page }) => {
 
   await expect(dialog.getByRole('status')).toContainText('검색 중 문제가 생겼습니다');
 });
+
+test('does not expose the unlisted portfolio through search', async ({ page }) => {
+  await page.goto(pagePath('/portfolio/8c5e1a7d3b92-signal-hub/'));
+  await expect(page.getByRole('heading', { level: 1, name: 'Signal Hub · 백엔드 포트폴리오' })).toBeVisible();
+  await expect(page.getByText('격리된 릴리스 검증 경로')).toBeVisible();
+
+  await page.goto(pagePath('/'), { waitUntil: 'networkidle' });
+  await page.keyboard.press('ControlOrMeta+k');
+  const dialog = page.getByRole('dialog', { name: '통합 검색' });
+  await dialog.getByRole('searchbox', { name: '지식 전체 검색' }).fill('격리된 릴리스 검증 경로');
+  await expect(dialog.locator('.search-dialog__status--loading')).toHaveCount(0, { timeout: 10_000 });
+  await expect(dialog.getByText('검색 중 문제가 생겼습니다. 잠시 후 다시 시도해 주세요.')).toHaveCount(0);
+  await expect(dialog.getByText('현재 검색을 사용할 수 없습니다. 메뉴에서 지식을 둘러보세요.')).toHaveCount(0);
+  await expect(dialog.locator('[role="option"][href*="/portfolio/"]')).toHaveCount(0);
+  await expect(page.locator('a[href*="/portfolio/"]')).toHaveCount(0);
+});

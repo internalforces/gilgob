@@ -7,6 +7,12 @@ const execFileAsync = promisify(execFile);
 const basePath = 'dist';
 const draftFixture = 'content/knowledge/__integration-draft.md';
 const publicLinkFixture = 'content/knowledge/__integration-public-link.md';
+const portfolioFixture = 'content/portfolio/__integration-unlisted.md';
+const portfolioDraftFixture = 'content/portfolio/__integration-unlisted-draft.md';
+const duplicatePortfolioFixture = 'content/portfolio/__integration-unlisted-duplicate.md';
+const portfolioShareId = '8c5e1a7d3b92-route-fixture';
+const publishedPortfolioShareId = '8c5e1a7d3b92-signal-hub';
+const portfolioDraftShareId = 'b91d2e4f6a80-draft-fixture';
 
 describe('content routes', () => {
   beforeAll(async () => {
@@ -38,6 +44,48 @@ status: seed
 
 [[공개되지 않는 초안|초안 링크]]
 `, 'utf8');
+    await writeFile(portfolioFixture, `---
+title: "통합 테스트 링크 전용 포트폴리오"
+description: "직접 링크 접근과 공개 표면 제외를 검증한다."
+shareId: "8c5e1a7d3b92-route-fixture"
+project: "signal-hub"
+targetRole: "백엔드 개발자"
+targetDomains:
+  primary: "데이터 플랫폼"
+  subdomains: ["시계열 분석", "핀테크 데이터", "개발자 도구"]
+period: "2026.08–현재"
+projectType: "개인 프로젝트"
+role: ["설계", "구현", "배포"]
+tags: ["TypeScript", "SQLite"]
+updated: 2026-08-21
+draft: false
+repository: "https://github.com/internalforces/SignalHub"
+package: "https://www.npmjs.com/package/csv-to-signal"
+---
+
+## 30초 요약
+
+통합 테스트 전용 본문이다.
+`, 'utf8');
+    await writeFile(portfolioDraftFixture, `---
+title: "프로덕션에서 제외되는 포트폴리오 초안"
+description: "포트폴리오 초안 정적 경로 제외를 검증한다."
+shareId: "${portfolioDraftShareId}"
+project: "signal-hub"
+targetRole: "백엔드 개발자"
+targetDomains:
+  primary: "데이터 플랫폼"
+  subdomains: ["시계열 분석"]
+period: "2026.08–현재"
+projectType: "개인 프로젝트"
+role: ["설계"]
+tags: ["TypeScript"]
+updated: 2026-08-21
+draft: true
+---
+
+초안 본문이다.
+`, 'utf8');
     try {
       await execFileAsync('npm', ['run', 'build'], {
         cwd: process.cwd(),
@@ -48,6 +96,8 @@ status: seed
       await Promise.all([
         rm(draftFixture, { force: true }),
         rm(publicLinkFixture, { force: true }),
+        rm(portfolioFixture, { force: true }),
+        rm(portfolioDraftFixture, { force: true }),
       ]);
     }
   }, 60_000);
@@ -145,4 +195,70 @@ status: seed
     expect(chunk).not.toMatch(/Zod(?:Error|Type|Check)|invalid_type|safeParse/);
     expect(Buffer.byteLength(chunk)).toBeLessThan(20_000);
   });
+
+  it('builds the direct portfolio route with unlisted metadata', async () => {
+    const html = await readFile(`${basePath}/portfolio/${portfolioShareId}/index.html`, 'utf8');
+
+    expect(html).toContain('content="noindex, nofollow, noarchive, nosnippet"');
+    expect(html).toMatch(/<body[^>]*data-pagefind-ignore="all"/);
+    expect(html).toContain('/gilgob/projects/signal-hub/');
+    expect(html).toContain('https://github.com/internalforces/SignalHub');
+    expect(html).toContain('https://www.npmjs.com/package/csv-to-signal');
+    expect(html).toContain('지원 산업 분야');
+    expect(html).toContain('데이터 플랫폼');
+    expect(html).toContain('시계열 분석');
+    expect(html).toContain('핀테크 데이터');
+    expect(html).toContain('개발자 도구');
+  });
+
+  it('does not emit a production route for a draft portfolio', async () => {
+    await expect(access(`${basePath}/portfolio/${portfolioDraftShareId}/index.html`))
+      .rejects.toMatchObject({ code: 'ENOENT' });
+  });
+
+  it('keeps portfolio routes out of public discovery surfaces', async () => {
+    await expect(access(`${basePath}/portfolio/index.html`)).rejects.toMatchObject({ code: 'ENOENT' });
+    const [sitemap, rss, home, project, index] = await Promise.all([
+      readFile(`${basePath}/sitemap-0.xml`, 'utf8'),
+      readFile(`${basePath}/rss.xml`, 'utf8'),
+      readFile(`${basePath}/index.html`, 'utf8'),
+      readFile(`${basePath}/projects/signal-hub/index.html`, 'utf8'),
+      readFile('.cache/content-index.json', 'utf8'),
+    ]);
+    for (const output of [sitemap, rss, home, project, index]) {
+      expect(output).not.toContain('/portfolio/');
+      expect(output).not.toContain('통합 테스트 링크 전용 포트폴리오');
+    }
+  });
+
+  it('rejects duplicate portfolio share IDs instead of choosing a document', async () => {
+    await writeFile(duplicatePortfolioFixture, `---
+title: "중복 공유 식별자 포트폴리오"
+description: "중복 공유 식별자 검증 전용 문서다."
+shareId: "${publishedPortfolioShareId}"
+project: "signal-hub"
+targetRole: "백엔드 개발자"
+targetDomains:
+  primary: "데이터 플랫폼"
+  subdomains: ["시계열 분석"]
+period: "2026.08–현재"
+projectType: "개인 프로젝트"
+role: ["설계"]
+tags: ["TypeScript"]
+updated: 2026-08-21
+draft: false
+---
+
+중복 문서 본문이다.
+`, 'utf8');
+    try {
+      await expect(execFileAsync('npm', ['run', 'build'], {
+        cwd: process.cwd(),
+        env: { ...process.env, NODE_ENV: 'production' },
+        maxBuffer: 10 * 1024 * 1024,
+      })).rejects.toThrow(/Duplicate portfolio shareId/i);
+    } finally {
+      await rm(duplicatePortfolioFixture, { force: true });
+    }
+  }, 60_000);
 });

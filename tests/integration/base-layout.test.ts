@@ -20,6 +20,14 @@ test('base layout loads the bundled Geist variable font', async () => {
   expect(packageJson.dependencies['@fontsource-variable/geist']).toBeDefined();
 });
 
+test('base layout supports unlisted pages', async () => {
+  const source = await readFile('src/layouts/BaseLayout.astro', 'utf8');
+
+  expect(source).toContain('robots?: string');
+  expect(source).toContain('searchable?: boolean');
+  expect(source).toContain("data-pagefind-ignore={searchable ? undefined : 'all'}");
+});
+
 test('global styles preserve the Geist body font while controls inherit it', async () => {
   const source = await readFile('src/styles/global.css', 'utf8');
 
