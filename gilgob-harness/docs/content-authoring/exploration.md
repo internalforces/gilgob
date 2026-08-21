@@ -9,7 +9,7 @@ Harness Version: 1.1
 
 Use `content/explorations/` when the central value is the investigation itself and the conclusion is incomplete, conditional, or still changing.
 
-Start from `content/templates/exploration.md`. A current example is `content/explorations/llm-watermark.md`.
+Start from `content/templates/exploration.md`.
 
 ## Good Fit
 

@@ -102,21 +102,33 @@ draft: true
     }
   }, 60_000);
 
-  it.each([
-    ['knowledge', 'database/b-tree-index'],
-    ['explorations', 'llm-watermark'],
-    ['projects', 'signal-hub'],
-    ['logs', '2026-08-20-oracle-hierarchical-query'],
-  ])('builds the %s index and detail route', async (kind, slug) => {
-    const [indexHtml, detailHtml] = await Promise.all([
-      readFile(`${basePath}/${kind}/index.html`, 'utf8'),
-      readFile(`${basePath}/${kind}/${slug}/index.html`, 'utf8'),
-    ]);
-
+  it.each(['knowledge', 'explorations', 'projects', 'logs'])('builds the %s index route', async (kind) => {
+    const indexHtml = await readFile(`${basePath}/${kind}/index.html`, 'utf8');
     expect(indexHtml).toContain('data-content-list');
+    expect(indexHtml).toContain('aria-live="polite"');
+  });
+
+  it.each(['knowledge', 'projects', 'logs'])('renders public cards in the %s index', async (kind) => {
+    const indexHtml = await readFile(`${basePath}/${kind}/index.html`, 'utf8');
     expect(indexHtml).toContain('data-filter-card');
     expect(indexHtml).toContain('data-pagefind-meta="type:');
-    expect(indexHtml).toContain('aria-live="polite"');
+  });
+
+  it('renders the empty exploration index without the deleted exploration route', async () => {
+    const indexHtml = await readFile(`${basePath}/explorations/index.html`, 'utf8');
+
+    expect(indexHtml).toContain('전체 0개 중 0개');
+    expect(indexHtml).not.toContain('data-filter-card');
+    await expect(access(`${basePath}/explorations/llm-watermark/index.html`)).rejects.toMatchObject({ code: 'ENOENT' });
+  });
+
+  it.each([
+    ['knowledge', 'database/b-tree-index'],
+    ['projects', 'signal-hub'],
+    ['logs', '2026-08-20-oracle-hierarchical-query'],
+  ])('builds the %s detail route', async (kind, slug) => {
+    const detailHtml = await readFile(`${basePath}/${kind}/${slug}/index.html`, 'utf8');
+
     expect(detailHtml).toContain('data-pagefind-body');
     expect(detailHtml).toContain('목차');
     expect(detailHtml).toContain('백링크');
