@@ -62,14 +62,6 @@ const updated = (entry.data.updated ?? entry.data.created).toLocaleDateString('k
           </details>
         )}
 
-        {entry.data.nextQuestions?.length && (
-          <section class="next-questions" aria-labelledby="next-questions-title">
-            <p>열린 질문</p>
-            <h2 id="next-questions-title">다음 탐구 질문</h2>
-            <ol>{entry.data.nextQuestions.map((question) => <li>{question}</li>)}</ol>
-          </section>
-        )}
-
         <Backlinks entries={backlinks} />
         <section class="reading-links" aria-labelledby="related-title" data-pagefind-ignore>
           <div class="reading-links__heading">
@@ -82,6 +74,14 @@ const updated = (entry.data.updated ?? entry.data.created).toLocaleDateString('k
             </ul>
           ) : <p class="reading-links__empty">연결된 공개 문서를 더 모으는 중입니다.</p>}
         </section>
+
+        {entry.data.nextQuestions?.length && (
+          <section class="next-questions" aria-labelledby="next-questions-title">
+            <p>열린 질문</p>
+            <h2 id="next-questions-title">다음 탐구 질문</h2>
+            <ol>{entry.data.nextQuestions.map((question) => <li>{question}</li>)}</ol>
+          </section>
+        )}
       </div>
 
       <aside class="reading-toc reading-toc--desktop" aria-label="목차" data-pagefind-ignore>

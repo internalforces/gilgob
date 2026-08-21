@@ -156,6 +156,19 @@ draft: true
     expect(html.indexOf('<div class="prose">')).toBeLessThan(html.indexOf('reading-toc--mobile'));
   });
 
+  it('places one related-knowledge footer between backlinks and next questions', async () => {
+    const html = await readFile(`${basePath}/knowledge/network/tcp-udp/index.html`, 'utf8');
+    const backlinks = html.indexOf('id="backlinks-title"');
+    const related = html.indexOf('id="related-title"');
+    const nextQuestions = html.indexOf('id="next-questions-title"');
+
+    expect(backlinks).toBeGreaterThan(-1);
+    expect(related).toBeGreaterThan(backlinks);
+    expect(nextQuestions).toBeGreaterThan(related);
+    expect(html.match(/>관련 지식<\/h2>/g)).toHaveLength(1);
+    expect(html).not.toContain('>연결된 지식</h2>');
+  });
+
   it('emits Pagefind result metadata and ignores repeated reading chrome', async () => {
     const html = await readFile(`${basePath}/knowledge/database/b-tree-index/index.html`, 'utf8');
 
