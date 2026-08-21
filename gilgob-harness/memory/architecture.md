@@ -78,7 +78,7 @@ Author in Obsidian or editor
 
 ## Decision Summary
 
-See `decisions.md` for complete records.
+See `gilgob-harness/memory/decisions.md` for complete records.
 
 | Decision | Choice | Date |
 |---|---|---|

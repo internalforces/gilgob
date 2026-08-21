@@ -92,11 +92,11 @@ The shared guide documents safe relative slugs, HTTPS external links, attachment
 
 ### Collection Guides
 
-- `knowledge.md`: reusable concepts, evidence, examples, misconceptions, links, and `seed -> growing -> mastered` maturity.
-- `exploration.md`: questions, hypotheses, evidence, counterevidence, current judgment, stopping rules, and `active -> paused | complete` status.
-- `project.md`: problems, constraints, decisions, structure, verification, results, limitations, and `idea -> building -> maintained -> archived` lifecycle.
-- `log.md`: date-centered learning events, actions, lessons, and promotion into reusable knowledge or explorations; no status field.
-- `portfolio.md`: role- and domain-targeted evidence, personal contribution, decisions, results, limitations, disclosure review, direct-share privacy, and non-authentication warning.
+- `gilgob-harness/docs/content-authoring/knowledge.md`: reusable concepts, evidence, examples, misconceptions, links, and `seed -> growing -> mastered` maturity.
+- `gilgob-harness/docs/content-authoring/exploration.md`: questions, hypotheses, evidence, counterevidence, current judgment, stopping rules, and `active -> paused | complete` status.
+- `gilgob-harness/docs/content-authoring/project.md`: problems, constraints, decisions, structure, verification, results, limitations, and `idea -> building -> maintained -> archived` lifecycle.
+- `gilgob-harness/docs/content-authoring/log.md`: date-centered learning events, actions, lessons, and promotion into reusable knowledge or explorations; no status field.
+- `gilgob-harness/docs/content-authoring/portfolio.md`: role- and domain-targeted evidence, personal contribution, decisions, results, limitations, disclosure review, direct-share privacy, and non-authentication warning.
 
 Each guide provides a compact required/optional frontmatter table, recommended body structure, evidence standard, anti-patterns, status or lifecycle guidance where applicable, and a publication checklist.
 

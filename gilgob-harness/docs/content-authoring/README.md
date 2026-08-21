@@ -13,11 +13,11 @@ Use this guide for every content request, then load exactly one collection-speci
 
 | The document primarily answers... | Collection | Template | Guide |
 |---|---|---|---|
-| “What is this, how does it work, and when is it useful?” | `knowledge` | `content/templates/knowledge.md` | `knowledge.md` |
-| “What question am I investigating, and what do I know so far?” | `explorations` | `content/templates/exploration.md` | `exploration.md` |
-| “What problem did this project address, what decisions were made, and what resulted?” | `projects` | `content/templates/project.md` | `project.md` |
-| “What did I learn or try on this date, and what comes next?” | `logs` | `content/templates/log.md` | `log.md` |
-| “How does verified project evidence support a particular job application?” | `portfolio` | `content/templates/portfolio.md` | `portfolio.md` |
+| “What is this, how does it work, and when is it useful?” | `knowledge` | `content/templates/knowledge.md` | `gilgob-harness/docs/content-authoring/knowledge.md` |
+| “What question am I investigating, and what do I know so far?” | `explorations` | `content/templates/exploration.md` | `gilgob-harness/docs/content-authoring/exploration.md` |
+| “What problem did this project address, what decisions were made, and what resulted?” | `projects` | `content/templates/project.md` | `gilgob-harness/docs/content-authoring/project.md` |
+| “What did I learn or try on this date, and what comes next?” | `logs` | `content/templates/log.md` | `gilgob-harness/docs/content-authoring/log.md` |
+| “How does verified project evidence support a particular job application?” | `portfolio` | `content/templates/portfolio.md` | `gilgob-harness/docs/content-authoring/portfolio.md` |
 
 If a note answers more than one question, choose its dominant purpose and link to separate documents for reusable subtopics. Do not duplicate the same long explanation across collections.
 
@@ -70,7 +70,7 @@ Collection-specific fields:
 - Explorations require `status: active | paused | complete`.
 - Projects require `status: idea | building | maintained | archived` and may include an HTTPS `repository`.
 - Logs do not use `status`.
-- Portfolio uses a separate schema documented in `portfolio.md`.
+- Portfolio uses a separate schema documented in `gilgob-harness/docs/content-authoring/portfolio.md`.
 
 ## Categories and Tags
 
@@ -151,7 +151,7 @@ Rules:
 - Production excludes drafts from the applicable indexes, detail routes, RSS, sitemap, search index, graph, and relationships as implemented by the site.
 - Keep `draft: true` when facts, disclosure, links, or structure are not ready.
 - Setting `draft: false` is an intentional publication decision, not a formatting cleanup.
-- Portfolio publication has additional privacy limits described in `portfolio.md`.
+- Portfolio publication has additional privacy limits described in `gilgob-harness/docs/content-authoring/portfolio.md`.
 
 ## Updating Existing Content
 
