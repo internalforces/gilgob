@@ -1,6 +1,14 @@
 ---
 import type { CollectionEntry } from 'astro:content';
+import PortfolioEvidence from '../components/portfolio/PortfolioEvidence.astro';
+import PortfolioOverview from '../components/portfolio/PortfolioOverview.astro';
+import PortfolioToolbar from '../components/portfolio/PortfolioToolbar.astro';
+import { PORTFOLIO_PROFILE } from '../config/portfolio';
 import { withBase } from '../config/site';
+import '@fontsource/noto-sans-kr/korean-400.css';
+import '@fontsource/noto-sans-kr/korean-500.css';
+import '@fontsource/noto-sans-kr/korean-600.css';
+import '@fontsource/noto-sans-kr/korean-700.css';
 import '../styles/portfolio.css';
 import BaseLayout from './BaseLayout.astro';
 
@@ -15,6 +23,14 @@ const actionLinks = [
   entry.data.package && { href: entry.data.package, label: '패키지 보기' },
   entry.data.demo && { href: entry.data.demo, label: '데모 보기' },
 ].filter((link): link is { href: string; label: string } => Boolean(link));
+const pdfRequiredText = Array.from(new Set([
+  PORTFOLIO_PROFILE.name,
+  PORTFOLIO_PROFILE.email,
+  entry.data.title,
+  entry.data.headline,
+  ...entry.data.metrics.map((metric) => metric.value),
+  ...entry.data.decisions.map((decision) => decision.implementation),
+]));
 ---
 
 <BaseLayout
@@ -22,43 +38,24 @@ const actionLinks = [
   description={entry.data.description}
   robots="noindex, nofollow, noarchive, nosnippet"
   searchable={false}
+  siteChrome={false}
 >
-  <article class="portfolio-page">
-    <header class="portfolio-hero site-container">
-      <p class="portfolio-hero__eyebrow">포트폴리오 / {entry.data.projectType}</p>
-      <h1>{entry.data.title}</h1>
-      <p class="portfolio-hero__description">{entry.data.description}</p>
-
-      <dl class="portfolio-metadata">
-        <div><dt>지원 직무</dt><dd>{entry.data.targetRole}</dd></div>
-        <div><dt>기간</dt><dd>{entry.data.period}</dd></div>
-        <div><dt>프로젝트 유형</dt><dd>{entry.data.projectType}</dd></div>
-        <div class="portfolio-metadata__domains">
-          <dt>지원 산업 분야</dt>
-          <dd>
-            <strong>1순위 · {entry.data.targetDomains.primary}</strong>
-            <ul aria-label="지원 서브도메인">
-              {entry.data.targetDomains.subdomains.map((domain) => <li>{domain}</li>)}
-            </ul>
-          </dd>
-        </div>
-      </dl>
-
-      <div class="portfolio-signals">
-        <section aria-labelledby="portfolio-role-title">
-          <h2 id="portfolio-role-title">맡은 역할</h2>
-          <ul>{entry.data.role.map((role) => <li>{role}</li>)}</ul>
-        </section>
-        <section aria-labelledby="portfolio-tag-title">
-          <h2 id="portfolio-tag-title">기술</h2>
-          <ul>{entry.data.tags.map((tag) => <li>#{tag}</li>)}</ul>
-        </section>
-      </div>
-
-      <div class="portfolio-actions" aria-label="프로젝트 링크">
+  <article
+    class="portfolio-page"
+    data-portfolio-project={entry.data.project}
+    data-portfolio-pdf-required-text={JSON.stringify(pdfRequiredText)}
+  >
+    <PortfolioToolbar />
+    <div class="portfolio-print-sheet">
+      <PortfolioOverview entry={entry} />
+      <PortfolioEvidence entry={entry} />
+    </div>
+    <section class="portfolio-detail" aria-labelledby="portfolio-detail-title">
+      <h2 id="portfolio-detail-title">상세 기술 기록</h2>
+      <div class="prose"><slot /></div>
+      <nav class="portfolio-actions" aria-label="프로젝트 링크">
         {actionLinks.map((link, index) => (
           <a
-            class:list={['button-link', { 'button-link--primary': index === 0 }]}
             href={link.href}
             target={index === 0 ? undefined : '_blank'}
             rel={index === 0 ? undefined : 'noreferrer'}
@@ -66,11 +63,12 @@ const actionLinks = [
             {link.label}
           </a>
         ))}
-      </div>
-    </header>
-
-    <div class="portfolio-content site-container">
-      <div class="prose"><slot /></div>
-    </div>
+      </nav>
+    </section>
+    <aside class="portfolio-contact" aria-labelledby="portfolio-contact-title">
+      <h2 id="portfolio-contact-title">함께 이야기하고 싶다면</h2>
+      <a href={`mailto:${PORTFOLIO_PROFILE.email}`}>{PORTFOLIO_PROFILE.email}</a>
+      <a href={PORTFOLIO_PROFILE.github}>GitHub</a>
+    </aside>
   </article>
 </BaseLayout>

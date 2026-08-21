@@ -28,6 +28,17 @@ test('base layout supports unlisted pages', async () => {
   expect(source).toContain("data-pagefind-ignore={searchable ? undefined : 'all'}");
 });
 
+test('base layout can suppress site chrome without removing main content', async () => {
+  const source = await readFile('src/layouts/BaseLayout.astro', 'utf8');
+
+  expect(source).toContain('siteChrome?: boolean');
+  expect(source).toContain('siteChrome = true');
+  expect(source).toContain('{siteChrome && <SiteHeader />}');
+  expect(source).toContain('{siteChrome && <SearchDialog');
+  expect(source).toContain('{siteChrome && <SiteFooter />}');
+  expect(source).toContain('<main id="main-content"');
+});
+
 test('global styles preserve the Geist body font while controls inherit it', async () => {
   const source = await readFile('src/styles/global.css', 'utf8');
 

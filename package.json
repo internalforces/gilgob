@@ -10,6 +10,7 @@
     "test": "vitest run",
     "dev": "astro dev",
     "build": "astro check && astro build && node scripts/build-search.mjs",
+    "portfolio:pdf": "npm run build && node scripts/export-portfolio-pdf.mjs",
     "preview": "astro preview",
     "check": "astro check",
     "test:watch": "vitest",
@@ -28,6 +29,7 @@
     "@astrojs/rss": "^4.0.19",
     "@astrojs/sitemap": "^3.7.3",
     "@fontsource-variable/geist": "^5.3.0",
+    "@fontsource/noto-sans-kr": "^5.3.0",
     "@pagefind/default-ui": "^1.5.2",
     "astro": "^7.2.4",
     "cytoscape": "^3.34.1",
@@ -47,6 +49,8 @@
     "@playwright/test": "^1.62.1",
     "@types/cytoscape": "^3.21.9",
     "@types/js-yaml": "^4.0.9",
+    "pdf-lib": "^1.17.1",
+    "pdfjs-dist": "^6.2.108",
     "typescript": "^6.0.3",
     "vitest": "^4.1.11"
   }

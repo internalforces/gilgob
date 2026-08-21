@@ -44,7 +44,7 @@ Obsidian의 Templates 플러그인에서 다음 파일을 선택합니다.
 
 `knowledge`, `exploration`, `project`, `log` 템플릿을 적용한 뒤 제목, 설명, 분야, 날짜, 상태를 실제 값으로 바꾸고 알맞은 컬렉션 폴더에 저장합니다. 이 공개 문서는 파일 경로가 기본 slug가 되며 `slug`를 명시하면 그 값을 사용합니다.
 
-포트폴리오는 공개 문서용 `category`, `status`, `slug` 규칙을 쓰지 않습니다. `title`, `description`, `shareId`, `project`, `targetRole`, `targetDomains`, `period`, `projectType`, `role`, `tags`, `updated`, `draft`를 작성하고, 필요하면 `repository`, `package`, `demo` HTTPS 링크를 추가합니다. `targetDomains`에는 확실한 1순위 `primary`와 하나 이상의 `subdomains`를 구분해 작성합니다. `shareId`는 파일명과 무관한 직접 공유 경로이며, 템플릿처럼 충분히 긴 임의형 접두사를 사용하면 우연한 발견을 줄일 수 있습니다. 다만 이는 인증이 아니므로 URL을 아는 사람은 열 수 있으며, 민감한 정보나 NDA 자료는 저장하지 마세요. 포트폴리오는 공개 목록, 사이트맵, RSS와 사이트 내 검색에서 제외됩니다.
+포트폴리오는 공개 문서용 `category`, `status`, `slug` 규칙을 쓰지 않습니다. `title`, `description`, `shareId`, `project`, `targetRole`, `targetDomains`, `period`, `projectType`, `role`, `tags`, `updated`, `draft`, `headline`, `metrics`, `story`, `capabilities`, `ownership`, `architecture`, `decisions`, `validation`, `currentScope`, `nextStep`를 작성하고, 필요하면 `repository`, `package`, `demo` HTTPS 링크를 추가합니다. `metrics`는 정확히 4개, `capabilities`와 `decisions`는 각각 정확히 3개, `validation.proofs`는 정확히 4개입니다. `architecture`는 2~4개 노드, `validation.steps`는 3~6단계로 작성합니다. `targetDomains`에는 확실한 1순위 `primary`와 하나 이상의 `subdomains`를 구분해 작성합니다. `shareId`는 파일명과 무관한 직접 공유 경로이며, 템플릿처럼 충분히 긴 임의형 접두사를 사용하면 우연한 발견을 줄일 수 있습니다. 다만 이는 인증이 아니므로 URL을 아는 사람은 열 수 있으며, 민감한 정보나 NDA 자료는 저장하지 마세요. 포트폴리오는 공개 목록, 사이트맵, RSS와 사이트 내 검색에서 제외됩니다.
 
 ## frontmatter 표
 
@@ -87,6 +87,22 @@ npm run test:e2e
 ```
 
 `npm run verify`는 Astro 타입 검사, 단위·통합 테스트, 정적 빌드와 Pagefind 색인을 실행합니다. Pagefind는 한국어 stemming(어근 확장)을 지원하지 않으므로 조사나 활용형을 자동으로 같은 단어로 묶지 못합니다. 검색이 누락되면 제목·태그에 실제로 쓰인 더 정확한 단어로 검색합니다.
+
+## 포트폴리오 PDF 내보내기
+
+Signal Hub 공유 포트폴리오의 공식 PDF는 다음 명령으로 생성합니다.
+
+```bash
+npm run portfolio:pdf -- --share-id 8c5e1a7d3b92-signal-hub
+```
+
+검증을 통과한 결과는 `output/pdf/sonmyeonggwan-signal-hub-project-portfolio.pdf`에 저장됩니다. 이 명령은 프로덕션 빌드와 로컬 미리보기를 사용하며, A4 세로 PDF가 정확히 한 페이지가 아니면 기존 결과를 교체하지 않고 실패합니다.
+
+자동 내보내기를 사용할 수 없을 때는 공유 포트폴리오 페이지의 **PDF로 저장** 버튼으로 브라우저 인쇄 창을 연 뒤 A4 세로 방향, 배경 그래픽 포함 설정으로 저장할 수 있습니다. Chromium 실행 파일이 없다는 오류가 나오면 다음 명령으로 설치한 뒤 다시 시도합니다.
+
+```bash
+npx playwright install chromium
+```
 
 ## GitHub Pages 설정
 

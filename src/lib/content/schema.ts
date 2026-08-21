@@ -50,6 +50,36 @@ export const projectSchema = commonSchema.extend({
 
 export const logSchema = commonSchema;
 
+const portfolioMetricSchema = z.object({
+  value: z.string().min(1),
+  label: z.string().min(1),
+  detail: z.string().min(1),
+});
+
+const portfolioCapabilitySchema = z.object({
+  title: z.string().min(1),
+  summary: z.string().min(1),
+  evidence: z.string().min(1),
+  visual: z.enum(['trend', 'threshold', 'window']).optional(),
+});
+
+const portfolioArchitectureNodeSchema = z.object({
+  label: z.string().min(1),
+  title: z.string().min(1),
+  detail: z.string().min(1),
+});
+
+const portfolioDecisionSchema = z.object({
+  title: z.string().min(1),
+  implementation: z.string().min(1),
+  impact: z.string().min(1),
+});
+
+const portfolioProofSchema = z.object({
+  value: z.string().min(1),
+  label: z.string().min(1),
+});
+
 export const portfolioSchema = z.object({
   title: z.string().min(1),
   description: z.string().min(1),
@@ -69,6 +99,24 @@ export const portfolioSchema = z.object({
   repository: httpsUrlSchema.optional(),
   package: httpsUrlSchema.optional(),
   demo: httpsUrlSchema.optional(),
+  headline: z.string().min(1),
+  metrics: z.array(portfolioMetricSchema).length(4),
+  story: z.object({
+    problem: z.string().min(1),
+    approach: z.string().min(1),
+    result: z.string().min(1),
+  }),
+  capabilities: z.array(portfolioCapabilitySchema).length(3),
+  ownership: z.array(z.string().min(1)).min(1),
+  architecture: z.array(portfolioArchitectureNodeSchema).min(2).max(4),
+  decisions: z.array(portfolioDecisionSchema).length(3),
+  validation: z.object({
+    steps: z.array(z.string().min(1)).min(3).max(6),
+    proofs: z.array(portfolioProofSchema).length(4),
+    command: z.string().min(1).optional(),
+  }),
+  currentScope: z.string().min(1),
+  nextStep: z.string().min(1),
 });
 
 export type ContentFrontmatter = z.infer<typeof commonSchema> & { status?: string };

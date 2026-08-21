@@ -7,6 +7,7 @@ dist/
 test-results/
 playwright-report/
 blob-report/
+output/pdf/
 .DS_Store
 *.log
 

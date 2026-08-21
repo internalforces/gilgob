@@ -1,0 +1,83 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { PORTFOLIO_PROFILE } from '../../config/portfolio';
+import PortfolioMiniGraphic from './PortfolioMiniGraphic.astro';
+
+interface Props {
+  entry: CollectionEntry<'portfolio'>;
+}
+
+const { entry } = Astro.props;
+const story = [
+  { label: '문제', copy: entry.data.story.problem },
+  { label: '선택', copy: entry.data.story.approach },
+  { label: '결과', copy: entry.data.story.result },
+];
+---
+
+<section class="portfolio-screen portfolio-overview" aria-labelledby="portfolio-overview-title">
+  <header class="portfolio-frame__header">
+    <div>
+      <p class="portfolio-frame__identity">{PORTFOLIO_PROFILE.name}</p>
+      <p>{entry.data.targetRole}</p>
+      <p class="portfolio-frame__domains">
+        지원 산업 분야 · <strong>{entry.data.targetDomains.primary}</strong> ·
+        {entry.data.targetDomains.subdomains.join(' · ')}
+      </p>
+    </div>
+    <p class="portfolio-frame__marker">PROJECT 01 · 무엇을 만들었는가</p>
+  </header>
+
+  <h1 id="portfolio-overview-title">{entry.data.headline}</h1>
+
+  <dl class="portfolio-metrics" aria-label="프로젝트 핵심 지표">
+    {entry.data.metrics.map((metric) => (
+      <div>
+        <dt>{metric.label}</dt>
+        <dd>{metric.value}</dd>
+        <dd class="portfolio-metrics__detail">{metric.detail}</dd>
+      </div>
+    ))}
+  </dl>
+
+  <section class="portfolio-section" aria-labelledby="portfolio-story-title">
+    <h2 id="portfolio-story-title">문제에서 결과까지</h2>
+    <div class="portfolio-story">
+      {story.map((item, index) => (
+        <article class="portfolio-story__card">
+          <p class="portfolio-card__index">0{index + 1}</p>
+          <h3>{item.label}</h3>
+          <p>{item.copy}</p>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <section class="portfolio-section" aria-labelledby="portfolio-capabilities-title">
+    <h2 id="portfolio-capabilities-title">핵심 구현 역량</h2>
+    <div class="portfolio-capabilities">
+      {entry.data.capabilities.map((capability) => (
+        <article class:list={['portfolio-capability', { 'portfolio-capability--with-visual': capability.visual }]}>
+          <PortfolioMiniGraphic visual={capability.visual} />
+          <div class="portfolio-capability__copy">
+            <h3>{capability.title}</h3>
+            <p>{capability.summary}</p>
+            <p class="portfolio-capability__evidence">근거 · {capability.evidence}</p>
+          </div>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <section class="portfolio-ownership" aria-labelledby="portfolio-ownership-title">
+    <h2 id="portfolio-ownership-title">내가 맡은 범위</h2>
+    <ul>
+      {entry.data.ownership.map((item) => <li>{item}</li>)}
+    </ul>
+  </section>
+
+  <footer class="portfolio-frame__footer">
+    <a href={`mailto:${PORTFOLIO_PROFILE.email}`}>{PORTFOLIO_PROFILE.email}</a>
+    <p>화면 1 · 프로젝트 개요</p>
+  </footer>
+</section>
