@@ -7,7 +7,7 @@ Harness Version: 1.1
 
 # Known Issues: gilgob
 
-_Last updated: 2026-08-21_
+_Last updated: 2026-08-22_
 
 ## Active Bugs
 
@@ -44,4 +44,19 @@ Permanent direction: Proposed fix scope and required approval gates.
 
 ## Resolved Issues
 
-No resolved issue has been archived in Harness memory.
+### ISS-001: Compact pull request events emptied GitHub activity data
+
+- Severity: Medium
+- Found: 2026-08-22
+- Status: Resolved
+- Affected paths: `src/lib/github/fetch-github.ts`, `tests/unit/github-stats.test.ts`
+
+Reproduction: Normalize the current compact public `PullRequestEvent` shape, whose pull request object provides an API `url` but no `html_url`. The normalizer rejected the event, and a cache miss caused the build-time GitHub activity result to become empty.
+
+Expected behavior: Supported public pull request events produce safe `github.com` activity links without requiring a browser URL from the API payload.
+
+Root cause: Pull request normalization required `pull_request.html_url`, while the current events API returns compact pull request objects with `pull_request.url` instead.
+
+Workaround: A previously populated cache could preserve stale activity data, but no reliable workaround existed on a cache miss.
+
+Permanent direction: Resolved by accepting either URL field as input evidence, always constructing the canonical public pull request link from the validated repository and number, and covering compact and misleading URL payloads with regression tests.

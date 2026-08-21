@@ -223,11 +223,12 @@ function normalizeEvent(value: unknown): GitHubActivity | null {
     }
     case 'PullRequestEvent': {
       const pullRequest = isRecord(payload.pull_request) ? payload.pull_request : null;
+      const pullRequestUrl = pullRequest?.html_url ?? pullRequest?.url;
       if (typeof payload.action !== 'string'
         || !PULL_REQUEST_ACTIONS.has(payload.action)
         || !positiveInteger(payload.number)
         || !pullRequest
-        || !nonEmptyString(pullRequest.html_url, 2_048)) return null;
+        || !nonEmptyString(pullRequestUrl, 2_048)) return null;
       label = payload.action === 'merged'
         ? '풀 리퀘스트를 병합했습니다'
         : payload.action === 'closed'
@@ -236,7 +237,7 @@ function normalizeEvent(value: unknown): GitHubActivity | null {
             ? '풀 리퀘스트를 열었습니다'
             : '풀 리퀘스트를 업데이트했습니다';
       const number = positiveInteger(payload.number) ? payload.number : null;
-      url = safeGitHubUrl(pullRequest?.html_url, repository, number ? `/pull/${number}` : '/pulls');
+      url = constructedGitHubUrl(repository, number ? `/pull/${number}` : '/pulls');
       break;
     }
     case 'IssuesEvent': {

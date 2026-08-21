@@ -123,6 +123,72 @@ describe('GitHub payload normalization', () => {
     ])).toEqual([]);
   });
 
+  it('accepts compact PullRequestEvent payloads and constructs a safe public URL', () => {
+    expect(normalizeEvents([{
+      id: 'compact-pr-1',
+      type: 'PullRequestEvent',
+      public: true,
+      created_at: '2026-08-20T06:00:00Z',
+      repo: { name: 'internalforces/atlas' },
+      payload: {
+        action: 'merged',
+        number: 12,
+        pull_request: {
+          base: {
+            ref: 'main',
+            sha: '1111111111111111111111111111111111111111',
+            repo: {
+              id: 1,
+              name: 'atlas',
+              url: 'https://api.github.com/repos/internalforces/atlas',
+            },
+          },
+          head: {
+            ref: 'fix/github-activity',
+            sha: '2222222222222222222222222222222222222222',
+            repo: {
+              id: 1,
+              name: 'atlas',
+              url: 'https://api.github.com/repos/internalforces/atlas',
+            },
+          },
+          id: 12,
+          number: 12,
+          url: 'https://api.github.com/repos/internalforces/atlas/pulls/12',
+        },
+      },
+    }])).toEqual([{
+      id: 'compact-pr-1',
+      repository: 'internalforces/atlas',
+      label: '풀 리퀘스트를 병합했습니다',
+      url: 'https://github.com/internalforces/atlas/pull/12',
+      createdAt: '2026-08-20T06:00:00.000Z',
+    }]);
+  });
+
+  it('replaces a same-repository non-PR browser URL with the canonical pull request URL', () => {
+    expect(normalizeEvents([{
+      id: 'wrong-pr-url-1',
+      type: 'PullRequestEvent',
+      public: true,
+      created_at: '2026-08-20T06:00:00Z',
+      repo: { name: 'internalforces/atlas' },
+      payload: {
+        action: 'opened',
+        number: 12,
+        pull_request: {
+          html_url: 'https://github.com/internalforces/atlas/blob/main/README.md',
+        },
+      },
+    }])).toEqual([{
+      id: 'wrong-pr-url-1',
+      repository: 'internalforces/atlas',
+      label: '풀 리퀘스트를 열었습니다',
+      url: 'https://github.com/internalforces/atlas/pull/12',
+      createdAt: '2026-08-20T06:00:00.000Z',
+    }]);
+  });
+
   it('accepts official repository CreateEvent ref shapes with a null description', async () => {
     const officialExample = await fixture('create-repository') as Record<string, unknown>;
     const nullRefExample = {
