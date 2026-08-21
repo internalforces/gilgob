@@ -24,6 +24,84 @@ updated: 2026-08-21
 draft: false
 repository: "https://github.com/internalforces/SignalHub"
 package: "https://www.npmjs.com/package/csv-to-signal"
+headline: "재현 가능한 데이터 처리를 실제 배포까지 연결했습니다."
+metrics:
+  - value: "약 4주"
+    label: "개발 기간"
+    detail: "2026-07-27 첫 커밋부터"
+  - value: "83"
+    label: "자동화 테스트"
+    detail: "15개 테스트 파일"
+  - value: "9"
+    label: "워크스페이스"
+    detail: "앱 1 · 커넥터 3 · 패키지 5"
+  - value: "0.3.0"
+    label: "npm 공개 버전"
+    detail: "Node.js 20 · 22 · 24"
+story:
+  problem: "전체 운영 플랫폼 없이 시계열 규칙을 먼저 검증하기 어려웠습니다."
+  approach: "CSV 입력과 명시적인 규칙 기반 탐지기에 범위를 집중했습니다."
+  result: "같은 입력에서 같은 신호와 중복 없는 저장 결과를 재현합니다."
+capabilities:
+  - title: "연속 변화율"
+    summary: "인접 값의 변화를 탐지합니다."
+    evidence: "동일 입력에서 같은 신호 ID"
+    visual: "trend"
+  - title: "임계값 통과"
+    summary: "기준선의 상향·하향 통과를 찾습니다."
+    evidence: "방향과 시점을 명시"
+    visual: "threshold"
+  - title: "시간 윈도우 변화"
+    summary: "지정 기간의 누적 변화를 비교합니다."
+    evidence: "24시간 변화율 25%"
+    visual: "window"
+ownership:
+  - "모노레포 아키텍처"
+  - "탐지·점수화"
+  - "SQLite 저장"
+  - "CLI·테스트·npm 배포"
+architecture:
+  - label: "INPUT"
+    title: "CSV Connector"
+    detail: "시계열 행 정규화"
+  - label: "CORE"
+    title: "Detector + Score"
+    detail: "규칙 기반 신호 생성"
+  - label: "OUTPUT"
+    title: "SQLite + JSON"
+    detail: "멱등 저장과 정렬 출력"
+decisions:
+  - title: "결정론적 신호 ID"
+    implementation: "입력과 규칙으로 ID를 생성했습니다."
+    impact: "재실행 결과를 비교할 수 있습니다."
+  - title: "SQLite 멱등 저장"
+    implementation: |-
+      INSERT OR IGNORE
+      TEXT PRIMARY KEY
+    impact: "동일 신호의 중복 적재를 막습니다."
+  - title: "단방향 패키지 경계"
+    implementation: "입력→코어→저장·출력 방향을 유지했습니다."
+    impact: "책임과 배포 단위를 분리합니다."
+validation:
+  steps:
+    - "build"
+    - "83 tests"
+    - "typecheck"
+    - "audit"
+    - "isolated install"
+    - "real CLI run"
+  proofs:
+    - value: "2"
+      label: "격리 환경 생성 신호"
+    - value: "25%"
+      label: "24시간 변화율"
+    - value: "1"
+      label: "소비자 data.db"
+    - value: "0"
+      label: "패키지 내부 DB"
+  command: "npm run release:check"
+currentScope: "CSV 입력과 로컬 CLI 실행을 지원하며 외부 서비스 커넥터는 포함하지 않습니다."
+nextStep: "CSV 파싱과 외부 커넥터 경계를 강화하되 결정론과 멱등성 계약을 유지합니다."
 ---
 
 ## 30초 요약

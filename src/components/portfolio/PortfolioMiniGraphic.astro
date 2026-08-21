@@ -1,0 +1,36 @@
+---
+interface Props {
+  visual?: 'trend' | 'threshold' | 'window';
+}
+
+const { visual } = Astro.props;
+---
+
+{visual === 'trend' && (
+  <svg class="portfolio-mini-graphic" viewBox="0 0 120 52" aria-hidden="true" fill="none">
+    <path d="M8 43 L46 31 L76 35 L112 9" stroke="currentColor" stroke-width="2.5" />
+    <circle cx="8" cy="43" r="3" stroke="currentColor" stroke-width="2" />
+    <circle cx="76" cy="35" r="3" stroke="currentColor" stroke-width="2" />
+    <circle cx="112" cy="9" r="3" stroke="currentColor" stroke-width="2" />
+  </svg>
+)}
+
+{visual === 'threshold' && (
+  <svg class="portfolio-mini-graphic" viewBox="0 0 120 52" aria-hidden="true" fill="none">
+    <path d="M7 25 H113" stroke="currentColor" stroke-width="1.5" stroke-dasharray="5 4" />
+    <path d="M9 43 L46 36 L70 29 L88 17 L112 10" stroke="currentColor" stroke-width="2.5" />
+    <circle cx="76" cy="25" r="3" stroke="currentColor" stroke-width="2" />
+  </svg>
+)}
+
+{visual === 'window' && (
+  <div class="portfolio-mini-graphic portfolio-mini-graphic--window" aria-hidden="true">
+    <span class="portfolio-mini-graphic__label">24h</span>
+    <svg viewBox="0 0 120 32" aria-hidden="true" fill="none">
+      <path d="M17 3 V14 H103 V3" stroke="currentColor" stroke-width="2" />
+      <path d="M17 25 H103" stroke="currentColor" stroke-width="2.5" />
+      <circle cx="17" cy="25" r="3" stroke="currentColor" stroke-width="2" />
+      <circle cx="103" cy="25" r="3" stroke="currentColor" stroke-width="2" />
+    </svg>
+  </div>
+)}

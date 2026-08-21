@@ -21,7 +21,7 @@ test('reading page keeps its mobile table of contents collapsed by default', asy
   await expect(tableOfContents.getByText('목차', { exact: true })).toBeVisible();
 });
 
-for (const path of ['/', '/knowledge/', '/skills/', '/graph/']) {
+for (const path of ['/', '/knowledge/', '/skills/', '/graph/', '/portfolio/8c5e1a7d3b92-signal-hub/']) {
   test(`${path} has no horizontal overflow on mobile`, async ({ page }) => {
     await page.goto(pagePath(path), { waitUntil: 'networkidle' });
     expect(await page.evaluate(() => (

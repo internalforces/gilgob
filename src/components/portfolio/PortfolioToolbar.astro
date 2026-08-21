@@ -1,0 +1,17 @@
+---
+import { PORTFOLIO_PROFILE } from '../../config/portfolio';
+---
+
+<div class="portfolio-toolbar" role="toolbar" aria-label="포트폴리오 도구">
+  <p>{PORTFOLIO_PROFILE.name}</p>
+  <div class="portfolio-toolbar__actions">
+    <a href={PORTFOLIO_PROFILE.github}>GitHub</a>
+    <a href={`mailto:${PORTFOLIO_PROFILE.email}`}>{PORTFOLIO_PROFILE.email}</a>
+    <button type="button" data-print-portfolio>PDF로 저장</button>
+  </div>
+</div>
+
+<script>
+  const printButton = document.querySelector<HTMLButtonElement>('[data-print-portfolio]');
+  printButton?.addEventListener('click', () => window.print());
+</script>

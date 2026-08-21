@@ -13,6 +13,7 @@ export interface Props {
   noindex?: boolean;
   robots?: string;
   searchable?: boolean;
+  siteChrome?: boolean;
 }
 
 const {
@@ -22,6 +23,7 @@ const {
   noindex = false,
   robots,
   searchable = true,
+  siteChrome = true,
 } = Astro.props;
 const robotsContent = robots ?? (noindex ? 'noindex, nofollow' : undefined);
 const pageTitle = title === SITE_CONFIG.name ? title : `${title} · ${SITE_CONFIG.name}`;
@@ -57,12 +59,12 @@ const socialImage = socialImagePath
   </head>
   <body data-pagefind-ignore={searchable ? undefined : 'all'}>
     <a class="skip-link" href="#main-content">본문 바로가기</a>
-    <SiteHeader />
-    <SearchDialog client:load base={SITE_CONFIG.base} />
+    {siteChrome && <SiteHeader />}
+    {siteChrome && <SearchDialog client:load base={SITE_CONFIG.base} />}
     <main id="main-content" class="site-main" tabindex="-1">
       <slot />
     </main>
-    <SiteFooter />
+    {siteChrome && <SiteFooter />}
   </body>
 </html>
 
