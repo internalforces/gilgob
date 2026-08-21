@@ -41,7 +41,7 @@ test('supports multiple facets and clears a selection removed by filtering', asy
   await expect(page.getByRole('button', { name: /B-Tree는 왜 DB Index에 사용될까/ })).toHaveCount(0);
   await expect(page.getByRole('region', { name: '선택한 노드 상세' })).toContainText('Signal Hub');
 
-  await page.getByRole('checkbox', { name: /Knowledge Garden/ }).check();
+  await page.getByRole('group', { name: /태그/ }).getByRole('checkbox', { name: /TypeScript/ }).check();
   await expect(page.getByText('활성 필터 2개')).toBeVisible();
   await expect(page.getByText('문서 1개 · 노드')).toBeVisible();
 });
@@ -114,7 +114,11 @@ test.describe('without JavaScript', () => {
       const categoryGroupItem = categoryGroup.locator('..');
       await expect(categoryGroupItem.getByRole('link', { name: document.title, exact: true })).toHaveCount(1);
       for (const tag of document.tags) {
-        const tagGroup = fallback.getByRole('heading', { level: 3, name: `태그: #${tag}` });
+        const tagGroup = fallback.getByRole('heading', {
+          level: 3,
+          name: `태그: #${tag}`,
+          exact: true,
+        });
         const tagId = await tagGroup.getAttribute('id');
         expect(tagId).not.toBeNull();
         const tagLink = article.getByRole('link', { name: `#${tag}`, exact: true });

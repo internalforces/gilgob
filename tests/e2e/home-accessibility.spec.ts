@@ -44,7 +44,7 @@ test('home exposes YAML skill progress and Korean project metadata', async ({ pa
 
   await expect(page.getByRole('progressbar', { name: '스킬 트리 기준 전체 스킬 진척도' })).toBeAttached();
   const metadata = page.locator('.project-card__meta').first();
-  await expect(metadata).toContainText('구축 중');
+  await expect(metadata).toContainText('유지 중');
   await expect(metadata).toContainText('프로젝트');
   await expect(metadata).not.toContainText('Projects');
 });
