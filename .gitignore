@@ -11,5 +11,10 @@ blob-report/
 *.log
 
 # Obsidian workspace state is local to each device.
+/.obsidian/
 content/.obsidian/workspace.json
 content/.obsidian/workspace-mobile.json
+content/.obsidian/app.json
+content/.obsidian/appearance.json
+content/.obsidian/core-plugins.json
+content/.obsidian/graph.json
