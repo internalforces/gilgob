@@ -27,13 +27,13 @@ headline: "CSV 시계열 데이터를 신호로 바꾸는 CLI를 설계해 npm�
 metrics:
   - value: "0.3.0"
     label: "npm 공개 버전"
-    detail: "Node.js 20 · 22 · 24 지원"
+    detail: "Node.js 20 · 22 · 24"
   - value: "83"
     label: "자동화 테스트"
-    detail: "15개 파일 · 릴리스 점검 기준"
+    detail: "15개 파일"
   - value: "9"
     label: "워크스페이스"
-    detail: "CLI 1 · 커넥터 3 · 패키지 5"
+    detail: "1 CLI · 3 커넥터 · 5 패키지"
 story:
   problem: "시계열 규칙 하나를 시험하려고 수집 서버와 대시보드까지 만들 수는 없었습니다."
   approach: "입력은 CSV, 실행은 로컬 CLI로 좁히고 탐지 규칙을 코드로 작성했습니다."
