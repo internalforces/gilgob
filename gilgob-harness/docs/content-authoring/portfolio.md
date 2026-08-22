@@ -40,6 +40,12 @@ Portfolio frontmatter is separate from the four indexed collections.
 | `package` | No | Public HTTPS package URL |
 | `demo` | No | Public HTTPS demo URL |
 
+The structured screen fields follow these limits:
+
+- Write `metrics`, `capabilities`, `decisions`, and `validation.proofs` with 2–4 evidence-backed items each. Do not add filler to reach the maximum.
+- Write `architecture` with 2–4 nodes and `validation.steps` with 3–6 steps.
+- Make `headline`, `story`, `currentScope`, and `nextStep` concrete enough to stand without promotional adjectives.
+
 Do not add `category`, `created`, `aliases`, `featured`, `slug`, `nextQuestions`, or collection `status` fields to portfolio frontmatter.
 
 ## Project Link

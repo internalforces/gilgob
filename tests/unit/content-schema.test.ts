@@ -27,8 +27,8 @@ const portfolio = {
   project: 'signal-hub',
   targetRole: '백엔드 개발자',
   targetDomains: {
-    primary: '데이터 플랫폼',
-    subdomains: ['시계열 분석', '핀테크 데이터', '개발자 도구'],
+    primary: '시계열 데이터 처리',
+    subdomains: ['개발자 도구', '로컬 데이터 분석'],
   },
   period: '2026.08–현재',
   projectType: '개인 프로젝트',
@@ -38,7 +38,7 @@ const portfolio = {
   draft: false,
   repository: 'https://github.com/internalforces/SignalHub',
   package: 'https://www.npmjs.com/package/csv-to-signal',
-  headline: '재현 가능한 데이터 처리를 실제 배포까지 연결했습니다.',
+  headline: 'CSV 시계열 데이터를 신호로 바꾸는 CLI를 설계해 npm에 배포했습니다.',
   metrics: [
     { value: '약 4주', label: '개발 기간', detail: '2026-07-27 첫 커밋부터' },
     { value: '83', label: '자동화 테스트', detail: '15개 테스트 파일' },
@@ -149,15 +149,49 @@ describe('content schemas', () => {
     expect(portfolioSchema.parse(portfolio).shareId).toBe(portfolio.shareId);
   });
 
+  it('accepts two cards in each flexible portfolio evidence group', () => {
+    expect(portfolioSchema.parse({
+      ...portfolio,
+      metrics: portfolio.metrics.slice(0, 2),
+    }).metrics).toHaveLength(2);
+    expect(portfolioSchema.parse({
+      ...portfolio,
+      capabilities: portfolio.capabilities.slice(0, 2),
+    }).capabilities).toHaveLength(2);
+    expect(portfolioSchema.parse({
+      ...portfolio,
+      decisions: portfolio.decisions.slice(0, 2),
+    }).decisions).toHaveLength(2);
+    expect(portfolioSchema.parse({
+      ...portfolio,
+      validation: { ...portfolio.validation, proofs: portfolio.validation.proofs.slice(0, 2) },
+    }).validation.proofs).toHaveLength(2);
+  });
+
   it.each([
-    ['metrics', { metrics: portfolio.metrics.slice(0, 3) }],
-    ['capabilities', { capabilities: [...portfolio.capabilities, portfolio.capabilities[0]] }],
+    ['metrics minimum', { metrics: portfolio.metrics.slice(0, 1) }],
+    ['metrics maximum', { metrics: [...portfolio.metrics, portfolio.metrics[0]] }],
+    ['capabilities minimum', { capabilities: portfolio.capabilities.slice(0, 1) }],
+    ['capabilities maximum', {
+      capabilities: [...portfolio.capabilities, portfolio.capabilities[0], portfolio.capabilities[1]],
+    }],
     ['architecture minimum', { architecture: portfolio.architecture.slice(0, 1) }],
     ['architecture maximum', { architecture: [...portfolio.architecture, portfolio.architecture[0], portfolio.architecture[1]] }],
-    ['decisions', { decisions: portfolio.decisions.slice(0, 2) }],
+    ['decisions minimum', { decisions: portfolio.decisions.slice(0, 1) }],
+    ['decisions maximum', {
+      decisions: [...portfolio.decisions, portfolio.decisions[0], portfolio.decisions[1]],
+    }],
     ['validation steps minimum', { validation: { ...portfolio.validation, steps: ['build', 'test'] } }],
     ['validation steps maximum', { validation: { ...portfolio.validation, steps: ['1', '2', '3', '4', '5', '6', '7'] } }],
-    ['validation proofs', { validation: { ...portfolio.validation, proofs: portfolio.validation.proofs.slice(0, 3) } }],
+    ['validation proofs minimum', {
+      validation: { ...portfolio.validation, proofs: portfolio.validation.proofs.slice(0, 1) },
+    }],
+    ['validation proofs maximum', {
+      validation: {
+        ...portfolio.validation,
+        proofs: [...portfolio.validation.proofs, portfolio.validation.proofs[0]],
+      },
+    }],
   ])('rejects an invalid portfolio %s count', (_name, override) => {
     expect(() => portfolioSchema.parse({ ...portfolio, ...override })).toThrow();
   });
@@ -169,15 +203,15 @@ describe('content schemas', () => {
 
   it('requires prioritized portfolio target domains', () => {
     expect(portfolioSchema.parse(portfolio).targetDomains).toEqual({
-      primary: '데이터 플랫폼',
-      subdomains: ['시계열 분석', '핀테크 데이터', '개발자 도구'],
+      primary: '시계열 데이터 처리',
+      subdomains: ['개발자 도구', '로컬 데이터 분석'],
     });
 
     const { targetDomains: _targetDomains, ...portfolioWithoutTargetDomains } = portfolio;
     expect(() => portfolioSchema.parse(portfolioWithoutTargetDomains)).toThrow();
     expect(() => portfolioSchema.parse({
       ...portfolio,
-      targetDomains: { primary: '데이터 플랫폼', subdomains: [] },
+      targetDomains: { primary: '시계열 데이터 처리', subdomains: [] },
     })).toThrow();
   });
 

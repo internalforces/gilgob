@@ -4,16 +4,16 @@ import { pagePath } from './helpers';
 const portfolioPath = pagePath('/portfolio/8c5e1a7d3b92-signal-hub/');
 const koreanMobileNumberPattern = /(?:^|[^0-9])010(?:[ -]?[0-9]{4}){2}(?![0-9])/;
 
-test('shows candidate, project value and four evidence metrics', async ({ page }) => {
+test('shows candidate, concrete project outcome and evidence metrics', async ({ page }) => {
   await page.goto(portfolioPath, { waitUntil: 'networkidle' });
 
   await expect(page.getByRole('heading', {
     level: 1,
-    name: '재현 가능한 데이터 처리를 실제 배포까지 연결했습니다.',
+    name: 'CSV 시계열 데이터를 신호로 바꾸는 CLI를 설계해 npm에 배포했습니다.',
   })).toBeVisible();
   await expect(page.getByText('손명관').first()).toBeVisible();
   await expect(page.getByText('백엔드 개발자').first()).toBeVisible();
-  await expect(page.locator('.portfolio-metrics > *')).toHaveCount(4);
+  await expect(page.locator('.portfolio-metrics > *')).toHaveCount(3);
   await expect(page.locator('.portfolio-screen')).toHaveCount(2);
   expect(await page.locator('body').innerText()).not.toMatch(koreanMobileNumberPattern);
 });
@@ -101,11 +101,11 @@ test('keeps both portfolio screen headings visible with reduced motion', async (
     await page.goto(portfolioPath, { waitUntil: 'networkidle' });
     await expect(page.getByRole('heading', {
       level: 1,
-      name: '재현 가능한 데이터 처리를 실제 배포까지 연결했습니다.',
+      name: 'CSV 시계열 데이터를 신호로 바꾸는 CLI를 설계해 npm에 배포했습니다.',
     })).toBeVisible();
     await expect(page.getByRole('heading', {
       level: 2,
-      name: 'Signal Hub · 백엔드 포트폴리오',
+      name: 'Signal Hub · CSV 시계열 분석 CLI',
     })).toBeVisible();
   } finally {
     await context.close();

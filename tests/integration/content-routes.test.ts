@@ -372,20 +372,19 @@ nextStep: "검증 범위를 확장합니다."
     expect(html).toContain('data-portfolio-project="route-fixture"');
     expect(html.match(/class="portfolio-screen/g)).toHaveLength(2);
     expect(html).toContain('구조화된 라우트 근거를 별도 프로젝트로 검증했습니다.');
-    expect(html).toContain('무엇을 만들었는가');
-    expect(html).toContain('왜 신뢰할 수 있는가');
+    expect(html).toContain('프로젝트 개요');
+    expect(html).toContain('설계와 검증');
     expect(html).toContain('문제');
-    expect(html).toContain('선택');
+    expect(html).toContain('방식');
     expect(html).toContain('결과');
-    expect(html).toContain('핵심 구현 역량');
-    expect(html).not.toContain('핵심 탐지 역량');
+    expect(html).toContain('구현한 기능');
     expect(html).toMatch(/<span class="portfolio-mini-graphic__label">24h<\/span>\s*<svg/);
     expect(html).toContain('현재 픽스처의 구조화된 필드에서 토큰을 만듭니다.');
-    expect(html).toContain('현재 범위');
-    expect(html).toContain('다음 단계');
+    expect(html).toContain('지원 범위');
+    expect(html).toContain('다음 개선');
     expect(html).toContain('portfolio-detail');
     expect(html).toContain('/gilgob/projects/route-fixture/');
-    expect(html).toContain('지원 산업 분야');
+    expect(html).toContain('관련 분야');
     expect(html).toContain('개발자 생산성');
     expect(html).toContain('정적 생성');
     expect(html).toContain('품질 자동화');
@@ -412,11 +411,11 @@ nextStep: "검증 범위를 확장합니다."
     expect(publishedRequiredText).toEqual(expect.arrayContaining([
       '손명관',
       'tarmk0801@gmail.com',
-      'Signal Hub · 백엔드 포트폴리오',
-      '재현 가능한 데이터 처리를 실제 배포까지 연결했습니다.',
+      'Signal Hub · CSV 시계열 분석 CLI',
+      'CSV 시계열 데이터를 신호로 바꾸는 CLI를 설계해 npm에 배포했습니다.',
       '83',
       '0.3.0',
-      'INSERT OR IGNORE\nTEXT PRIMARY KEY',
+      '신호 ID를 기본키로 두고 INSERT OR IGNORE로 저장합니다.',
     ]));
     expect(fixtureRequiredText).not.toEqual(publishedRequiredText);
     expect(portfolioCss).toContain('@page');

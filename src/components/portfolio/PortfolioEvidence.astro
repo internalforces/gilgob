@@ -15,11 +15,11 @@ const { entry } = Astro.props;
       <h2 id="portfolio-evidence-title">{entry.data.title}</h2>
       <p>{entry.data.projectType}</p>
     </div>
-    <p class="portfolio-frame__marker">PROJECT 02 · 왜 신뢰할 수 있는가</p>
+    <p class="portfolio-frame__marker">설계와 검증</p>
   </header>
 
   <section class="portfolio-section" aria-labelledby="portfolio-architecture-title">
-    <h3 id="portfolio-architecture-title">처리 아키텍처</h3>
+    <h3 id="portfolio-architecture-title">처리 구조</h3>
     <ol class="portfolio-architecture">
       {entry.data.architecture.map((node) => (
         <li>
@@ -32,11 +32,11 @@ const { entry } = Astro.props;
   </section>
 
   <section class="portfolio-section" aria-labelledby="portfolio-decisions-title">
-    <h3 id="portfolio-decisions-title">핵심 기술 결정</h3>
+    <h3 id="portfolio-decisions-title">설계에서 내린 결정</h3>
     <div class="portfolio-decisions">
       {entry.data.decisions.map((decision, index) => (
         <article>
-          <p class="portfolio-card__index">DECISION 0{index + 1}</p>
+          <p class="portfolio-card__index">결정 0{index + 1}</p>
           <h4>{decision.title}</h4>
           <dl>
             <div><dt>구현</dt><dd>{decision.implementation}</dd></div>
@@ -49,14 +49,14 @@ const { entry } = Astro.props;
 
   <section class="portfolio-section portfolio-validation" aria-labelledby="portfolio-validation-title">
     <div class="portfolio-validation__pipeline">
-      <h3 id="portfolio-validation-title">검증 파이프라인</h3>
+      <h3 id="portfolio-validation-title">배포 전 확인 항목</h3>
       <ol>
         {entry.data.validation.steps.map((step) => <li>{step}</li>)}
       </ol>
       {entry.data.validation.command && <code>{entry.data.validation.command}</code>}
     </div>
     <div class="portfolio-validation__proofs">
-      <h3>검증 결과</h3>
+      <h3>실행 확인</h3>
       <dl>
         {entry.data.validation.proofs.map((proof) => (
           <div><dt>{proof.label}</dt><dd>{proof.value}</dd></div>
@@ -65,19 +65,19 @@ const { entry } = Astro.props;
     </div>
   </section>
 
-  <section class="portfolio-scope" aria-label="현재 범위와 다음 단계">
+  <section class="portfolio-scope" aria-label="지원 범위와 다음 개선">
     <article>
-      <h3>현재 범위</h3>
+      <h3>지원 범위</h3>
       <p>{entry.data.currentScope}</p>
     </article>
     <article>
-      <h3>다음 단계</h3>
+      <h3>다음 개선</h3>
       <p>{entry.data.nextStep}</p>
     </article>
   </section>
 
   <footer class="portfolio-frame__footer">
     <a href={`mailto:${PORTFOLIO_PROFILE.email}`}>{PORTFOLIO_PROFILE.email}</a>
-    <p>화면 2 · 기술 근거</p>
+    <p>2 / 2 · 설계와 검증</p>
   </footer>
 </section>

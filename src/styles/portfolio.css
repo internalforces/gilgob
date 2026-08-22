@@ -696,7 +696,7 @@
   }
 
   .portfolio-evidence {
-    grid-template-rows: auto minmax(0, 0.78fr) minmax(0, 1.12fr) minmax(0, 1.02fr) minmax(0, 0.72fr) auto;
+    grid-template-rows: auto minmax(0, 0.78fr) minmax(0, 1.25fr) minmax(0, 1.05fr) minmax(0, 0.56fr) auto;
     gap: 1.4mm;
   }
 
@@ -744,7 +744,7 @@
   }
 
   .portfolio-metrics {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(36mm, 1fr));
     border-radius: 1.5mm;
   }
 
@@ -771,7 +771,12 @@
   }
 
   .portfolio-decisions {
+    grid-template-columns: repeat(auto-fit, minmax(38mm, 1fr));
     height: calc(100% - 6.2mm);
+  }
+
+  .portfolio-capabilities {
+    grid-template-columns: repeat(auto-fit, minmax(38mm, 1fr));
   }
 
   .portfolio-story__card,

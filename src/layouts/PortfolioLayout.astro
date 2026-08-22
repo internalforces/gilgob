@@ -51,7 +51,7 @@ const pdfRequiredText = Array.from(new Set([
       <PortfolioEvidence entry={entry} />
     </div>
     <section class="portfolio-detail" aria-labelledby="portfolio-detail-title">
-      <h2 id="portfolio-detail-title">상세 기술 기록</h2>
+      <h2 id="portfolio-detail-title">설계·구현 상세</h2>
       <div class="prose"><slot /></div>
       <nav class="portfolio-actions" aria-label="프로젝트 링크">
         {actionLinks.map((link, index) => (
@@ -66,7 +66,7 @@ const pdfRequiredText = Array.from(new Set([
       </nav>
     </section>
     <aside class="portfolio-contact" aria-labelledby="portfolio-contact-title">
-      <h2 id="portfolio-contact-title">함께 이야기하고 싶다면</h2>
+      <h2 id="portfolio-contact-title">연락처</h2>
       <a href={`mailto:${PORTFOLIO_PROFILE.email}`}>{PORTFOLIO_PROFILE.email}</a>
       <a href={PORTFOLIO_PROFILE.github}>GitHub</a>
     </aside>

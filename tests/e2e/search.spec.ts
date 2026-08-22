@@ -253,8 +253,10 @@ test('announces a Pagefind loading error in Korean', async ({ page }) => {
 
 test('does not expose the unlisted portfolio through search', async ({ page }) => {
   await page.goto(pagePath('/portfolio/8c5e1a7d3b92-signal-hub/'));
-  await expect(page.getByRole('heading', { level: 1, name: '재현 가능한 데이터 처리를 실제 배포까지 연결했습니다.' })).toBeVisible();
-  await expect(page.getByText('격리된 릴리스 검증 경로')).toBeVisible();
+  await expect(page.getByRole('heading', {
+    level: 1,
+    name: 'CSV 시계열 데이터를 신호로 바꾸는 CLI를 설계해 npm에 배포했습니다.',
+  })).toBeVisible();
 
   await page.goto(pagePath('/'), { waitUntil: 'networkidle' });
   await page.keyboard.press('ControlOrMeta+k');
