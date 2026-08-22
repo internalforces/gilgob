@@ -725,7 +725,7 @@
   }
 
   .portfolio-overview > h1 {
-    max-width: 24ch;
+    max-width: 100%;
     font-family: 'Noto Sans KR', sans-serif;
     font-size: 22pt;
     letter-spacing: -0.055em;
