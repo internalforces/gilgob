@@ -14,6 +14,7 @@ test('no-token and no-cache build keeps the deterministic GitHub empty state', a
 
     const section = page.locator('[data-github-activity]');
     await expect(section).toHaveAttribute('data-state', 'empty');
+    await section.locator('summary').click();
     await expect(section.getByRole('status')).toHaveText('GitHub 통계를 불러오지 못했습니다.');
     await expect(section.locator('.github-activity__grid')).toHaveCount(0);
     const results = await new AxeBuilder({ page }).include('[data-github-activity]').analyze();

@@ -42,6 +42,7 @@ test('home card links remain keyboard focusable before their scroll reveal', asy
 test('home exposes YAML skill progress and Korean project metadata', async ({ page }) => {
   await page.goto(homeUrl, { waitUntil: 'networkidle' });
 
+  await page.locator('details[data-home-support="signals"] summary').click();
   await expect(page.getByRole('progressbar', { name: '스킬 트리 기준 전체 스킬 진척도' })).toBeAttached();
   const metadata = page.locator('.project-card__meta').first();
   await expect(metadata).toContainText('유지 중');
@@ -49,11 +50,62 @@ test('home exposes YAML skill progress and Korean project metadata', async ({ pa
   await expect(metadata).not.toContainText('Projects');
 });
 
+test('home leads through one connected work before secondary discovery', async ({ page }) => {
+  await page.goto(homeUrl, { waitUntil: 'networkidle' });
+
+  const featuredProjects = page.getByRole('heading', { name: '하나의 작업에서 시작하기' });
+  const recentLearning = page.getByRole('heading', { name: '최근 기록으로 이어가기' });
+  const fieldIndex = page.getByRole('heading', { name: '관심 주제로 넓혀가기' });
+  expect(await featuredProjects.evaluate((element) => element.getBoundingClientRect().top))
+    .toBeLessThan(await recentLearning.evaluate((element) => element.getBoundingClientRect().top));
+  expect(await recentLearning.evaluate((element) => element.getBoundingClientRect().top))
+    .toBeLessThan(await fieldIndex.evaluate((element) => element.getBoundingClientRect().top));
+
+  await expect(page.locator('.field-index')).not.toContainText('0개의 기록');
+  await expect(page.getByRole('heading', { name: '기록 유형' })).toHaveCount(0);
+  await expect(page.locator('.project-card__connections').first()).toBeVisible();
+  await expect(page.locator('.project-card__path-step').first()).toBeVisible();
+  await expect(page.locator('.project-card__path-step').first().getByRole('link'))
+    .toHaveAttribute('href', pagePath('/knowledge/software-design/connector-interface-design'));
+  await expect(page.locator('.recent-learning__heading')).toContainText('최근 공개된 학습 기록');
+  await expect(page.locator('.project-card__visual')).toHaveCount(0);
+});
+
+test('home keeps system evidence available through progressive disclosure', async ({ page }) => {
+  await page.goto(homeUrl, { waitUntil: 'networkidle' });
+
+  const signals = page.locator('details[data-home-support="signals"]');
+  const github = page.locator('details[data-home-support="github"]');
+  await expect(signals).not.toHaveAttribute('open', '');
+  await expect(github).not.toHaveAttribute('open', '');
+  await expect(signals.getByText('배움의 현재 상태')).toBeHidden();
+  await expect(github.getByRole('heading', { name: 'GitHub 활동' })).toBeVisible();
+
+  await signals.locator('summary').click();
+  await expect(signals.getByText('배움의 현재 상태')).toBeVisible();
+
+  for (const summary of [signals.locator('summary'), github.locator('summary')]) {
+    expect(await summary.evaluate((element) => (
+      [...element.children].every((child) => child.matches('span, svg'))
+    ))).toBe(true);
+  }
+});
+
+test('home explains when its learning signals were derived', async ({ page }) => {
+  await page.goto(homeUrl, { waitUntil: 'networkidle' });
+
+  const provenance = page.locator('[data-signal-provenance]');
+  await page.locator('details[data-home-support="signals"] summary').click();
+  await expect(provenance).toContainText('공개 기록 집계');
+  await expect(provenance.locator('time')).toHaveAttribute('datetime', /.+/);
+});
+
 test('home keeps every generated GitHub state safe, Korean, and accessible', async ({ page }) => {
   await page.goto(homeUrl, { waitUntil: 'networkidle' });
 
   const section = page.locator('[data-github-activity]');
   await expect(section.getByRole('heading', { name: 'GitHub 활동' })).toBeVisible();
+  await section.locator('summary').click();
   await expect(section).toHaveAttribute('data-state', /^(ready|stale|empty)$/);
   const state = await section.getAttribute('data-state');
   const profileLink = section.getByRole('link', { name: /GitHub 프로필 보기/ });
@@ -76,6 +128,14 @@ test('home keeps every generated GitHub state safe, Korean, and accessible', asy
     } else {
       await expect(section.getByRole('status')).toHaveCount(0);
     }
+
+    const trailingScroll = await page.evaluate(() => {
+      const footer = document.querySelector('footer');
+      if (!(footer instanceof HTMLElement)) return Number.POSITIVE_INFINITY;
+      return document.documentElement.scrollHeight
+        - (footer.getBoundingClientRect().bottom + window.scrollY);
+    });
+    expect(trailingScroll).toBeLessThan(2);
   }
 
   const links = await section.locator('a[href]').evaluateAll((anchors) => anchors.map((anchor) => {

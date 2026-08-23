@@ -132,4 +132,12 @@ const { variant = 'header', label = variant === 'home' ? '통합 검색 열기' 
     .search-trigger__copy small,
     .search-trigger kbd { display: none; }
   }
+
+  @media (max-width: 52rem) {
+    .search-trigger--home {
+      position: relative;
+      inset: auto;
+      margin-block-start: 1rem;
+    }
+  }
 </style>

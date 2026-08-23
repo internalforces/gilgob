@@ -13,8 +13,8 @@ const dateFormatter = new Intl.DateTimeFormat('ko-KR', { year: 'numeric', month:
 <section class="recent-learning home-section" aria-labelledby="recent-learning-title">
   <header class="recent-learning__heading">
     <div>
-      <h2 id="recent-learning-title">최근 배운 것</h2>
-      <p>짧게 기록하고, 나중에 더 큰 지식으로 연결할 학습의 단서입니다.</p>
+      <h2 id="recent-learning-title">최근 기록으로 이어가기</h2>
+      <p>최근 공개된 학습 기록에서 새로운 배움의 단서를 찾습니다.</p>
     </div>
     <a href={withBase('/logs/')}>학습 기록 보기 <span aria-hidden="true">→</span></a>
   </header>
@@ -46,7 +46,7 @@ const dateFormatter = new Intl.DateTimeFormat('ko-KR', { year: 'numeric', month:
 </section>
 
 <style>
-  .home-section { padding-block-start: clamp(7rem, 13vw, 11rem); }
+  .home-section { padding-block-start: clamp(5rem, 9vw, 7.5rem); }
 
   .recent-learning__heading {
     display: flex;
@@ -56,7 +56,7 @@ const dateFormatter = new Intl.DateTimeFormat('ko-KR', { year: 'numeric', month:
     margin-block-end: clamp(2rem, 4vw, 3.5rem);
   }
 
-  .recent-learning__heading h2 { margin: 0; font-size: clamp(2rem, 4vw, 3.5rem); font-weight: 620; letter-spacing: -0.045em; line-height: 1.08; }
+  .recent-learning__heading h2 { margin: 0; font-size: clamp(2rem, 4vw, 3.5rem); font-weight: 620; letter-spacing: -0.04em; line-height: 1.08; }
   .recent-learning__heading p { max-width: 40rem; margin: 0.8rem 0 0; color: var(--muted); }
   .recent-learning__heading > a { color: var(--primary); font-size: 0.9rem; font-weight: 650; text-decoration: none; white-space: nowrap; }
 
@@ -69,14 +69,16 @@ const dateFormatter = new Intl.DateTimeFormat('ko-KR', { year: 'numeric', month:
     gap: clamp(1rem, 3vw, 2.5rem);
     padding-block: clamp(1.75rem, 4vw, 3rem);
     border-block-end: 1px solid var(--line);
-    transition: padding-inline 180ms ease, background 180ms ease;
+    transition: background 180ms ease;
   }
 
-  .learning-row:hover { padding-inline: 0.75rem; background: color-mix(in srgb, var(--surface) 75%, transparent); }
+  .learning-row:hover { background: color-mix(in srgb, var(--surface) 75%, transparent); }
   .learning-row__index { padding-block-start: 0.3rem; color: var(--muted); font-family: ui-monospace, 'SFMono-Regular', Consolas, monospace; font-size: 0.72rem; }
   .learning-row h3 { margin: 0; font-size: clamp(1.25rem, 2.4vw, 1.85rem); font-weight: 610; letter-spacing: -0.035em; line-height: 1.25; }
   .learning-row h3 a { text-decoration: none; }
   .learning-row h3 a:hover { color: var(--primary); }
+  .learning-row__copy { transition: transform 180ms ease; }
+  .learning-row:hover .learning-row__copy { transform: translateX(0.5rem); }
   .learning-row__copy p { max-width: 42rem; margin: 0.7rem 0 0; color: var(--muted); font-size: 0.9rem; }
   .learning-row__meta { display: grid; justify-items: end; gap: 0.65rem; color: var(--muted); font-size: 0.76rem; }
   .learning-row__meta ul { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 0.4rem; margin: 0; padding: 0; list-style: none; }

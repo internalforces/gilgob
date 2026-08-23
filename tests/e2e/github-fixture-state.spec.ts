@@ -19,9 +19,11 @@ test('fixture GitHub activity remains safe and accessible on desktop and mobile'
     await page.goto(homeUrl, { waitUntil: 'networkidle' });
     const section = page.locator('[data-github-activity]');
     await expect(section).toHaveAttribute('data-state', expectedState);
+    await section.locator('summary').click();
     await expect(section.getByRole('group', { name: /지난 1년 GitHub 기여 합계/ })).toBeAttached();
-    await expect(section.getByRole('img', { name: /2026년 8월 20일, 기여 2회/ })).toBeAttached();
+    await expect(section.locator('.contribution-calendar__day[role="img"]')).toHaveCount(0);
     await expect(section.getByRole('table', { name: '날짜별 GitHub 기여 횟수', includeHidden: true })).toBeAttached();
+    await expect(section.getByRole('row', { name: '2026-08-20 2회', includeHidden: true })).toBeAttached();
     await expect(section.getByText('커밋 2개를 푸시했습니다')).toBeVisible();
     if (expectedState === 'stale') {
       await expect(section.locator('.recent-activity time').first()).not.toHaveText('방금 전');
