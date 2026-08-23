@@ -7,42 +7,41 @@ Harness Version: 1.1
 
 # Current Session: gilgob
 
-_Last updated: 2026-08-22_
+_Last updated: 2026-08-23_
 
 ## Session Information
 
-- **Role:** Debugger, Implementer, and Tester
-- **Goal:** Restore build-time GitHub activity rendering for the current compact public pull request event payload.
-- **Branch:** `main`
+- **Role:** Implementer, Reviewer, and Tester
+- **Goal:** Simplify the homepage reading journey while preserving system evidence and hardening search recovery.
+- **Branch:** `codex/home-reading-journey`
 
 ## Confirmed Requirements
 
-- Implement every repository-side fix that does not require a manually supplied value.
-- Do not hardcode or expose a GitHub token.
-- Preserve the static build, cache fallback, and safe public GitHub URL contracts.
-- Commit the scoped fix, push it to `origin/main`, and deploy it through the existing GitHub Pages workflow.
+- Lead readers from one featured project into recent learning and topic discovery.
+- Keep system signals and GitHub activity available through progressive disclosure.
+- Make search failures recoverable without losing the current query.
+- Keep the planned DNS and QUIC/HTTP3 topics unresolved until their documents are authored.
 
 ## Completed in This Session
 
-- Confirmed that contribution GraphQL data succeeds while compact `PullRequestEvent` normalization fails because `html_url` is absent.
-- Added a regression test that mirrors the compact pull request shape and watched it fail before changing production code.
-- Accepted the compact API `url` as input evidence while always constructing the public `github.com` pull request URL from the validated repository and number.
-- Confirmed the fixed code returns ready GitHub statistics against the current API without a cache.
+- Reordered and condensed the homepage into a reader-first journey backed by real content relationships.
+- Reduced mobile hero delay and moved secondary dashboard evidence into collapsed disclosures.
+- Added reader-facing search fallback links, retry behavior, and cache-busted Pagefind module retries.
+- Improved mobile navigation focus containment and reduced duplicate contribution-calendar announcements.
+- Recorded the Impeccable critiques and addressed all five prioritized findings.
 
 ## Current Work
 
-- No implementation, review, or verification work remains.
+- Local implementation and review are complete in commits `a583ca7` and `8bfcde3`.
+- Release preparation is awaiting an explicit integration choice; nothing has been pushed or deployed.
 
 ## Next Handoff
 
-Deployment of this fix was explicitly approved on 2026-08-22 and is triggered by its `main` push. Local builds without a token and without a populated cache intentionally remain in the safe empty state.
+Choose whether to merge locally, push a pull request, or keep the branch. Any push, merge, or deployment still requires explicit approval for the exact action.
 
 ## Verification Evidence
 
-- TDD red: `npm test -- tests/unit/github-stats.test.ts` failed only the new compact pull request regression test; the other 29 tests passed.
-- Security review red: a same-repository non-PR browser URL was reproduced and shown to bypass the generic repository URL check.
-- Focused green: `npm test -- tests/unit/github-stats.test.ts` passed 1 file and 31 tests after canonical PR URL construction was enforced.
-- Current API boundary check: the fixed code returned ready data with 53 contribution weeks, 6 recent events, no warning, and no unsafe event URL.
-- Production static gate: `GITHUB_TOKEN=<build-time token> SITE_URL=https://internalforces.github.io BASE_PATH=/gilgob npm run verify` passed 18 test files and 213 tests, generated 18 static pages, and indexed 9 public pages.
-- Production browser gate: `GITHUB_TOKEN=<build-time token> SITE_URL=https://internalforces.github.io BASE_PATH=/gilgob npm run test:e2e` passed 62 tests with 2 state-fixture tests intentionally skipped.
-- Expected warnings remain for unresolved future-topic links about DNS and QUIC/HTTP3 and Pagefind's lack of Korean stemming support.
+- Production static gate: `SITE_URL=https://internalforces.github.io BASE_PATH=/gilgob npm run verify` passed 18 test files and 219 tests, generated 18 static pages, and indexed 9 public pages.
+- Production browser gate: `SITE_URL=https://internalforces.github.io BASE_PATH=/gilgob npx playwright test --workers=1` passed 68 tests with 2 state-fixture tests intentionally skipped.
+- Independent review found no remaining Critical or Important issues.
+- Expected warnings remain for the intentionally unwritten DNS and QUIC/HTTP3 topics and Pagefind's lack of Korean stemming support.
