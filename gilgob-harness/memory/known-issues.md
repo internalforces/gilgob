@@ -44,6 +44,23 @@ Permanent direction: Proposed fix scope and required approval gates.
 
 ## Resolved Issues
 
+### ISS-003: Multiple featured projects created competing homepage starts
+
+- Severity: Medium
+- Found: 2026-08-23
+- Status: Resolved
+- Affected paths: `src/lib/content/queries.ts`, `src/pages/index.astro`, `tests/unit/content-queries.test.ts`
+
+Reproduction: Supply the date-sorted public entry list with two project entries whose frontmatter both sets `featured: true`. The homepage passed both entries to the featured-project section.
+
+Expected behavior: The reader-first homepage presents one deterministic project as its starting path.
+
+Root cause: The homepage filtered all featured projects but did not limit the valid multi-featured result before rendering.
+
+Workaround: Authors could keep only one project featured, but the schema does not enforce that convention.
+
+Permanent direction: Resolved by selecting the first featured project from the already date-sorted public entries and covering multiple featured projects with a unit regression test.
+
 ### ISS-002: Mobile menu kept the desktop page inert after resize
 
 - Severity: High

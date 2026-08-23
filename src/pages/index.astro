@@ -8,7 +8,7 @@ import ContributionCalendar from '../components/github/ContributionCalendar.astr
 import RecentActivity from '../components/github/RecentActivity.astro';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { readContentIndex } from '../lib/content/index-store';
-import { getPublicEntries } from '../lib/content/queries';
+import { getPublicEntries, selectFeaturedProject } from '../lib/content/queries';
 import { calculateContentStats, loadSkillSignal } from '../lib/content/stats';
 import type { ContentIndex, ContentRecord } from '../lib/content/types';
 import { getGitHubStats } from '../lib/github/fetch-github';
@@ -44,9 +44,8 @@ const activeExplorations = entries.filter((entry) => (
   entry.kind === 'explorations' && entry.data.status === 'active'
 ));
 const recentLearning = entries.filter((entry) => entry.kind === 'logs');
-const featuredProjects = entries.filter((entry) => (
-  entry.kind === 'projects' && entry.data.featured
-));
+const featuredProject = selectFeaturedProject(entries);
+const featuredProjects = featuredProject === undefined ? [] : [featuredProject];
 const projectConnections = Object.fromEntries(featuredProjects.map((entry) => {
   const project = publicRecords.get(entry.id);
   const connectionIds = project === undefined
