@@ -34,6 +34,20 @@ test('mobile menu contains keyboard focus and locks background scrolling', async
   await expect(dialog.getByRole('link', { name: 'GitHub 프로필 열기' })).toBeFocused();
 });
 
+test('mobile menu releases the page when the viewport becomes desktop-sized', async ({ page }) => {
+  await page.goto(pagePath('/'), { waitUntil: 'networkidle' });
+  await page.getByRole('button', { name: '모바일 메뉴 열기' }).click();
+
+  await expect(page.locator('body')).toHaveClass(/menu-open/);
+  await expect(page.locator('#main-content')).toHaveAttribute('inert', '');
+
+  await page.setViewportSize({ width: 1024, height: 844 });
+
+  await expect(page.getByRole('dialog', { name: '모바일 메뉴' })).toHaveCount(0);
+  await expect(page.locator('body')).not.toHaveClass(/menu-open/);
+  await expect(page.locator('#main-content')).not.toHaveAttribute('inert', '');
+});
+
 test('mobile home puts its title and primary search in the first viewport', async ({ page }) => {
   await page.setViewportSize({ width: 360, height: 640 });
   await page.goto(pagePath('/'), { waitUntil: 'networkidle' });

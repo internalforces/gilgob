@@ -33,6 +33,16 @@ export default function MobileMenu({ items, utilityItems, githubHref }: Props) {
   };
 
   useLayoutEffect(() => {
+    const mobileViewport = window.matchMedia('(max-width: 52rem)');
+    const closeOutsideMobileViewport = (event: MediaQueryListEvent) => {
+      if (!event.matches) setIsOpen(false);
+    };
+
+    mobileViewport.addEventListener('change', closeOutsideMobileViewport);
+    return () => mobileViewport.removeEventListener('change', closeOutsideMobileViewport);
+  }, []);
+
+  useLayoutEffect(() => {
     if (!isOpen) return;
 
     const background = document.querySelectorAll<HTMLElement>('#main-content, .site-footer');

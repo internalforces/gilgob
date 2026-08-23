@@ -7,7 +7,7 @@ Harness Version: 1.1
 
 # Known Issues: gilgob
 
-_Last updated: 2026-08-22_
+_Last updated: 2026-08-23_
 
 ## Active Bugs
 
@@ -43,6 +43,23 @@ Permanent direction: Proposed fix scope and required approval gates.
 ```
 
 ## Resolved Issues
+
+### ISS-002: Mobile menu kept the desktop page inert after resize
+
+- Severity: High
+- Found: 2026-08-23
+- Status: Resolved
+- Affected paths: `src/components/navigation/MobileMenu.tsx`, `tests/e2e/mobile.spec.ts`
+
+Reproduction: Open the mobile menu at a viewport below `52rem`, then resize above the mobile breakpoint. The menu becomes hidden by CSS, but `body.menu-open` and `inert` remain on the page.
+
+Expected behavior: Leaving the mobile breakpoint closes the menu and releases the page scroll and interaction locks.
+
+Root cause: The Preact menu state did not observe the CSS breakpoint, so hiding the component did not trigger the open-state effect cleanup.
+
+Workaround: Narrow the viewport again to close the menu, or reload the page.
+
+Permanent direction: Resolved by closing the menu when the shared `52rem` media query stops matching and covering the resize path with a browser regression test.
 
 ### ISS-001: Compact pull request events emptied GitHub activity data
 
