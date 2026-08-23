@@ -83,6 +83,23 @@ it('imports Pagefind from the configured base path when no sentinel exists', asy
   expect(importModule).toHaveBeenCalledWith('/garden/pagefind/pagefind.js');
 });
 
+it('uses a fresh module URL when retrying a failed Pagefind import', async () => {
+  const module = { search: vi.fn() };
+  const importModule = vi.fn()
+    .mockRejectedValueOnce(new Error('일시적인 모듈 로드 오류'))
+    .mockResolvedValueOnce(module);
+  const load = createPagefindLoader('/garden', {
+    fetchStatus: vi.fn(async () => 404),
+    importModule,
+  });
+
+  await expect(load()).rejects.toThrow('일시적인 모듈 로드 오류');
+  await expect(load()).resolves.toBe(module);
+
+  expect(importModule).toHaveBeenNthCalledWith(1, '/garden/pagefind/pagefind.js');
+  expect(importModule).toHaveBeenNthCalledWith(2, '/garden/pagefind/pagefind.js?retry=1');
+});
+
 it('retries the Pagefind loader after a transient rejection', async () => {
   const search = vi.fn(async () => ({
     results: [{ id: 'recovered', data: async () => result('recovered') }],

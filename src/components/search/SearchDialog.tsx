@@ -20,9 +20,9 @@ type ViewState = 'idle' | 'loading' | 'results' | 'empty' | 'error' | 'unavailab
 function statusMessage(state: ViewState): string {
   switch (state) {
     case 'loading': return '검색 중입니다.';
-    case 'empty': return '일치하는 지식을 찾지 못했습니다.';
-    case 'error': return '검색 중 문제가 생겼습니다. 잠시 후 다시 시도해 주세요.';
-    case 'unavailable': return '현재 검색을 사용할 수 없습니다. 메뉴에서 지식을 둘러보세요.';
+    case 'empty': return '일치하는 지식을 찾지 못했습니다. 다른 검색어를 입력하거나 기록을 둘러보세요.';
+    case 'error': return '검색을 완료하지 못했습니다. 같은 검색을 다시 시도하거나 기록을 둘러보세요.';
+    case 'unavailable': return '현재 검색을 사용할 수 없습니다. 기록을 직접 둘러볼 수 있습니다.';
     default: return '검색어를 입력하면 지식, 탐구, 프로젝트와 학습 기록을 찾습니다.';
   }
 }
@@ -59,6 +59,12 @@ export default function SearchDialog({ base }: Props) {
   const timerRef = useRef<number | undefined>(undefined);
   const composingRef = useRef(false);
   const openRef = useRef(false);
+  const fallbackLinks = [
+    { label: '지식 둘러보기', href: resolvePagefindUrl('/knowledge/', base) },
+    { label: '탐구 둘러보기', href: resolvePagefindUrl('/explorations/', base) },
+    { label: '프로젝트 둘러보기', href: resolvePagefindUrl('/projects/', base) },
+    { label: '학습 기록 둘러보기', href: resolvePagefindUrl('/logs/', base) },
+  ];
 
   const openSearch = (trigger?: HTMLElement | null) => {
     if (openRef.current) {
@@ -161,6 +167,12 @@ export default function SearchDialog({ base }: Props) {
     setViewState('loading');
     setActiveIndex(-1);
     timerRef.current = window.setTimeout(() => void runSearch(value, generation), 120);
+  };
+
+  const retrySearch = () => {
+    if (!query.trim()) return;
+    scheduleSearch(query);
+    inputRef.current?.focus();
   };
 
   useEffect(() => {
@@ -292,9 +304,21 @@ export default function SearchDialog({ base }: Props) {
 
         <div class="search-dialog__content">
           {viewState !== 'results' && (
-            <div class={`search-dialog__status search-dialog__status--${viewState}`} role="status" aria-live="polite">
-              <span class="search-dialog__status-signal" aria-hidden="true"></span>
-              <p>{statusMessage(viewState)}</p>
+            <div class={`search-dialog__status search-dialog__status--${viewState}`}>
+              <div class="search-dialog__status-message" role="status" aria-live="polite">
+                <span class="search-dialog__status-signal" aria-hidden="true"></span>
+                <p>{statusMessage(viewState)}</p>
+              </div>
+              {(viewState === 'empty' || viewState === 'error' || viewState === 'unavailable') && (
+                <div class="search-dialog__recovery">
+                  {viewState === 'error' && (
+                    <button type="button" onClick={retrySearch}>같은 검색 다시 시도</button>
+                  )}
+                  <nav aria-label="검색 대신 기록 둘러보기">
+                    {fallbackLinks.map((link) => <a href={link.href}>{link.label}</a>)}
+                  </nav>
+                </div>
+              )}
             </div>
           )}
 

@@ -227,7 +227,7 @@ test('shows the Korean unavailable state when the build sentinel is present', as
   await page.getByRole('searchbox', { name: '지식 전체 검색' }).fill('데이터');
 
   await expect(page.getByRole('dialog', { name: '통합 검색' }).getByRole('status'))
-    .toContainText('검색을 사용할 수 없습니다');
+    .toContainText('현재 검색을 사용할 수 없습니다');
 });
 
 test('announces loading and an empty result in Korean', async ({ page }) => {
@@ -240,15 +240,45 @@ test('announces loading and an empty result in Korean', async ({ page }) => {
   await expect(dialog.getByRole('status')).toContainText('일치하는 지식을 찾지 못했습니다');
 });
 
-test('announces a Pagefind loading error in Korean', async ({ page }) => {
-  await page.route('**/pagefind/pagefind.js', (route) => route.abort());
+test('recovers from a Pagefind loading error without losing the query', async ({ page }) => {
+  let attempts = 0;
+  await page.route('**/pagefind/pagefind.js*', (route) => {
+    attempts += 1;
+    if (attempts === 1) return route.abort();
+    return route.fulfill({
+      status: 200,
+      contentType: 'text/javascript',
+      body: `
+        export async function search(query) {
+          return { results: [{
+            id: 'recovered',
+            async data() {
+              return {
+                url: '/knowledge/database/b-tree-index/',
+                excerpt: query + ' 검색 결과',
+                plain_excerpt: query + ' 검색 결과',
+                meta: { title: '복구된 검색 결과', type: '지식', category: 'Computer Science' }
+              };
+            }
+          }] };
+        }
+      `,
+    });
+  });
   await page.goto(pagePath('/'), { waitUntil: 'networkidle' });
   await page.keyboard.press('ControlOrMeta+k');
   const dialog = page.getByRole('dialog', { name: '통합 검색' });
 
   await dialog.getByRole('searchbox').fill('디스크');
 
-  await expect(dialog.getByRole('status')).toContainText('검색 중 문제가 생겼습니다');
+  await expect(dialog.getByRole('status')).toContainText('검색을 완료하지 못했습니다');
+  await expect(dialog.getByRole('link', { name: '지식 둘러보기' })).toBeVisible();
+  await expect(dialog.getByRole('link', { name: '탐구 둘러보기' })).toBeVisible();
+  await dialog.getByRole('button', { name: '같은 검색 다시 시도' }).click();
+
+  await expect.poll(() => attempts).toBe(2);
+  await expect(dialog.getByRole('option', { name: /복구된 검색 결과/ })).toBeVisible();
+  await expect(dialog.getByRole('searchbox')).toHaveValue('디스크');
 });
 
 test('does not expose the unlisted portfolio through search', async ({ page }) => {
@@ -263,8 +293,12 @@ test('does not expose the unlisted portfolio through search', async ({ page }) =
   const dialog = page.getByRole('dialog', { name: '통합 검색' });
   await dialog.getByRole('searchbox', { name: '지식 전체 검색' }).fill('격리된 릴리스 검증 경로');
   await expect(dialog.locator('.search-dialog__status--loading')).toHaveCount(0, { timeout: 10_000 });
-  await expect(dialog.getByText('검색 중 문제가 생겼습니다. 잠시 후 다시 시도해 주세요.')).toHaveCount(0);
-  await expect(dialog.getByText('현재 검색을 사용할 수 없습니다. 메뉴에서 지식을 둘러보세요.')).toHaveCount(0);
+  await expect(dialog.locator('.search-dialog__status--error')).toHaveCount(0);
+  await expect(dialog.locator('.search-dialog__status--unavailable')).toHaveCount(0);
+  expect(
+    await dialog.getByRole('option').count()
+      + await dialog.locator('.search-dialog__status--empty').count(),
+  ).toBeGreaterThan(0);
   await expect(dialog.locator('[role="option"][href*="/portfolio/"]')).toHaveCount(0);
   await expect(page.locator('a[href*="/portfolio/"]')).toHaveCount(0);
 });
