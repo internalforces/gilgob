@@ -40,6 +40,10 @@ export function normalizeEntry(kind: ContentKind, entry: QueryEntry): Normalized
   };
 }
 
+export function selectFeaturedProject(entries: NormalizedEntry[]): NormalizedEntry | undefined {
+  return entries.find((entry) => entry.kind === 'projects' && entry.data.featured);
+}
+
 export async function getPublicEntries(kind?: ContentKind): Promise<NormalizedEntry[]> {
   const { getCollection } = await import('astro:content');
   const kinds: ContentKind[] = kind

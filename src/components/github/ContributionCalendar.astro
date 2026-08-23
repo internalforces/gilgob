@@ -16,10 +16,6 @@ const monthLabels = weeks.map((week, index) => {
   const previousMonth = previousDay ? Number(previousDay.date.slice(5, 7)) : null;
   return index === 0 || month !== previousMonth ? `${month}월` : '';
 });
-const formatDayLabel = (date: string, count: number) => {
-  const [year, month, day] = date.split('-').map(Number);
-  return `${year}년 ${month}월 ${day}일, 기여 ${count}회`;
-};
 ---
 
 <section class="contribution-calendar" aria-labelledby="contribution-calendar-title">
@@ -46,8 +42,7 @@ const formatDayLabel = (date: string, count: number) => {
                 <span
                   class={`contribution-calendar__day contribution-calendar__day--${day.level}`}
                   style={`grid-row: ${new Date(`${day.date}T00:00:00.000Z`).getUTCDay() + 1}`}
-                  role="img"
-                  aria-label={formatDayLabel(day.date, day.count)}
+                  aria-hidden="true"
                 ></span>
               ))}
             </div>
@@ -67,13 +62,15 @@ const formatDayLabel = (date: string, count: number) => {
     <span>많음</span>
   </div>
 
-  <table class="contribution-calendar__table">
-    <caption>날짜별 GitHub 기여 횟수</caption>
-    <thead><tr><th scope="col">날짜</th><th scope="col">기여 횟수</th></tr></thead>
-    <tbody>
-      {days.map((day) => <tr><th scope="row">{day.date}</th><td>{day.count}회</td></tr>)}
-    </tbody>
-  </table>
+  <div class="contribution-calendar__table-wrap">
+    <table>
+      <caption>날짜별 GitHub 기여 횟수</caption>
+      <thead><tr><th scope="col">날짜</th><th scope="col">기여 횟수</th></tr></thead>
+      <tbody>
+        {days.map((day) => <tr><th scope="row">{day.date}</th><td>{day.count}회</td></tr>)}
+      </tbody>
+    </table>
+  </div>
 </section>
 
 <style>
@@ -101,6 +98,6 @@ const formatDayLabel = (date: string, count: number) => {
   .contribution-calendar__legend { display: flex; align-items: center; justify-content: end; gap: 0.32rem; margin-block-start: 0.65rem; color: var(--muted); font-size: 0.66rem; }
   .contribution-calendar__legend-cell { width: 0.58rem; height: 0.58rem; }
   .contribution-calendar__empty { min-height: 7rem; display: grid; place-items: center; color: var(--muted); font-size: 0.82rem; }
-  .contribution-calendar__table { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }
+  .contribution-calendar__table-wrap { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }
   @media (max-width: 36rem) { .contribution-calendar__header { align-items: start; flex-direction: column; } }
 </style>

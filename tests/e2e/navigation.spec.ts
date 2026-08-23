@@ -15,7 +15,13 @@ test('exposes every Korean global route and identifies the current location', as
   await page.goto(pagePath('/projects/'), { waitUntil: 'networkidle' });
   const navigationRegion = page.getByRole('navigation', { name: '주요 메뉴' });
 
-  for (const [label, path] of navigation) {
+  await expect(navigationRegion.locator(':scope > ul > li > a')).toHaveCount(4);
+  await navigationRegion.getByText('도구', { exact: true }).click();
+
+  await expect(page.getByRole('link', { name: 'gilgob 홈' }))
+    .toHaveAttribute('href', pagePath('/'));
+
+  for (const [label, path] of navigation.slice(1)) {
     await expect(navigationRegion.getByRole('link', { name: label, exact: true }))
       .toHaveAttribute('href', pagePath(path));
   }

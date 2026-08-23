@@ -7,7 +7,7 @@ Harness Version: 1.1
 
 # Known Issues: gilgob
 
-_Last updated: 2026-08-22_
+_Last updated: 2026-08-23_
 
 ## Active Bugs
 
@@ -43,6 +43,40 @@ Permanent direction: Proposed fix scope and required approval gates.
 ```
 
 ## Resolved Issues
+
+### ISS-003: Multiple featured projects created competing homepage starts
+
+- Severity: Medium
+- Found: 2026-08-23
+- Status: Resolved
+- Affected paths: `src/lib/content/queries.ts`, `src/pages/index.astro`, `tests/unit/content-queries.test.ts`
+
+Reproduction: Supply the date-sorted public entry list with two project entries whose frontmatter both sets `featured: true`. The homepage passed both entries to the featured-project section.
+
+Expected behavior: The reader-first homepage presents one deterministic project as its starting path.
+
+Root cause: The homepage filtered all featured projects but did not limit the valid multi-featured result before rendering.
+
+Workaround: Authors could keep only one project featured, but the schema does not enforce that convention.
+
+Permanent direction: Resolved by selecting the first featured project from the already date-sorted public entries and covering multiple featured projects with a unit regression test.
+
+### ISS-002: Mobile menu kept the desktop page inert after resize
+
+- Severity: High
+- Found: 2026-08-23
+- Status: Resolved
+- Affected paths: `src/components/navigation/MobileMenu.tsx`, `tests/e2e/mobile.spec.ts`
+
+Reproduction: Open the mobile menu at a viewport below `52rem`, then resize above the mobile breakpoint. The menu becomes hidden by CSS, but `body.menu-open` and `inert` remain on the page.
+
+Expected behavior: Leaving the mobile breakpoint closes the menu and releases the page scroll and interaction locks.
+
+Root cause: The Preact menu state did not observe the CSS breakpoint, so hiding the component did not trigger the open-state effect cleanup.
+
+Workaround: Narrow the viewport again to close the menu, or reload the page.
+
+Permanent direction: Resolved by closing the menu when the shared `52rem` media query stops matching and covering the resize path with a browser regression test.
 
 ### ISS-001: Compact pull request events emptied GitHub activity data
 

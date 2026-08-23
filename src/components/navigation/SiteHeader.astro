@@ -3,12 +3,13 @@ import { SITE_CONFIG, withBase } from '../../config/site';
 import SearchTrigger from '../search/SearchTrigger.astro';
 import MobileMenu from './MobileMenu';
 
-const navigation = [
-  { label: '홈', href: withBase('/') },
+const primaryNavigation = [
   { label: '지식', href: withBase('/knowledge/') },
   { label: '탐구', href: withBase('/explorations/') },
   { label: '프로젝트', href: withBase('/projects/') },
   { label: '학습 기록', href: withBase('/logs/') },
+];
+const utilityNavigation = [
   { label: '스킬 트리', href: withBase('/skills/') },
   { label: '지식 그래프', href: withBase('/graph/') },
 ];
@@ -27,13 +28,27 @@ const isCurrent = (href: string) =>
 
     <nav class="site-header__nav" aria-label="주요 메뉴">
       <ul>
-        {navigation.map((item) => (
+        {primaryNavigation.map((item) => (
           <li>
             <a href={item.href} aria-current={isCurrent(item.href) ? 'page' : undefined}>
               {item.label}
             </a>
           </li>
         ))}
+        <li class="site-header__tools">
+          <details>
+            <summary>도구</summary>
+            <ul>
+              {utilityNavigation.map((item) => (
+                <li>
+                  <a href={item.href} aria-current={isCurrent(item.href) ? 'page' : undefined}>
+                    {item.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </details>
+        </li>
       </ul>
     </nav>
 
@@ -54,7 +69,8 @@ const isCurrent = (href: string) =>
 
     <MobileMenu
       client:load
-      items={navigation.map((item) => ({ ...item, current: isCurrent(item.href) }))}
+      items={primaryNavigation.map((item) => ({ ...item, current: isCurrent(item.href) }))}
+      utilityItems={utilityNavigation.map((item) => ({ ...item, current: isCurrent(item.href) }))}
       githubHref={SITE_CONFIG.github}
     />
   </div>
@@ -101,7 +117,7 @@ const isCurrent = (href: string) =>
     min-width: 0;
   }
 
-  .site-header__nav ul {
+  .site-header__nav > ul {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -111,7 +127,8 @@ const isCurrent = (href: string) =>
     list-style: none;
   }
 
-  .site-header__nav a {
+  .site-header__nav > ul > li > a,
+  .site-header__tools summary {
     position: relative;
     display: block;
     padding-block: 0.6rem;
@@ -123,7 +140,8 @@ const isCurrent = (href: string) =>
     transition: color 180ms ease;
   }
 
-  .site-header__nav a::after {
+  .site-header__nav > ul > li > a::after,
+  .site-header__tools summary::after {
     position: absolute;
     inset-inline: 0;
     inset-block-end: 0.28rem;
@@ -135,16 +153,44 @@ const isCurrent = (href: string) =>
     transition: transform 180ms ease;
   }
 
-  .site-header__nav a:hover,
-  .site-header__nav a[aria-current='page'] {
+  .site-header__nav > ul > li > a:hover,
+  .site-header__nav > ul > li > a[aria-current='page'],
+  .site-header__tools summary:hover,
+  .site-header__tools details[open] summary {
     color: var(--ink);
   }
 
-  .site-header__nav a:hover::after,
-  .site-header__nav a[aria-current='page']::after {
+  .site-header__nav > ul > li > a:hover::after,
+  .site-header__nav > ul > li > a[aria-current='page']::after,
+  .site-header__tools summary:hover::after,
+  .site-header__tools details[open] summary::after {
     transform: scaleX(1);
     transform-origin: left;
   }
+
+  .site-header__tools { position: relative; }
+  .site-header__tools summary { list-style: none; cursor: pointer; }
+  .site-header__tools summary::-webkit-details-marker { display: none; }
+  .site-header__tools > details > ul {
+    position: absolute;
+    z-index: 40;
+    inset-block-start: calc(100% + 0.5rem);
+    inset-inline-end: 0;
+    display: grid;
+    width: 10rem;
+    gap: 0.15rem;
+    margin: 0;
+    padding: 0.5rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface);
+    box-shadow: 0 1rem 2.5rem color-mix(in srgb, var(--ink) 14%, transparent);
+    list-style: none;
+  }
+  .site-header__tools > details:not([open]) > ul { display: none; }
+  .site-header__tools a { display: block; padding: 0.65rem 0.75rem; border-radius: 0.5rem; color: var(--muted); font-size: 0.8rem; text-decoration: none; }
+  .site-header__tools a:hover,
+  .site-header__tools a[aria-current='page'] { background: color-mix(in srgb, var(--primary) 7%, var(--surface)); color: var(--primary); }
 
   .site-header__actions {
     display: flex;
@@ -175,11 +221,12 @@ const isCurrent = (href: string) =>
       gap: 1.25rem;
     }
 
-    .site-header__nav ul {
+    .site-header__nav > ul {
       gap: 0.65rem;
     }
 
-    .site-header__nav a {
+    .site-header__nav > ul > li > a,
+    .site-header__tools summary {
       font-size: 0.8rem;
     }
   }

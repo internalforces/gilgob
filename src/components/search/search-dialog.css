@@ -108,15 +108,16 @@
 }
 
 .search-dialog__status {
-  display: flex;
+  display: grid;
   min-height: 13rem;
-  align-items: center;
-  justify-content: center;
-  gap: 0.7rem;
+  align-content: center;
+  justify-items: center;
+  gap: 1.25rem;
   color: var(--muted);
   text-align: center;
 }
 
+.search-dialog__status-message { display: flex; align-items: center; justify-content: center; gap: 0.7rem; }
 .search-dialog__status p { max-width: 28rem; margin: 0; }
 
 .search-dialog__status-signal {
@@ -138,6 +139,21 @@
   background: var(--danger);
   box-shadow: 0 0 0 0.3rem color-mix(in srgb, var(--danger) 13%, transparent);
 }
+
+.search-dialog__recovery { display: grid; justify-items: center; gap: 1rem; }
+.search-dialog__recovery > button {
+  min-height: 2.75rem;
+  padding: 0.7rem 1rem;
+  border: 1px solid var(--primary);
+  border-radius: 0.65rem;
+  background: var(--primary);
+  color: var(--surface);
+  font-size: 0.82rem;
+  font-weight: 650;
+  cursor: pointer;
+}
+.search-dialog__recovery nav { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.4rem 1rem; }
+.search-dialog__recovery a { color: var(--primary); font-size: 0.78rem; font-weight: 620; text-underline-offset: 0.2em; }
 
 .search-dialog__results {
   display: grid;

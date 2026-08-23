@@ -75,12 +75,17 @@ export function createPagefindLoader(
   dependencies: PagefindLoaderDependencies = browserDependencies,
 ): SearchModuleLoader {
   const bundlePath = `${normalizeBase(base)}/pagefind`;
+  let importAttempt = 0;
 
   return async () => {
     const unavailableStatus = await dependencies.fetchStatus(`${bundlePath}/unavailable.json`);
     if (unavailableStatus === 200) throw new SearchUnavailableError();
 
-    return dependencies.importModule(`${bundlePath}/pagefind.js`);
+    const moduleUrl = importAttempt === 0
+      ? `${bundlePath}/pagefind.js`
+      : `${bundlePath}/pagefind.js?retry=${importAttempt}`;
+    importAttempt += 1;
+    return dependencies.importModule(moduleUrl);
   };
 }
 

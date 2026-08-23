@@ -13,6 +13,53 @@ test('mobile menu closes with Escape and restores trigger focus', async ({ page 
   await expect(trigger).toBeFocused();
 });
 
+test('mobile menu closes from its backdrop and restores trigger focus', async ({ page }) => {
+  await page.goto(pagePath('/'), { waitUntil: 'networkidle' });
+  const trigger = page.getByRole('button', { name: '모바일 메뉴 열기' });
+  await trigger.click();
+  await page.locator('.mobile-menu__backdrop').click({ position: { x: 4, y: 4 } });
+  await expect(page.getByRole('navigation', { name: '모바일 주요 메뉴' })).toBeHidden();
+  await expect(trigger).toBeFocused();
+});
+
+test('mobile menu contains keyboard focus and locks background scrolling', async ({ page }) => {
+  await page.goto(pagePath('/'), { waitUntil: 'networkidle' });
+  await page.getByRole('button', { name: '모바일 메뉴 열기' }).click();
+
+  await expect(page.locator('body')).toHaveClass(/menu-open/);
+  const dialog = page.getByRole('dialog', { name: '모바일 메뉴' });
+  await expect(dialog).toBeVisible();
+  await dialog.getByRole('button', { name: '모바일 메뉴 닫기' }).focus();
+  await page.keyboard.press('Shift+Tab');
+  await expect(dialog.getByRole('link', { name: 'GitHub 프로필 열기' })).toBeFocused();
+});
+
+test('mobile menu releases the page when the viewport becomes desktop-sized', async ({ page }) => {
+  await page.goto(pagePath('/'), { waitUntil: 'networkidle' });
+  await page.getByRole('button', { name: '모바일 메뉴 열기' }).click();
+
+  await expect(page.locator('body')).toHaveClass(/menu-open/);
+  await expect(page.locator('#main-content')).toHaveAttribute('inert', '');
+
+  await page.setViewportSize({ width: 1024, height: 844 });
+
+  await expect(page.getByRole('dialog', { name: '모바일 메뉴' })).toHaveCount(0);
+  await expect(page.locator('body')).not.toHaveClass(/menu-open/);
+  await expect(page.locator('#main-content')).not.toHaveAttribute('inert', '');
+});
+
+test('mobile home puts its title and primary search in the first viewport', async ({ page }) => {
+  await page.setViewportSize({ width: 360, height: 640 });
+  await page.goto(pagePath('/'), { waitUntil: 'networkidle' });
+
+  const title = await page.getByRole('heading', { level: 1 }).boundingBox();
+  const search = await page.getByRole('button', { name: '통합 검색 열기' }).boundingBox();
+  expect(title).not.toBeNull();
+  expect(search).not.toBeNull();
+  expect(title!.y).toBeLessThan(220);
+  expect(search!.y + search!.height).toBeLessThanOrEqual(640);
+});
+
 test('reading page keeps its mobile table of contents collapsed by default', async ({ page }) => {
   await page.goto(pagePath('/knowledge/database/b-tree-index/'), { waitUntil: 'networkidle' });
   const tableOfContents = page.locator('details.reading-toc--mobile');

@@ -4,6 +4,7 @@ import {
   filterAndSortEntries,
   normalizeEntry,
   resolveEntryRelations,
+  selectFeaturedProject,
 } from '../../src/lib/content/queries';
 
 const commonData = {
@@ -52,6 +53,43 @@ describe('content queries', () => {
       slug: 'database/index-structure',
       url: '/knowledge/database/index-structure',
       body: '# B-Tree',
+    });
+  });
+
+  it('selects one starting project from date-sorted featured projects', () => {
+    const featuredKnowledge = normalizeEntry('knowledge', {
+      id: 'featured-knowledge',
+      data: {
+        ...commonData,
+        title: '대표 지식',
+        created: new Date('2026-08-23'),
+        featured: true,
+        status: 'mastered',
+      },
+    });
+    const newest = normalizeEntry('projects', {
+      id: 'newest',
+      data: {
+        ...commonData,
+        title: '최근 프로젝트',
+        created: new Date('2026-08-22'),
+        featured: true,
+        status: 'maintained',
+      },
+    });
+    const older = normalizeEntry('projects', {
+      id: 'older',
+      data: {
+        ...commonData,
+        title: '이전 프로젝트',
+        created: new Date('2026-08-20'),
+        featured: true,
+        status: 'maintained',
+      },
+    });
+    expect(selectFeaturedProject([featuredKnowledge, newest, older])).toMatchObject({
+      id: 'projects/newest',
+      data: { title: '최근 프로젝트' },
     });
   });
 
