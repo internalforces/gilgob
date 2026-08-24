@@ -66,6 +66,8 @@ Prepare a preview that separates:
 
 Include the learning goal, approved skills actually used, whether completion evidence was demonstrated, the classified findings, and a recommended collection, proposed path, document purpose, and related documents.
 
+The synthesis serves process review and must retain the exact approved skill names actually used. The authored Knowledge Garden document serves a reader-facing audience and must omit those skill names by default unless a skill is materially relevant to the subject being taught.
+
 ## Content Proposal and Handoff
 
 Preview the document proposal and obtain user approval before creating a file or handing off to the Content Writer. Route its dominant result through the existing [Content Authoring Guide](../content-authoring/README.md): date-centered learning events to `logs`, unresolved questions to `explorations`, verified reusable explanations to `knowledge`, and durable project decisions, results, or maintenance facts to `projects`. The Content Writer chooses the exact template and creates any approved document as `draft: true`.

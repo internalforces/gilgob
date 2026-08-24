@@ -3,7 +3,7 @@
 ## Status
 
 - Date: 2026-08-24
-- Status: Approved in conversation, pending implementation
+- Status: Implemented and verified
 - Decision owner: User
 - Implementation model: Documentation-based integration with the existing `gilgob-harness/`
 
@@ -298,4 +298,3 @@ The learning Harness is complete when:
 8. generated learning content defaults to `draft: true` and existing collection templates;
 9. no dependency, schema, application, route, template, or publication behavior changes;
 10. all Harness documentation checks pass without altering unrelated user files.
-

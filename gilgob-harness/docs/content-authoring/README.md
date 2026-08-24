@@ -25,6 +25,8 @@ If a note answers more than one question, choose its dominant purpose and link t
 
 Content Writer begins only after the user approves the Learning Facilitator's synthesis and document proposal. Re-check duplicates, evidence, the dominant collection, and `draft: true` before authoring. Do not treat AI dialogue as evidence or infer mastery from a session.
 
+The process synthesis and the authored Knowledge Garden document have different audiences. Preserve the exact approved skill names actually used in the process synthesis for review, but omit skill names from reader-facing content by default unless a skill is materially relevant to the subject being taught.
+
 | Session result | Collection |
 |---|---|
 | Date-centered event, attempt, or correction | `logs` |

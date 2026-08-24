@@ -40,8 +40,10 @@ learning request
 - The learner approves or revises the topic proposal before skill selection.
 - The learner explicitly approves each exact selected skill before it is read or used; approval lasts only for the current session.
 - A new skill needed mid-session requires new approval before use.
+- Unavailable skills are never installed automatically.
+- Installing a skill requires separate explicit user approval; session-use approval is not installation approval.
 - The learner approves a document proposal before a Content Writer creates a file.
-- Existing approval requirements still govern installation, publishing, moving, merging, deleting, deploying, and other gated actions.
+- Existing approval requirements still govern publishing, moving, merging, deleting, deploying, and other gated actions.
 
 ## Durable Content Contract
 
@@ -49,7 +51,16 @@ The session result is a reviewable input, not authored content. Route any approv
 
 ## Context Loading
 
-The facilitator starts with the root and Harness constitutions, then this guide. Load the topic-selection guide only for selecting or revising a topic, the session workflow before selecting skills or tutoring, and related content plus Content Writer guidance only for a durable-content proposal. This keeps the workflow selective while preserving the existing source-of-truth boundaries.
+Load context in this order:
+
+1. `AGENTS.md` and `gilgob-harness/AGENTS.md`.
+2. `gilgob-harness/memory/project.md` and `gilgob-harness/memory/session.md`.
+3. This learning entry guide.
+4. `gilgob-harness/docs/learning/topic-selection.md` and the smallest related `content/` evidence needed to select or scope a topic.
+5. `gilgob-harness/docs/learning/session-workflow.md` before selecting skills or tutoring.
+6. `gilgob-harness/prompts/content-writing.md`, `gilgob-harness/docs/content-authoring/README.md`, and exactly one collection guide only after the user approves a durable-content proposal.
+
+This keeps loading selective: related content is allowed when it is evidence for topic selection, while Content Writer guidance remains deferred until an approved handoff.
 
 ## Completion Checklist
 

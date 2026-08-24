@@ -79,6 +79,7 @@ Agents must never:
 Obtain explicit user approval before:
 
 - Adding, removing, or performing a major upgrade of an external dependency.
+- Installing a skill; skill installation requires its own explicit approval.
 - Using every skill proposed for a learning session before its first use; a new skill added mid-session requires additional approval.
 - Changing infrastructure, GitHub Actions deployment behavior, the production domain, or the `/gilgob` base-path contract.
 - Changing a public interface or published content URL.
