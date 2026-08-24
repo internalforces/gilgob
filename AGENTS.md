@@ -11,6 +11,7 @@ Read [`gilgob-harness/AGENTS.md`](gilgob-harness/AGENTS.md) before planning, edi
 
 Non-negotiable rules:
 
+- Route requests to select a study topic, conduct an interactive learning session, or draft learning from a session through `gilgob-harness/docs/learning/README.md`.
 - Treat `content/` as both the Obsidian Vault and the source of truth for Astro content.
 - Do not invent facts, outcomes, citations, milestones, bugs, or project history.
 - Do not expose secrets or print secret-bearing files.

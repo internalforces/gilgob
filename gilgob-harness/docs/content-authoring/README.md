@@ -21,6 +21,17 @@ Use this guide for every content request, then load exactly one collection-speci
 
 If a note answers more than one question, choose its dominant purpose and link to separate documents for reusable subtopics. Do not duplicate the same long explanation across collections.
 
+## Learning Session Handoff
+
+Content Writer begins only after the user approves the Learning Facilitator's synthesis and document proposal. Re-check duplicates, evidence, the dominant collection, and `draft: true` before authoring. Do not treat AI dialogue as evidence or infer mastery from a session.
+
+| Session result | Collection |
+|---|---|
+| Date-centered event, attempt, or correction | `logs` |
+| Unresolved central question with a next action | `explorations` |
+| Verified reusable explanation | `knowledge` |
+| Durable project decision, result, or maintenance state | `projects` |
+
 ## Authoritative Contracts
 
 Before changing fields or behavior, inspect:

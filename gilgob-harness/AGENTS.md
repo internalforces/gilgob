@@ -9,7 +9,7 @@ Harness Version: 1.1
 
 Read this file before any other harness document. If another harness document conflicts with this constitution, this file wins.
 
-_Last updated: 2026-08-21_
+_Last updated: 2026-08-24_
 
 ## Project Overview
 
@@ -56,6 +56,7 @@ Every path in the root entry point and Harness documentation is relative to the 
 | Researcher | Gather official evidence and compare options | `gilgob-harness/reports/research-*.md` |
 | Debugger | Reproduce failures and identify root causes | `gilgob-harness/memory/known-issues.md` and diagnostic reports |
 | Tester | Select and run proportional verification | Tests and test reports |
+| Learning Facilitator | Select scoped learning topics, obtain skill approval, guide sessions, and synthesize demonstrated learning | Reviewed session synthesis and Content Writer handoff |
 | Content Writer | Create or improve content from the collection guides | `content/**/*.md` or `content/**/*.mdx` |
 | Content Curator | Inventory, organize, merge, archive, and propose deletion of content | Curation reports and approved content changes |
 
@@ -78,6 +79,7 @@ Agents must never:
 Obtain explicit user approval before:
 
 - Adding, removing, or performing a major upgrade of an external dependency.
+- Using every skill proposed for a learning session before its first use; a new skill added mid-session requires additional approval.
 - Changing infrastructure, GitHub Actions deployment behavior, the production domain, or the `/gilgob` base-path contract.
 - Changing a public interface or published content URL.
 - Publishing a document whose factual claims or disclosure status are uncertain.
@@ -105,6 +107,7 @@ Additional routing:
 | Code or UI change | `gilgob-harness/commands.md`, `gilgob-harness/standards.md`, `gilgob-harness/memory/architecture.md` |
 | Architecture decision | `gilgob-harness/tech-stack.md`, `gilgob-harness/dependencies.md`, `gilgob-harness/memory/decisions.md` |
 | New or revised content | `gilgob-harness/docs/content-authoring/README.md` and one collection guide |
+| Learning topic selection or interactive study | `gilgob-harness/prompts/learning.md` and `gilgob-harness/docs/learning/README.md` |
 | Content organization or deletion | `gilgob-harness/prompts/content-curation.md` and the affected collection guides |
 | Bug diagnosis | `gilgob-harness/prompts/debug.md`, `gilgob-harness/memory/known-issues.md`, relevant tests |
 | Refactoring | `gilgob-harness/prompts/refactor.md`, relevant tests, and known debt |

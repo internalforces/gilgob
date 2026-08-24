@@ -7,7 +7,7 @@ Harness Version: 1.1
 
 # gilgob Workflow Playbooks
 
-_Last updated: 2026-08-21_
+_Last updated: 2026-08-24_
 
 ## General Routing
 
@@ -54,6 +54,21 @@ Researcher: question -> official sources -> option comparison -> recommendation
   -> HUMAN APPROVAL: dependency, infrastructure, public interface, or deployment impact
   -> Planner: implementation task when requested
 ```
+
+## Guided Learning Workflow
+
+```text
+Learning Facilitator: inspect evidence -> propose one scoped topic
+  -> HUMAN APPROVAL: topic and completion evidence
+  -> propose the smallest useful skill set
+  -> HUMAN APPROVAL: every selected skill before use
+  -> conduct diagnosis, scaffolded learning, practice, and teach-back
+  -> present classified session synthesis and document proposal
+  -> HUMAN APPROVAL: durable document proposal
+  -> Content Writer: create and verify draft content
+```
+
+Topic selection uses `gilgob-harness/docs/learning/topic-selection.md`, session execution uses `gilgob-harness/docs/learning/session-workflow.md`, and no skill approval carries into another learning session.
 
 ## Content Writing Workflow
 
@@ -132,6 +147,8 @@ There is no separate staging environment documented in this repository. Do not c
 |---|---|
 | Read, inspect, search, or diagnose repository files | No |
 | Edit requested code or content without public URL impact | No |
+| Approve the scoped topic and completion evidence before a learning session | Yes |
+| Use a selected skill for the first time in the current learning session | Yes |
 | Add or major-upgrade a dependency | Yes |
 | Change deployment, domain, or base path | Yes |
 | Publish uncertain or sensitive content | Yes |
