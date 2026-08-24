@@ -9,24 +9,7 @@ Harness Version: 1.1
 
 _Last updated: 2026-08-24_
 
-### HARNESS-002: Add an approval-gated guided learning workflow
-
-- Owner: Architect, Learning Facilitator, Content Writer, and Implementer
-- Priority: High
-- Started: 2026-08-24
-- Related decision or report: `docs/superpowers/specs/2026-08-24-learning-harness-design.md`
-
-Description: Integrate topic generation, per-session skill approval, interactive learning, reviewed synthesis, and draft-content handoff into the existing documentation-based Harness.
-
-Definition of done:
-
-- [ ] Learning requests route through one canonical guide with all seven topic-selection modes.
-- [ ] Every selected skill requires explicit, session-scoped approval before use.
-- [ ] Session synthesis separates evidence, demonstrated understanding, provisional judgment, corrections, and open questions.
-- [ ] Existing collection and draft safeguards govern every proposed learning document.
-- [ ] Pure Harness documentation verification passes after the final edit.
-
-Blockers: None.
+No active operational task is recorded.
 
 ## Entry Format
 

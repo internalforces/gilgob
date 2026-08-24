@@ -7,7 +7,7 @@ Harness Version: 1.1
 
 # Decision Log: gilgob
 
-_Last updated: 2026-08-21_
+_Last updated: 2026-08-24_
 
 ## ADR Format
 
@@ -60,3 +60,19 @@ Consequences: What future work must respect.
 **Trade-offs:** Contributors must keep the boundary between internal Harness language and published content language explicit.
 
 **Consequences:** New or updated Harness documents use English; collection guides remind Content Writer to author site content in Korean by default.
+
+## ADR-003: Integrate approval-gated guided learning into the Harness
+
+- **Date:** 2026-08-24
+- **Status:** Accepted
+- **Decided by:** User
+
+**Context:** The Knowledge Garden needs a repeatable way to select study topics, learn through dialogue, and convert demonstrated understanding into durable draft content without treating AI output as evidence.
+
+**Decision:** Add a documentation-based Learning Facilitator workflow to `gilgob-harness/`. Every proposed skill requires explicit approval before first use in a learning session, new mid-session skills require additional approval, and all approvals expire when the session ends. Approved session synthesis enters the existing Content Writer workflow instead of creating a new collection or runtime system.
+
+**Rationale:** This reuses installed teaching and domain skills while keeping the user in control of the learning method and preserving the current file-backed content architecture.
+
+**Trade-offs:** The workflow is instruction-enforced rather than programmatically enforced, available skills vary by environment, and explicit approval adds a step before tutoring begins.
+
+**Consequences:** Learning requests load the learning prompt and guide, skill selection remains minimal and session-scoped, unavailable skills are never installed automatically, and durable learning content remains subject to existing evidence, draft, schema, and verification rules.
