@@ -23,7 +23,8 @@ The implementation will:
 - guide interactive learning through diagnosis, scaffolding, practice, and teach-back;
 - separate verified facts, demonstrated understanding, provisional judgments, corrected misunderstandings, and open questions;
 - hand approved session results to the existing Content Writer workflow;
-- create content only as `draft: true` unless a separate publication request is approved;
+- create new content only as `draft: true` and preserve an existing document's publication state during updates unless a separate change is approved;
+- accept an already-completed learning result through validation and handoff without rerunning tutoring or requesting retrospective skill approval;
 - document fallback behavior when a skill or evidence source is unavailable.
 
 The implementation will not:
@@ -52,13 +53,13 @@ The Learning Facilitator owns the learning process:
 
 ### Content Writer
 
-The existing Content Writer owns durable content creation:
+The existing Content Writer owns durable content creation and in-place revision:
 
 1. search for duplicate or overlapping documents;
 2. select exactly one dominant collection for each proposed document;
-3. start from the matching template;
+3. start a new document from the matching template or preserve the identity and publication state of an approved update target;
 4. distinguish evidence, user understanding, interpretation, and open questions;
-5. create the approved document as `draft: true`;
+5. create an approved new document as `draft: true` or update the approved existing target in place;
 6. connect useful existing documents and run collection-appropriate verification.
 
 The Learning Facilitator does not bypass the Content Writer's schema, authorship, disclosure, or verification rules.
@@ -155,7 +156,7 @@ Prefer an available learning-oriented skill for conceptual tutoring, but do not 
 Before invoking a skill, show:
 
 - the exact skill name;
-- whether it is the teaching or domain skill;
+- whether its approved role is teaching, domain support, research, or visualization;
 - why it is relevant to the approved topic;
 - what it will change about the learning process;
 - a clear statement that it has not yet been used.
@@ -205,7 +206,7 @@ Close the session when one of these conditions is met:
 - the approved completion evidence has been demonstrated;
 - the user asks to stop;
 - a missing prerequisite should become a separate learning topic;
-- external evidence or an experiment is required before continuing;
+- required external evidence or an experiment cannot be obtained or performed within the current session;
 - the scope has split into independent questions.
 
 Skill approvals expire when the session closes.
@@ -229,9 +230,10 @@ The preview must include:
 - approved skills actually used;
 - whether the completion evidence was demonstrated;
 - classified session findings;
-- recommended collection, proposed path, document purpose, and related documents.
+- when durable content is recommended: `create` or `update`, the dominant collection, proposed or existing path, document purpose, and related documents;
+- when durable content is not recommended: an explicit reason instead of invented proposal fields.
 
-The user approves the document proposal before the Content Writer creates a file.
+The user approves the session synthesis and document proposal together before the Content Writer creates or updates a file.
 
 ## Content Routing
 
@@ -248,7 +250,8 @@ Prefer one representative document from a session. Propose multiple documents on
 
 ### Draft safeguards
 
-- Start every generated learning document with `draft: true`.
+- Start every new learning document with `draft: true`.
+- For an update, preserve the existing document's identity, creation metadata, and publication state unless the user separately approves changing them.
 - Do not copy the raw transcript into authored content.
 - Do not use an AI response as evidence by itself.
 - Do not record exercises, results, or understanding that did not occur.
@@ -294,7 +297,7 @@ The learning Harness is complete when:
 4. adding a skill mid-session requires a new approval;
 5. the session workflow requires diagnosis, active learner participation, and demonstrated understanding;
 6. synthesis separates facts, demonstrated understanding, provisional judgments, corrections, and open questions;
-7. document creation requires a reviewed proposal and uses the existing Content Writer workflow;
-8. generated learning content defaults to `draft: true` and existing collection templates;
+7. document creation or update requires an approved synthesis and proposal and uses the existing Content Writer workflow;
+8. new learning content defaults to `draft: true` and existing collection templates, while updates preserve the approved target's publication state;
 9. no dependency, schema, application, route, template, or publication behavior changes;
 10. all Harness documentation checks pass without altering unrelated user files.

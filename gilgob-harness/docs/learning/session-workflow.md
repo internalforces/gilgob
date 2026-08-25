@@ -13,7 +13,7 @@ Confirm that the learner approved one scoped topic under [Selecting a Learning T
 
 ## Skill Selection
 
-Propose the smallest useful skill set: zero or one teaching skill, zero or one domain-support skill, and research or visualization capabilities only when needed. Use available metadata to discover installed skills. If a useful skill is unavailable, report it and offer an unskilled or evidence-based fallback; do not install it automatically.
+Propose the smallest useful skill set: zero or one teaching skill, zero or one domain-support skill, and research or visualization skills only when needed. Use available metadata to discover installed skills. If a useful skill is unavailable, report it and offer an unskilled or evidence-based fallback; do not install it automatically.
 
 ## Initial Skill Approval
 
@@ -21,7 +21,7 @@ Before using any skill, present an approval request like this for each exact ski
 
 ```text
 Skill: <exact skill name>
-Role: teaching | domain support
+Role: teaching | domain support | research | visualization
 Why it is relevant: <connection to the approved topic>
 Session effect: <how it changes the teaching or investigation process>
 Status: This skill has not been used.
@@ -31,7 +31,7 @@ Ask the learner to approve all, approve a subset, request a replacement or more 
 
 ## Mid-Session Skill Approval
 
-Pause before adding a skill that was not initially approved. Name the exact skill, its teaching or domain-support role, why the new need arose, how it would affect the current session, and that it has not been used. Wait for explicit approval before reading or invoking it. Rejected skills must not be substituted or invoked indirectly.
+Pause before adding a skill that was not initially approved. Name the exact skill, its teaching, domain-support, research, or visualization role, why the new need arose, how it would affect the current session, and that it has not been used. Wait for explicit approval before reading or invoking it. Rejected skills must not be substituted or invoked indirectly.
 
 ## Interactive Learning Rhythm
 
@@ -51,7 +51,7 @@ Diagnose before choosing teaching depth unless existing work already demonstrate
 
 ## Completion Evidence and Closure
 
-Close the session when the approved completion evidence is demonstrated, the learner asks to stop, a missing prerequisite needs a separate topic, external evidence or an experiment is required, or the scope splits into independent questions. Do not infer completion from passive agreement. On closure, all skill approvals expire.
+Close the session when the approved completion evidence is demonstrated, the learner asks to stop, a missing prerequisite needs a separate topic, required external evidence or an experiment cannot be obtained or performed within the current session, or the scope splits into independent questions. Run an approved experiment within the current session when it is available and belongs to the planned practice or completion evidence. Do not infer completion from passive agreement. On closure, all skill approvals expire.
 
 ## Session Synthesis
 
@@ -64,13 +64,15 @@ Prepare a preview that separates:
 - `Open questions`: retain concrete unresolved follow-ups without implying resolution.
 - `Next actions`: name a practice, investigation, or document outcome.
 
-Include the learning goal, approved skills actually used, whether completion evidence was demonstrated, the classified findings, and a recommended collection, proposed path, document purpose, and related documents.
+Always include the learning goal, approved skills actually used, whether completion evidence was demonstrated, and the classified findings. When a durable document is recommended, also include its `Document action: create | update`, dominant collection, proposed or existing path, document purpose, and related documents. When no durable document is warranted, state `No durable document recommended` and explain why instead of inventing proposal fields.
 
 The synthesis serves process review and must retain the exact approved skill names actually used. The authored Knowledge Garden document serves a reader-facing audience and must omit those skill names by default unless a skill is materially relevant to the subject being taught.
 
 ## Content Proposal and Handoff
 
-Preview the document proposal and obtain user approval before creating a file or handing off to the Content Writer. Route its dominant result through the existing [Content Authoring Guide](../content-authoring/README.md): date-centered learning events to `logs`, unresolved questions to `explorations`, verified reusable explanations to `knowledge`, and durable project decisions, results, or maintenance facts to `projects`. The Content Writer chooses the exact template and creates any approved document as `draft: true`.
+Load the smallest relevant Content Writer prompt, shared authoring guide, and one collection guide before preparing a durable-content proposal. Preview the session synthesis and document proposal together, then obtain user approval of both before creating or updating a file or handing off to the Content Writer. Route the dominant result through the existing [Content Authoring Guide](../content-authoring/README.md): date-centered learning events to `logs`, unresolved questions to `explorations`, verified reusable explanations to `knowledge`, and durable project decisions, results, or maintenance facts to `projects`.
+
+For `create`, the Content Writer starts from the exact collection template and creates the approved document as `draft: true`. For `update`, the proposal names the existing target and the Content Writer preserves its `created` date, path or explicit slug, and current publication state unless the user separately approves changing them; follow the existing update workflow and set `updated` for a material revision.
 
 ## Fallback and Interruption Rules
 
@@ -84,4 +86,4 @@ If an approved skill becomes unavailable, report the limitation and offer an uns
 - [ ] Each tutoring turn asked one focused question.
 - [ ] Completion evidence was demonstrated or the limitation is recorded.
 - [ ] The synthesis separates all six required categories.
-- [ ] The learner approved a document proposal before Content Writer handoff.
+- [ ] The learner approved the session synthesis and document proposal before Content Writer handoff, or the synthesis records that no durable document is recommended.

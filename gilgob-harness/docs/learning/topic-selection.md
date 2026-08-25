@@ -48,13 +48,15 @@ Learning stages
 Practice
 Completion evidence
 Related existing documents
+Document action: none | create | update
+Target document: <existing path or not applicable>
 ```
 
-The user must approve or revise the topic proposal before any skill selection.
+Use `update` when an existing document already owns the central question and the expected durable outcome would deepen that document. Use `create` only when a separate document would have an independent purpose, and use `none` when the session does not yet warrant durable content. The user must approve or revise the topic proposal before any skill selection; the session synthesis may refine the action before the final content handoff.
 
 ## Duplicate and Boundary Rules
 
-Search existing indexed content before proposing a new document. Prefer deepening an existing document when it already owns the same central question. Keep a topic to one coherent learning and assessment session, preserve unresolved branches as follow-up proposals, and do not activate candidates the user has not selected.
+Search existing indexed content before proposing a new document. Prefer deepening an existing document when it already owns the same central question, carry that target forward as an `update`, and do not silently replace it with a new draft. Keep a topic to one coherent learning and assessment session, preserve unresolved branches as follow-up proposals, and do not activate candidates the user has not selected.
 
 ## Topic Approval Checklist
 
@@ -63,4 +65,5 @@ Search existing indexed content before proposing a new document. Prefer deepenin
 - [ ] The central question is answerable in one scoped session.
 - [ ] Prerequisites, practice, and completion evidence are concrete.
 - [ ] Related documents were checked for duplication or useful context.
+- [ ] The document action is `none`, `create`, or `update`, and any update names its existing target.
 - [ ] The user approved the topic before skill selection.

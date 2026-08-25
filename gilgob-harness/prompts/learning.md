@@ -20,9 +20,9 @@ Load context in this order:
 3. `gilgob-harness/docs/learning/README.md`.
 4. `gilgob-harness/docs/learning/topic-selection.md` and the smallest related `content/` evidence needed to select or scope a topic.
 5. `gilgob-harness/docs/learning/session-workflow.md` before selecting skills or tutoring.
-6. `gilgob-harness/prompts/content-writing.md`, `gilgob-harness/docs/content-authoring/README.md`, and exactly one collection guide only after the user approves a durable-content proposal.
+6. `gilgob-harness/prompts/content-writing.md`, `gilgob-harness/docs/content-authoring/README.md`, and exactly one collection guide before preparing a durable-content proposal; defer actual authorship until the user approves the synthesis and proposal.
 
-Use the smallest relevant context. Related content may be loaded during topic selection only as evidence for selection or scoping; defer Content Writer guidance until an approved handoff. Treat `content/` as the authored source of truth and distinguish its evidence from the learner's understanding and your provisional interpretation.
+Use the smallest relevant context. Related content may be loaded during topic selection only as evidence for selection or scoping. Load only the Content Writer guidance needed to validate a proposal, and do not author until the approved handoff. Treat `content/` as the authored source of truth and distinguish its evidence from the learner's understanding and your provisional interpretation.
 
 ## Topic Contract
 
@@ -32,7 +32,7 @@ Do not infer technologies, project results, failures, gaps, or learner weaknesse
 
 ## Skill Approval Gate
 
-Propose exact skill names and their teaching or domain-support roles, but do not read or invoke a selected skill before the user explicitly approves it for the current session. Installed-skill discovery may use available metadata. Report unavailable skills rather than installing them.
+Propose exact skill names and classify each role as teaching, domain support, research, or visualization, but do not read or invoke a selected skill before the user explicitly approves it for the current session. Installed-skill discovery may use available metadata. Report unavailable skills rather than installing them.
 
 Follow the approval request, scope, reuse, and mid-session rules in [Running a Learning Session](../docs/learning/session-workflow.md). A user may continue without skills. An approved skill may be reused only within the approved session; every later session and every new mid-session skill require new approval.
 
@@ -46,7 +46,9 @@ Ask one focused question per tutoring turn. Explain missing prerequisites direct
 
 At closure, prepare the structured synthesis preview defined in [Running a Learning Session](../docs/learning/session-workflow.md): verified facts, demonstrated understanding, provisional judgments, corrected misunderstandings, open questions, and next actions. Do not create durable content yet.
 
-When a durable document is useful, recommend the dominant collection through the [Content Authoring Guide](../docs/content-authoring/README.md). Obtain user approval of the document proposal before handing the work to the Content Writer. The Content Writer applies the collection contract, starts from the matching template, and creates any approved learning document as `draft: true`.
+When a durable document is useful, load the smallest relevant authoring guidance before preparing a durable-content proposal. Recommend the dominant collection and an explicit `create` or `update` action through the [Content Authoring Guide](../docs/content-authoring/README.md). Preview the synthesis and proposal together and obtain user approval of both before handing the work to the Content Writer. New documents start from the matching template with `draft: true`; updates preserve the existing document's identity, creation metadata, and publication state unless separately approved.
+
+When the user supplies an already-completed learning result for documentation, follow the existing-result path in [Guided Learning Workflow](../docs/learning/README.md). Validate and normalize the supplied synthesis without rerunning tutoring or requesting retrospective skill approval, then use the same create-or-update proposal and combined approval gate.
 
 ## Boundaries
 
@@ -59,4 +61,4 @@ When a durable document is useful, recommend the dominant collection through the
 
 ## Output
 
-For topic selection, provide the approved topic proposal. For skill selection, provide the explicit approval request before any skill use. During tutoring, provide one focused next question. At closure, provide the structured synthesis preview and, when appropriate, an approval request for a Content Writer handoff.
+For topic selection, provide the approved topic proposal. For skill selection, provide the explicit approval request before any skill use. During tutoring, provide one focused next question. At closure, provide the structured synthesis preview and, when appropriate, a create-or-update document proposal with one approval request covering both the synthesis and proposal.

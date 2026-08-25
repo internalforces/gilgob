@@ -63,12 +63,14 @@ Learning Facilitator: inspect evidence -> propose one scoped topic
   -> propose the smallest useful skill set
   -> HUMAN APPROVAL: every selected skill before use
   -> conduct diagnosis, scaffolded learning, practice, and teach-back
-  -> present classified session synthesis and document proposal
-  -> HUMAN APPROVAL: durable document proposal
-  -> Content Writer: create and verify draft content
+  -> present classified session synthesis and conditional create-or-update document proposal
+  -> HUMAN APPROVAL: session synthesis and document proposal together
+  -> Content Writer: create a verified draft or update the approved target
 ```
 
 Topic selection uses `gilgob-harness/docs/learning/topic-selection.md`, session execution uses `gilgob-harness/docs/learning/session-workflow.md`, and no skill approval carries into another learning session.
+
+For an already-completed learning result, validate and normalize the supplied synthesis, load the smallest relevant authoring guidance, and enter at the combined synthesis-and-proposal approval gate. Do not rerun tutoring or request retrospective skill approval.
 
 ## Content Writing Workflow
 

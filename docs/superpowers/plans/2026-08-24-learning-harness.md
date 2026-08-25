@@ -486,4 +486,3 @@ git status --short
 ```
 
 Expected: the three implementation commits are visible after the design commit; pre-existing `.impeccable/design.json`, `DESIGN.md`, and `content/explorations/` remain untracked and unmodified unless their state was independently changed by the user.
-
