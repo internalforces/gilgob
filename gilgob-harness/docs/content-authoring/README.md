@@ -21,6 +21,21 @@ Use this guide for every content request, then load exactly one collection-speci
 
 If a note answers more than one question, choose its dominant purpose and link to separate documents for reusable subtopics. Do not duplicate the same long explanation across collections.
 
+## Learning Session Handoff
+
+Content Writer begins only after the user approves the Learning Facilitator's synthesis and document proposal together. The proposal must declare `create` or `update` and name the target for an update. Re-check duplicates, evidence, and the dominant collection before authoring. Do not treat AI dialogue as evidence or infer mastery from a session.
+
+For `create`, start from the exact matching template and set `draft: true`. For `update`, follow this guide's existing-content workflow: preserve `created`, the current path or explicit slug, and the current publication state unless the user separately approves changing them; set `updated` for a material revision. Do not create a second document when an existing document already owns the central question.
+
+The process synthesis and the authored Knowledge Garden document have different audiences. Preserve the exact approved skill names actually used in the process synthesis for review, but omit skill names from reader-facing content by default unless a skill is materially relevant to the subject being taught.
+
+| Session result | Collection |
+|---|---|
+| Date-centered event, attempt, or correction | `logs` |
+| Unresolved central question with a next action | `explorations` |
+| Verified reusable explanation | `knowledge` |
+| Durable project decision, result, or maintenance state | `projects` |
+
 ## Authoritative Contracts
 
 Before changing fields or behavior, inspect:
