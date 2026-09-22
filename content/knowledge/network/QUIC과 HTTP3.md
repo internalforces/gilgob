@@ -143,7 +143,7 @@ UDP 사용만으로 성능이 보장되지는 않는다. QUIC이 UDP를 선택�
 
 ### QUIC은 HTTP/3에서만 사용한다
 
-HTTP/3가 대표적인 QUIC 사용 사례지만, QUIC은 일반 목적 전송 프로토콜이다. 다른 애플리케이션 프로토콜도 QUIC의 스트림이나 데이터그램 기능을 사용할 수 있다.
+HTTP/3가 대표적인 QUIC 사용 사례지만, QUIC은 일반 목적 전송 프로토콜이다. 다른 애플리케이션 프로토콜도 기본 QUIC의 신뢰성 있는 스트림을 사용할 수 있다. 비신뢰성 애플리케이션 데이터그램이 필요하면 기본 기능이 아니라 별도로 협상하는 QUIC DATAGRAM 확장을 사용해야 한다.
 
 ## 핵심 정리
 
@@ -165,4 +165,5 @@ HTTP/3가 대표적인 QUIC 사용 사례지만, QUIC은 일반 목적 전송 �
 - [RFC 9000: QUIC — A UDP-Based Multiplexed and Secure Transport](https://www.rfc-editor.org/rfc/rfc9000.html)
 - [RFC 9001: Using TLS to Secure QUIC](https://www.rfc-editor.org/rfc/rfc9001.html)
 - [RFC 9114: HTTP/3](https://www.rfc-editor.org/rfc/rfc9114.html)
+- [RFC 9221: An Unreliable Datagram Extension to QUIC](https://www.rfc-editor.org/rfc/rfc9221.html)
 - [RFC 9308: Applicability of the QUIC Transport Protocol](https://www.rfc-editor.org/rfc/rfc9308.html)
