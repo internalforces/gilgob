@@ -7,6 +7,7 @@ tags:
   - DNS
   - Domain
 created: 2026-09-02
+updated: 2026-09-22
 draft: false
 aliases:
   - DNS
@@ -15,7 +16,6 @@ featured: false
 status: growing
 nextQuestions:
   - dig +trace로 재귀 DNS 리졸버의 조회 과정을 어떻게 직접 확인할까?
-  - DNS는 언제 UDP 53번 포트 대신 TCP 53번 포트를 사용할까?
   - DNSSEC는 DNS 응답의 위조를 어떻게 검증할까?
   - DoH와 DoT는 일반 DNS 질의와 무엇이 다를까?
 ---
@@ -140,6 +140,36 @@ DNS는 도메인을 IP로 해석할 뿐이다. 그 다음 접속에는 [[IP와 P
 
 공인 IP가 자주 바뀌는 환경에서는 DDNS(Dynamic DNS)를 사용해 IP 변경을 감지하고 `A` 레코드를 자동으로 갱신할 수 있다. DNS 관리 업체가 바뀐 것이 아니므로 `NS` 레코드를 바꾸는 것은 아니다.
 
+## DNS는 언제 UDP와 TCP를 사용할까?
+
+DNS는 UDP와 TCP 모두 53번 포트를 사용한다. 일반적인 작은 질의는 연결 설정 부담이 작은 UDP로 처리하기 쉽지만, DNS가 항상 UDP로 시작해야 하는 것은 아니다. 운영상 이유가 있으면 처음부터 TCP를 선택할 수 있고, 범용 DNS 구현은 두 전송 방식을 모두 지원해야 한다.
+
+UDP 응답이 허용된 크기에 들어가지 않으면 DNS 서버는 응답을 잘라내고 헤더의 `TC(Truncated)` 플래그를 `1`로 설정할 수 있다. 클라이언트는 이 플래그를 보고 같은 질의를 TCP로 다시 보내 완전한 응답을 받는다.
+
+```text
+UDP 질의
+  → TC=0: 응답 내용과 RCODE를 해석
+  → TC=1: TCP로 같은 질의를 다시 전송
+```
+
+EDNS(0)을 사용하면 클라이언트가 512바이트보다 큰 UDP 응답을 받을 수 있다는 것을 알릴 수 있다. 따라서 응답이 512바이트를 넘는다는 이유만으로 TCP로 전환하지는 않는다. 광고한 UDP 크기 안에 응답이 완전히 들어가고 `TC=0`이면 UDP 응답을 그대로 해석하면 된다.
+
+`TC`와 `RCODE`는 서로 다른 질문에 답한다.
+
+| 필드 | 판단하는 것 | 예시 |
+| --- | --- | --- |
+| `TC` | 응답이 잘렸는가? | `TC=1`이면 TCP 재질의 |
+| `RCODE` | DNS 서버가 질의를 어떻게 처리했는가? | `NXDOMAIN`은 질의한 이름이 없음 |
+
+`TC=0`, `RCODE=NXDOMAIN`은 전송에 실패한 것이 아니라 “해당 이름이 없다”는 완전한 응답이다. TCP로 바꾸어 다시 묻기보다 도메인 철자와 질의한 레코드를 확인해야 한다. 반대로 `RCODE=NOERROR`라도 `TC=1`이면 응답이 잘렸으므로 TCP로 재질의해야 한다.
+
+전체 영역 데이터를 전송하는 `AXFR`은 예외적인 대표 사례다. 영역의 많은 레코드를 빠짐없이 옮겨야 하므로 TCP를 사용한다.
+
+```bash
+dig example.com A        # 일반 질의
+dig +tcp example.com A   # TCP로 질의
+```
+
 ## dig로 DNS 상태 확인하기
 
 `dig`로 레코드 유형별 응답을 확인할 수 있다.
@@ -190,6 +220,14 @@ DNS는 이름을 주소로 해석한다. 사설 IP를 인터넷에서 라우팅�
 
 DNS는 웹 접속 흐름의 첫 부분일 뿐이다. DNS 조회 후에도 포트, 라우팅, [[TCP와 UDP는 무엇이 다를까?|TCP]], TLS, HTTP, 웹 서버 상태를 모두 거쳐야 한다.
 
+### DNS는 항상 UDP만 사용한다
+
+DNS는 UDP와 TCP를 모두 사용한다. `TC=1`인 응답은 TCP 재질의가 필요하고, `AXFR`은 TCP를 사용한다. 범용 DNS 구현은 두 전송 방식을 모두 지원해야 한다.
+
+### RCODE가 오류면 TCP로 다시 질의해야 한다
+
+TCP 재질의를 직접 요구하는 표시는 `RCODE`가 아니라 `TC`다. `NXDOMAIN`과 같은 `RCODE`는 DNS 처리 결과를 나타내므로 오류의 의미에 맞게 원인을 확인해야 한다.
+
 ## 내가 이해한 방식
 
 DNS는 인터넷 주소 안내소에 가깝다. 주소 안내소는 도착지의 주소를 알려 주지만 그 건물의 문을 열거나 안에서 서비스하는 사람이 일하게 만들지는 않는다.
@@ -207,6 +245,12 @@ DNS는 인터넷 주소 안내소에 가깝다. 주소 안내소는 도착지의
 2. `A`, `AAAA`, `NS`, `MX`, `TXT`를 직접 조회해 응답 비교
 3. 재귀 리졸버를 바꾸어 캐시와 응답 차이 확인
 4. DNS 응답, 443번 포트, HTTPS 응답을 순서대로 확인해 장애 구간 판별
-5. DNS가 UDP와 TCP 53번 포트를 사용하는 조건을 [[TCP와 UDP는 무엇이 다를까?|TCP와 UDP]]와 연결해 학습
+5. `dig`와 `dig +tcp`의 응답을 비교하고 패킷 캡처로 UDP·TCP 전송 방식 확인
 
 그 다음 심화 주제로 DNSSEC, DoH(DNS over HTTPS), DoT(DNS over TLS)를 검토한다.
+
+## 참고 표준
+
+- [RFC 7766: DNS Transport over TCP](https://www.rfc-editor.org/rfc/rfc7766.html)
+- [RFC 6891: Extension Mechanisms for DNS (EDNS(0))](https://www.rfc-editor.org/rfc/rfc6891.html)
+- [RFC 5936: DNS Zone Transfer Protocol (AXFR)](https://www.rfc-editor.org/rfc/rfc5936.html)
