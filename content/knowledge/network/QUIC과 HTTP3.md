@@ -10,7 +10,7 @@ tags:
   - Transport-Layer
 created: 2026-09-22
 updated: 2026-09-23
-draft: true
+draft: false
 aliases:
   - QUIC과 HTTP3
   - HTTP/3와 QUIC

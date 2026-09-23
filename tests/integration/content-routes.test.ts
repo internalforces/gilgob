@@ -251,11 +251,17 @@ nextStep: "검증 범위를 확장합니다."
     expect(indexHtml).toContain('data-pagefind-meta="type:');
   });
 
-  it('renders the empty exploration index without the deleted exploration route', async () => {
+  it('renders the published Signal Hub exploration without restoring the deleted exploration route', async () => {
     const indexHtml = await readFile(`${basePath}/explorations/index.html`, 'utf8');
+    const detailHtml = await readFile(
+      `${basePath}/explorations/signal-hub-deterministic-pipeline/index.html`,
+      'utf8',
+    );
 
-    expect(indexHtml).toContain('전체 0개 중 0개');
-    expect(indexHtml).not.toContain('data-filter-card');
+    expect(indexHtml).toContain('전체 1개 중 1개');
+    expect(indexHtml).toContain('data-entry-id="explorations/signal-hub-deterministic-pipeline"');
+    expect(indexHtml).toContain('href="/gilgob/explorations/signal-hub-deterministic-pipeline"');
+    expect(detailHtml).toContain('data-pagefind-body');
     await expect(access(`${basePath}/explorations/llm-watermark/index.html`)).rejects.toMatchObject({ code: 'ENOENT' });
   });
 

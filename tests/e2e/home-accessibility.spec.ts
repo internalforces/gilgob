@@ -66,7 +66,7 @@ test('home leads through one connected work before secondary discovery', async (
   await expect(page.locator('.project-card__connections').first()).toBeVisible();
   await expect(page.locator('.project-card__path-step').first()).toBeVisible();
   await expect(page.locator('.project-card__path-step').first().getByRole('link'))
-    .toHaveAttribute('href', pagePath('/knowledge/software-design/connector-interface-design'));
+    .toHaveAttribute('href', pagePath('/explorations/signal-hub-deterministic-pipeline'));
   await expect(page.locator('.recent-learning__heading')).toContainText('최근 공개된 학습 기록');
   await expect(page.locator('.project-card__visual')).toHaveCount(0);
 });
